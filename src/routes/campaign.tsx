@@ -20,6 +20,7 @@ function CampaignSetup() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<"flashcards" | "quiz">("flashcards");
+  const [direction, setDirection] = useState<"de2it" | "it2de" | "mixed">("de2it");
   const [scope, setScope] = useState<"all" | "due">("due");
   const [themes, setThemes] = useState<string[]>([]);
   const [size, setSize] = useState<number>(20);
