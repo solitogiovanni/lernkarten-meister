@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      nouns: {
+        Row: {
+          article: Database["public"]["Enums"]["german_article"] | null
+          created_at: string
+          due_at: string
+          ease: number
+          examples: string[]
+          id: string
+          interval_days: number
+          lapses: number
+          last_rated_at: string | null
+          meanings: string[]
+          noun: string
+          plural: string | null
+          reps: number
+          themes: string[]
+          updated_at: string
+        }
+        Insert: {
+          article?: Database["public"]["Enums"]["german_article"] | null
+          created_at?: string
+          due_at?: string
+          ease?: number
+          examples?: string[]
+          id?: string
+          interval_days?: number
+          lapses?: number
+          last_rated_at?: string | null
+          meanings?: string[]
+          noun: string
+          plural?: string | null
+          reps?: number
+          themes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          article?: Database["public"]["Enums"]["german_article"] | null
+          created_at?: string
+          due_at?: string
+          ease?: number
+          examples?: string[]
+          id?: string
+          interval_days?: number
+          lapses?: number
+          last_rated_at?: string | null
+          meanings?: string[]
+          noun?: string
+          plural?: string | null
+          reps?: number
+          themes?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +76,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      german_article: "der" | "die" | "das"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +203,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      german_article: ["der", "die", "das"],
+    },
   },
 } as const
