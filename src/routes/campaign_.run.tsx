@@ -323,7 +323,20 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
           <div className={`mt-4 flex items-center gap-2 ${result.correct ? "text-emerald-600" : "text-rose-600"}`}>
             {result.correct ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
             <span className="font-medium">
-              {result.correct ? "Correct!" : `Answer: ${result.expected}`}
+              {result.correct ? (
+                "Correct!"
+              ) : (
+                <>
+                  Answer:{" "}
+                  {qtype === "it2de" && card.article ? (
+                    <span className={articleTextColor[card.article]}>
+                      {card.article} {card.noun}
+                    </span>
+                  ) : (
+                    result.expected
+                  )}
+                </>
+              )}
             </span>
           </div>
         )}
