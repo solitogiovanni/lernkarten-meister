@@ -176,16 +176,17 @@ function FlashcardView({ card, onRate }: { card: Card; onRate: (r: Rating) => vo
   return (
     <Card className="p-8 min-h-[320px] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+        {revealed && card.article ? (
+          <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
+            {card.article} {card.noun}
+          </div>
+        ) : (
+          <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+        )}
         {revealed && (
           <div className="mt-6 space-y-3">
-            {card.article && (
-              <div>
-                <span className={`text-sm px-2 py-0.5 rounded ${articleColor[card.article]} font-medium`}>
-                  {card.article}
-                </span>
-                {card.plural && <span className="ml-3 text-muted-foreground">Plural: {card.plural}</span>}
-              </div>
+            {card.plural && (
+              <div className="text-muted-foreground">Plural: {card.plural}</div>
             )}
             {card.meanings.length > 0 && (
               <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
