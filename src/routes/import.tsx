@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -31,8 +31,27 @@ function ImportPage() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [existing, setExisting] = useState<Set<string>>(new Set());
   const autofillFn = useServerFn(autofillNouns);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase
+      .from("nouns")
+      .select("noun")
+      .limit(5000)
+      .then(({ data }) => {
+        setExisting(new Set((data ?? []).map((r) => r.noun.trim().toLowerCase())));
+      });
+  }, []);
+
+  const isDuplicate = (noun: string, idx: number) => {
+    const key = noun.trim().toLowerCase();
+    if (!key) return false;
+    if (existing.has(key)) return true;
+    // duplicate within current drafts (earlier occurrence wins)
+    return drafts.findIndex((d, i) => i < idx && d.noun.trim().toLowerCase() === key) !== -1;
+  };
 
   type ParsedLine = {
     raw: string;
@@ -76,14 +95,16 @@ function ImportPage() {
       // Merge: user-provided meanings/article win
       const merged: Draft[] = parsed.map((p, i) => {
         const r = results[i];
+        const noun = r?.noun || p.noun;
+        const dupExisting = existing.has(noun.trim().toLowerCase());
         return {
           input: p.raw,
-          noun: r?.noun || p.noun,
+          noun,
           article: p.article ?? r?.article ?? null,
           plural: r?.plural ?? null,
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
-          include: true,
+          include: !dupExisting,
         };
       });
       setDrafts(merged);
@@ -95,15 +116,18 @@ function ImportPage() {
 
   const skipAi = () => {
     setDrafts(
-      parsed.map((p) => ({
-        input: p.raw,
-        noun: p.noun,
-        article: p.article,
-        plural: null,
-        meanings: p.meanings,
-        themes: [],
-        include: true,
-      }))
+      parsed.map((p) => {
+        const dupExisting = existing.has(p.noun.trim().toLowerCase());
+        return {
+          input: p.raw,
+          noun: p.noun,
+          article: p.article,
+          plural: null,
+          meanings: p.meanings,
+          themes: [],
+          include: !dupExisting,
+        };
+      })
     );
   };
 
@@ -112,7 +136,7 @@ function ImportPage() {
   };
 
   const saveAll = async () => {
-    const toInsert = drafts.filter((d) => d.include && d.noun.trim());
+    const toInsert = drafts.filter((d, i) => d.include && d.noun.trim() && !isDuplicate(d.noun, i));
     if (toInsert.length === 0) return toast.error("Nothing to save");
     setSaving(true);
     const rows = toInsert.map((d) => ({
@@ -182,8 +206,16 @@ function ImportPage() {
           </Card>
 
           <div className="space-y-2">
-            {drafts.map((d, i) => (
-              <Card key={i} className={`p-3 ${!d.include ? "opacity-50" : ""}`}>
+            {drafts.map((d, i) => {
+              const dup = isDuplicate(d.noun, i);
+              const dupExisting = existing.has(d.noun.trim().toLowerCase());
+              return (
+              <Card key={i} className={`p-3 ${!d.include ? "opacity-50" : ""} ${dup ? "border-amber-500/60 bg-amber-500/5" : ""}`}>
+                {dup && (
+                  <div className="text-xs text-amber-700 dark:text-amber-400 mb-2 font-medium">
+                    ⚠ Duplicate — already {dupExisting ? "in your deck" : "above in this list"}
+                  </div>
+                )}
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
@@ -247,7 +279,8 @@ function ImportPage() {
                   </div>
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
 
           <div className="text-center pt-2">
