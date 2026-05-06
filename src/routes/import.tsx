@@ -135,7 +135,7 @@ function ImportPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Import nouns</h1>
         <p className="text-sm text-muted-foreground">
-          Paste a list — one noun per line. Optionally include the article (e.g. "der Tisch").
+          One noun per line. Format: <code>article Noun = meaning1, meaning2</code> (article and meanings optional).
         </p>
       </div>
 
@@ -144,7 +144,7 @@ function ImportPage() {
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={"Haus\nder Tisch\nFreundschaft\n…"}
+            placeholder={"der Tisch = tavolo\ndie Freundschaft = amicizia\nHaus = casa, edificio"}
             rows={12}
             className="font-mono text-sm"
           />
