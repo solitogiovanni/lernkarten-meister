@@ -206,8 +206,16 @@ function ImportPage() {
           </Card>
 
           <div className="space-y-2">
-            {drafts.map((d, i) => (
-              <Card key={i} className={`p-3 ${!d.include ? "opacity-50" : ""}`}>
+            {drafts.map((d, i) => {
+              const dup = isDuplicate(d.noun, i);
+              const dupExisting = existing.has(d.noun.trim().toLowerCase());
+              return (
+              <Card key={i} className={`p-3 ${!d.include ? "opacity-50" : ""} ${dup ? "border-amber-500/60 bg-amber-500/5" : ""}`}>
+                {dup && (
+                  <div className="text-xs text-amber-700 dark:text-amber-400 mb-2 font-medium">
+                    ⚠ Duplicate — already {dupExisting ? "in your deck" : "above in this list"}
+                  </div>
+                )}
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
