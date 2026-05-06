@@ -95,14 +95,16 @@ function ImportPage() {
       // Merge: user-provided meanings/article win
       const merged: Draft[] = parsed.map((p, i) => {
         const r = results[i];
+        const noun = r?.noun || p.noun;
+        const dupExisting = existing.has(noun.trim().toLowerCase());
         return {
           input: p.raw,
-          noun: r?.noun || p.noun,
+          noun,
           article: p.article ?? r?.article ?? null,
           plural: r?.plural ?? null,
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
-          include: true,
+          include: !dupExisting,
         };
       });
       setDrafts(merged);
@@ -114,15 +116,18 @@ function ImportPage() {
 
   const skipAi = () => {
     setDrafts(
-      parsed.map((p) => ({
-        input: p.raw,
-        noun: p.noun,
-        article: p.article,
-        plural: null,
-        meanings: p.meanings,
-        themes: [],
-        include: true,
-      }))
+      parsed.map((p) => {
+        const dupExisting = existing.has(p.noun.trim().toLowerCase());
+        return {
+          input: p.raw,
+          noun: p.noun,
+          article: p.article,
+          plural: null,
+          meanings: p.meanings,
+          themes: [],
+          include: !dupExisting,
+        };
+      })
     );
   };
 
@@ -131,7 +136,7 @@ function ImportPage() {
   };
 
   const saveAll = async () => {
-    const toInsert = drafts.filter((d) => d.include && d.noun.trim());
+    const toInsert = drafts.filter((d, i) => d.include && d.noun.trim() && !isDuplicate(d.noun, i));
     if (toInsert.length === 0) return toast.error("Nothing to save");
     setSaving(true);
     const rows = toInsert.map((d) => ({
