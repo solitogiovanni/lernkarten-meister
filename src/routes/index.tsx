@@ -139,6 +139,10 @@ function DeckPage() {
 
   const createNew = async () => {
     if (!newValue.noun.trim()) return toast.error("Noun is required");
+    const key = newValue.noun.trim().toLowerCase();
+    if (rows.some((r) => r.noun.trim().toLowerCase() === key)) {
+      return toast.error(`"${newValue.noun.trim()}" is already in your deck`);
+    }
     const { error } = await supabase.from("nouns").insert({
       article: newValue.article,
       noun: newValue.noun.trim(),
@@ -153,6 +157,10 @@ function DeckPage() {
     setNewValue(emptyNoun);
     load();
   };
+
+  const newDuplicate = creating
+    && newValue.noun.trim()
+    && rows.some((r) => r.noun.trim().toLowerCase() === newValue.noun.trim().toLowerCase());
 
   const aiFillCurrent = async (target: "edit" | "new") => {
     const v = target === "edit" ? editValue : newValue;
