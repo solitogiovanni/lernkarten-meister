@@ -86,6 +86,22 @@ function CampaignSetup() {
             Quiz
           </Button>
         </div>
+        {mode === "flashcards" && (
+          <div className="mt-4">
+            <Label className="mb-2 block text-sm text-muted-foreground">Direction</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button size="sm" variant={direction === "de2it" ? "default" : "outline"} onClick={() => setDirection("de2it")}>
+                DE → IT
+              </Button>
+              <Button size="sm" variant={direction === "it2de" ? "default" : "outline"} onClick={() => setDirection("it2de")}>
+                IT → DE
+              </Button>
+              <Button size="sm" variant={direction === "mixed" ? "default" : "outline"} onClick={() => setDirection("mixed")}>
+                Mixed
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card className="p-4">
