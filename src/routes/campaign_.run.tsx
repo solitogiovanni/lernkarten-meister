@@ -19,7 +19,7 @@ const searchSchema = z.object({
   limit: fallback(z.number(), 20).default(20),
 });
 
-export const Route = createFileRoute("/campaign/run")({
+export const Route = createFileRoute("/campaign_/run")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Studying — Wortschatz" }] }),
   component: RunPage,
