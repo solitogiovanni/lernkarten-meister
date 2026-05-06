@@ -56,7 +56,7 @@ const articleTextColor = {
 };
 
 function RunPage() {
-  const { mode, scope, themes, limit } = Route.useSearch();
+  const { mode, scope, themes, limit, direction } = Route.useSearch();
   const themeList = themes ? themes.split(",").filter(Boolean) : [];
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
