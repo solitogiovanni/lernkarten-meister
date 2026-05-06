@@ -17,6 +17,7 @@ const searchSchema = z.object({
   scope: fallback(z.enum(["all", "due"]), "due").default("due"),
   themes: fallback(z.string(), "").default(""),
   limit: fallback(z.number(), 20).default(20),
+  direction: fallback(z.enum(["de2it", "it2de", "mixed"]), "de2it").default("de2it"),
 });
 
 export const Route = createFileRoute("/campaign_/run")({
