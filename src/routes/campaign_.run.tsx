@@ -48,10 +48,10 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const articleColor = {
-  der: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-  die: "bg-pink-500/15 text-pink-700 dark:text-pink-300",
-  das: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+const articleTextColor = {
+  der: "text-blue-700 dark:text-blue-300",
+  die: "text-pink-700 dark:text-pink-300",
+  das: "text-emerald-700 dark:text-emerald-300",
 };
 
 function RunPage() {
@@ -176,16 +176,17 @@ function FlashcardView({ card, onRate }: { card: Card; onRate: (r: Rating) => vo
   return (
     <Card className="p-8 min-h-[320px] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+        {revealed && card.article ? (
+          <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
+            {card.article} {card.noun}
+          </div>
+        ) : (
+          <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+        )}
         {revealed && (
           <div className="mt-6 space-y-3">
-            {card.article && (
-              <div>
-                <span className={`text-sm px-2 py-0.5 rounded ${articleColor[card.article]} font-medium`}>
-                  {card.article}
-                </span>
-                {card.plural && <span className="ml-3 text-muted-foreground">Plural: {card.plural}</span>}
-              </div>
+            {card.plural && (
+              <div className="text-muted-foreground">Plural: {card.plural}</div>
             )}
             {card.meanings.length > 0 && (
               <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
@@ -322,7 +323,20 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
           <div className={`mt-4 flex items-center gap-2 ${result.correct ? "text-emerald-600" : "text-rose-600"}`}>
             {result.correct ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
             <span className="font-medium">
-              {result.correct ? "Correct!" : `Answer: ${result.expected}`}
+              {result.correct ? (
+                "Correct!"
+              ) : (
+                <>
+                  Answer:{" "}
+                  {qtype === "it2de" && card.article ? (
+                    <span className={articleTextColor[card.article]}>
+                      {card.article} {card.noun}
+                    </span>
+                  ) : (
+                    result.expected
+                  )}
+                </>
+              )}
             </span>
           </div>
         )}
