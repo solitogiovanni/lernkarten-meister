@@ -34,20 +34,60 @@ function ImportPage() {
   const autofillFn = useServerFn(autofillNouns);
   const navigate = useNavigate();
 
-  const parsed = text
+  type ParsedLine = {
+    raw: string;
+    article: "der" | "die" | "das" | null;
+    noun: string;
+    meanings: string[];
+  };
+
+  const parseLine = (line: string): ParsedLine => {
+    const raw = line.trim();
+    // Split off meanings after "=" or ":"
+    const [leftRaw, ...rightParts] = raw.split(/\s*[=:]\s*/);
+    const left = leftRaw.trim();
+    const right = rightParts.join("=").trim();
+    const meanings = right
+      ? right.split(/\s*,\s*/).map((s) => s.trim()).filter(Boolean)
+      : [];
+    const m = left.match(/^(der|die|das)\s+(.+)$/i);
+    if (m) {
+      return { raw, article: m[1].toLowerCase() as "der" | "die" | "das", noun: m[2].trim(), meanings };
+    }
+    return { raw, article: null, noun: left, meanings };
+  };
+
+  const parsed: ParsedLine[] = text
     .split(/\r?\n/)
     .map((l) => l.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(parseLine);
 
   const runAi = async () => {
     if (parsed.length === 0) return toast.error("Paste at least one noun");
     if (parsed.length > 50) return toast.error("Max 50 nouns at a time");
     setBusy(true);
     try {
-      const { results, error } = await autofillFn({ data: { nouns: parsed } });
+      // Send only the German part to the AI
+      const { results, error } = await autofillFn({
+        data: { nouns: parsed.map((p) => (p.article ? `${p.article} ${p.noun}` : p.noun)) },
+      });
       if (error) return toast.error(error);
-      setDrafts(results.map((r) => ({ ...r, include: true })));
-      toast.success(`AI filled ${results.length} nouns`);
+      // Merge: user-provided meanings/article win
+      const merged: Draft[] = parsed.map((p, i) => {
+        const r = results[i];
+        return {
+          input: p.raw,
+          noun: r?.noun || p.noun,
+          article: p.article ?? r?.article ?? null,
+          plural: r?.plural ?? null,
+          meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
+          themes: r?.themes ?? [],
+          include: true,
+        };
+      });
+      setDrafts(merged);
+      toast.success(`AI filled ${merged.length} nouns`);
     } finally {
       setBusy(false);
     }
@@ -55,14 +95,15 @@ function ImportPage() {
 
   const skipAi = () => {
     setDrafts(
-      parsed.map((p) => {
-        // Try parse "der Tisch" form
-        const m = p.match(/^(der|die|das)\s+(.+)$/i);
-        if (m) {
-          return { input: p, noun: m[2], article: m[1].toLowerCase() as "der" | "die" | "das", plural: null, meanings: [], themes: [], include: true };
-        }
-        return { input: p, noun: p, article: null, plural: null, meanings: [], themes: [], include: true };
-      })
+      parsed.map((p) => ({
+        input: p.raw,
+        noun: p.noun,
+        article: p.article,
+        plural: null,
+        meanings: p.meanings,
+        themes: [],
+        include: true,
+      }))
     );
   };
 
