@@ -17,6 +17,7 @@ const searchSchema = z.object({
   scope: fallback(z.enum(["all", "due"]), "due").default("due"),
   themes: fallback(z.string(), "").default(""),
   limit: fallback(z.number(), 20).default(20),
+  direction: fallback(z.enum(["de2it", "it2de", "mixed"]), "de2it").default("de2it"),
 });
 
 export const Route = createFileRoute("/campaign_/run")({
@@ -55,7 +56,7 @@ const articleTextColor = {
 };
 
 function RunPage() {
-  const { mode, scope, themes, limit } = Route.useSearch();
+  const { mode, scope, themes, limit, direction } = Route.useSearch();
   const themeList = themes ? themes.split(",").filter(Boolean) : [];
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
@@ -163,7 +164,7 @@ function RunPage() {
       <Progress value={((idx) / cards.length) * 100} className="mb-6" />
 
       {mode === "flashcards" ? (
-        <FlashcardView card={current} onRate={submitFlashRating} key={current.id} />
+        <FlashcardView card={current} onRate={submitFlashRating} direction={direction} key={current.id} />
       ) : (
         <QuizView card={current} onResult={submitQuizResult} key={current.id} />
       )}
@@ -171,32 +172,64 @@ function RunPage() {
   );
 }
 
-function FlashcardView({ card, onRate }: { card: Card; onRate: (r: Rating) => void }) {
+function FlashcardView({
+  card,
+  onRate,
+  direction,
+}: {
+  card: Card;
+  onRate: (r: Rating) => void;
+  direction: "de2it" | "it2de" | "mixed";
+}) {
   const [revealed, setRevealed] = useState(false);
+  // Decide direction for this specific card (mixed = random per card)
+  const effectiveDir = useMemo<"de2it" | "it2de">(() => {
+    if (direction === "mixed") return Math.random() < 0.5 ? "de2it" : "it2de";
+    // If IT→DE requested but no meanings, fall back to DE→IT
+    if (direction === "it2de" && card.meanings.length === 0) return "de2it";
+    return direction;
+  }, [direction, card.id]);
+
+  const isIt2De = effectiveDir === "it2de";
+
   return (
     <Card className="p-8 min-h-[320px] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        {revealed && card.article ? (
-          <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
-            {card.article} {card.noun}
-          </div>
+        {!revealed ? (
+          isIt2De ? (
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Italian → German</p>
+              <div className="text-3xl font-semibold tracking-tight">{card.meanings.join(" / ")}</div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">German → Italian</p>
+              <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+            </div>
+          )
         ) : (
-          <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
-        )}
-        {revealed && (
-          <div className="mt-6 space-y-3">
-            {card.plural && (
-              <div className="text-muted-foreground">Plural: {card.plural}</div>
-            )}
-            {card.meanings.length > 0 && (
-              <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
-            )}
-            {card.examples.length > 0 && (
-              <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md">
-                {card.examples[0]}
+          <>
+            {card.article ? (
+              <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
+                {card.article} {card.noun}
               </div>
+            ) : (
+              <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
             )}
-          </div>
+            <div className="mt-6 space-y-3">
+              {card.plural && (
+                <div className="text-muted-foreground">Plural: {card.plural}</div>
+              )}
+              {card.meanings.length > 0 && (
+                <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
+              )}
+              {card.examples.length > 0 && (
+                <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md">
+                  {card.examples[0]}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
       {!revealed ? (
