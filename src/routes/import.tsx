@@ -279,7 +279,8 @@ function ImportPage() {
                   </div>
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
 
           <div className="text-center pt-2">
