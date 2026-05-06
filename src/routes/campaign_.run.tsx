@@ -48,10 +48,10 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const articleColor = {
-  der: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-  die: "bg-pink-500/15 text-pink-700 dark:text-pink-300",
-  das: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+const articleTextColor = {
+  der: "text-blue-700 dark:text-blue-300",
+  die: "text-pink-700 dark:text-pink-300",
+  das: "text-emerald-700 dark:text-emerald-300",
 };
 
 function RunPage() {
