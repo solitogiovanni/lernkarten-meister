@@ -31,8 +31,27 @@ function ImportPage() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [existing, setExisting] = useState<Set<string>>(new Set());
   const autofillFn = useServerFn(autofillNouns);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase
+      .from("nouns")
+      .select("noun")
+      .limit(5000)
+      .then(({ data }) => {
+        setExisting(new Set((data ?? []).map((r) => r.noun.trim().toLowerCase())));
+      });
+  }, []);
+
+  const isDuplicate = (noun: string, idx: number) => {
+    const key = noun.trim().toLowerCase();
+    if (!key) return false;
+    if (existing.has(key)) return true;
+    // duplicate within current drafts (earlier occurrence wins)
+    return drafts.findIndex((d, i) => i < idx && d.noun.trim().toLowerCase() === key) !== -1;
+  };
 
   type ParsedLine = {
     raw: string;
