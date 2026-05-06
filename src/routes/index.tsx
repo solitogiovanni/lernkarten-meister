@@ -211,7 +211,7 @@ function DeckPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               value={q}
-              onChange={(e) => navigate({ search: (p) => ({ ...p, q: e.target.value }) })}
+              onChange={(e) => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, q: e.target.value }) })}
               placeholder="Search noun, plural, meaning…"
               className="pl-8"
             />
@@ -219,7 +219,7 @@ function DeckPage() {
           <Button
             variant={due ? "default" : "outline"}
             size="sm"
-            onClick={() => navigate({ search: (p) => ({ ...p, due: !p.due }) })}
+            onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, due: !p.due }) })}
           >
             Due today ({dueCount})
           </Button>
@@ -238,7 +238,7 @@ function DeckPage() {
             {allThemes.map((t) => (
               <button
                 key={t}
-                onClick={() => navigate({ search: (p) => ({ ...p, theme: p.theme === t ? "" : t }) })}
+                onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: p.theme === t ? "" : t }) })}
                 className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                   theme === t
                     ? "bg-primary text-primary-foreground border-primary"
