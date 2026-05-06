@@ -164,7 +164,7 @@ function RunPage() {
       <Progress value={((idx) / cards.length) * 100} className="mb-6" />
 
       {mode === "flashcards" ? (
-        <FlashcardView card={current} onRate={submitFlashRating} key={current.id} />
+        <FlashcardView card={current} onRate={submitFlashRating} direction={direction} key={current.id} />
       ) : (
         <QuizView card={current} onResult={submitQuizResult} key={current.id} />
       )}
