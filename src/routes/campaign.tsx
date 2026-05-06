@@ -58,7 +58,7 @@ function CampaignSetup() {
     if (limit === 0) return;
     navigate({
       to: "/campaign/run",
-      search: { mode, scope, themes: themes.join(","), limit },
+      search: { mode, scope, themes: themes.join(","), limit, direction: mode === "flashcards" ? direction : "de2it" },
     });
   };
 
