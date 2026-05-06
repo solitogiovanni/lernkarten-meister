@@ -353,12 +353,17 @@ function DeckPage() {
           </SheetHeader>
           <div className="mt-4">
             <NounForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} />
+            {newDuplicate && (
+              <div className="mt-3 text-sm text-amber-700 dark:text-amber-400 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2">
+                ⚠ "{newValue.noun.trim()}" is already in your deck
+              </div>
+            )}
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={() => aiFillCurrent("new")} disabled={aiBusy || !newValue.noun.trim()}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
                 AI fill
               </Button>
-              <Button onClick={createNew}>Add</Button>
+              <Button onClick={createNew} disabled={!!newDuplicate}>Add</Button>
             </div>
           </div>
         </SheetContent>
