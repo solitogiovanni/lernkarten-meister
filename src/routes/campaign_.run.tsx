@@ -323,6 +323,22 @@ function FlashcardView({
             )}
             <div className="mt-6 space-y-3">
               {card.plural && <div className="text-muted-foreground">Plural: {card.plural}</div>}
+              {card.kind === "verb" && (card.praeteritum || card.perfect) && (
+                <div className="text-muted-foreground space-y-0.5">
+                  {card.praeteritum && <div>Präteritum: <span className="font-medium text-foreground">{card.praeteritum}</span></div>}
+                  {card.perfect && <div>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></div>}
+                </div>
+              )}
+              {card.kind === "verb" && card.prepositions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {card.prepositions.map((p, i) => (
+                    <span key={i} className="text-xs px-2 py-0.5 rounded-full border bg-muted">
+                      {p.preposition}{p.case ? ` +${p.case.charAt(0).toUpperCase() + p.case.slice(1)}` : ""}
+                      {p.meaning && <span className="text-muted-foreground"> — {p.meaning}</span>}
+                    </span>
+                  ))}
+                </div>
+              )}
               {card.meanings.length > 0 && (
                 <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
               )}
