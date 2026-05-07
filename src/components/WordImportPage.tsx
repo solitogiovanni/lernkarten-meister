@@ -34,12 +34,12 @@ export function WordImportPage({
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase
+    (supabase as any)
       .from("words")
       .select("word")
       .eq("kind", kind)
       .limit(5000)
-      .then(({ data }) => {
+      .then(({ data }: { data: Array<{ word: string }> | null }) => {
         setExisting(new Set((data ?? []).map((r) => r.word.trim().toLowerCase())));
       });
   }, [kind]);

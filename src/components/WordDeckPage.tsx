@@ -54,7 +54,7 @@ export function WordDeckPage({
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("words")
       .select("id,word,meanings,examples,themes,due_at,reps")
       .eq("kind", kind)
@@ -103,7 +103,7 @@ export function WordDeckPage({
   const saveEdit = async () => {
     if (!editing) return;
     if (!editValue.word.trim()) return toast.error("Word is required");
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("words")
       .update({
         word: editValue.word.trim(),
