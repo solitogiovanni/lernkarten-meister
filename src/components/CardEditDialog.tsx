@@ -23,6 +23,7 @@ export type EditableCard = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments?: string | null;
   ease: number;
   interval_days: number;
   reps: number;
@@ -49,12 +50,14 @@ export function CardEditDialog({
     meanings: card.meanings,
     examples: card.examples,
     themes: card.themes,
+    comments: card.comments ?? "",
   });
   const [word, setWord] = useState<WordFormValue>({
     word: card.word,
     meanings: card.meanings,
     examples: card.examples,
     themes: card.themes,
+    comments: card.comments ?? "",
   });
   const [verb, setVerb] = useState<VerbFormValue>({
     present: card.word,
@@ -64,6 +67,7 @@ export function CardEditDialog({
     meanings: card.meanings,
     examples: card.examples,
     themes: card.themes,
+    comments: card.comments ?? "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -94,22 +98,23 @@ export function CardEditDialog({
           meanings: noun.meanings,
           examples: noun.examples.filter((e) => e.trim()),
           themes: noun.themes,
+          comments: noun.comments.trim() || null,
         };
         if (!payload.noun) throw new Error("Noun is required");
         if (kindChanged) {
-          const { data, error } = await supabase.from("nouns").insert({ ...payload, ...srs }).select().single();
+          const { data, error } = await (supabase as any).from("nouns").insert({ ...payload, ...srs }).select().single();
           if (error) throw error;
           await deleteOldRow(card.kind, card.id);
           next = {
             ...card, id: data.id, kind: "noun", article: data.article, word: data.noun, plural: data.plural,
             praeteritum: null, perfect: null, prepositions: [],
-            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [],
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
           };
         } else {
-          const { error } = await supabase.from("nouns").update(payload).eq("id", card.id);
+          const { error } = await (supabase as any).from("nouns").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, article: payload.article, word: payload.noun, plural: payload.plural,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
         }
       } else if (kind === "verb") {
         const payload = {
@@ -120,6 +125,7 @@ export function CardEditDialog({
           meanings: verb.meanings,
           examples: verb.examples.filter((e) => e.trim()),
           themes: verb.themes,
+          comments: verb.comments.trim() || null,
         };
         if (!payload.present) throw new Error("Present is required");
         if (kindChanged) {
@@ -129,14 +135,14 @@ export function CardEditDialog({
           next = {
             ...card, id: data.id, kind: "verb", article: null, word: data.present, plural: null,
             praeteritum: data.praeteritum, perfect: data.perfect, prepositions: data.prepositions ?? [],
-            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [],
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
           };
         } else {
           const { error } = await (supabase as any).from("verbs").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind: "verb", article: null, plural: null, word: payload.present,
             praeteritum: payload.praeteritum, perfect: payload.perfect, prepositions: payload.prepositions,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
         }
       } else {
         const payload = {
@@ -145,6 +151,7 @@ export function CardEditDialog({
           meanings: word.meanings,
           examples: word.examples.filter((e) => e.trim()),
           themes: word.themes,
+          comments: word.comments.trim() || null,
         };
         if (!payload.word) throw new Error("Word is required");
         if (kindChanged) {
@@ -154,13 +161,13 @@ export function CardEditDialog({
           next = {
             ...card, id: data.id, kind, article: null, word: data.word, plural: null,
             praeteritum: null, perfect: null, prepositions: [],
-            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [],
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
           };
         } else {
           const { error } = await (supabase as any).from("words").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind, article: null, plural: null, word: payload.word,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
         }
       }
 
