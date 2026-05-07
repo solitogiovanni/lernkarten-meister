@@ -68,6 +68,57 @@ export type Database = {
         }
         Relationships: []
       }
+      words: {
+        Row: {
+          created_at: string
+          due_at: string
+          ease: number
+          examples: string[]
+          id: string
+          interval_days: number
+          kind: Database["public"]["Enums"]["word_kind"]
+          lapses: number
+          last_rated_at: string | null
+          meanings: string[]
+          reps: number
+          themes: string[]
+          updated_at: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          due_at?: string
+          ease?: number
+          examples?: string[]
+          id?: string
+          interval_days?: number
+          kind: Database["public"]["Enums"]["word_kind"]
+          lapses?: number
+          last_rated_at?: string | null
+          meanings?: string[]
+          reps?: number
+          themes?: string[]
+          updated_at?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string
+          ease?: number
+          examples?: string[]
+          id?: string
+          interval_days?: number
+          kind?: Database["public"]["Enums"]["word_kind"]
+          lapses?: number
+          last_rated_at?: string | null
+          meanings?: string[]
+          reps?: number
+          themes?: string[]
+          updated_at?: string
+          word?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -77,6 +128,7 @@ export type Database = {
     }
     Enums: {
       german_article: "der" | "die" | "das"
+      word_kind: "adjective" | "adverb"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -205,6 +257,7 @@ export const Constants = {
   public: {
     Enums: {
       german_article: ["der", "die", "das"],
+      word_kind: ["adjective", "adverb"],
     },
   },
 } as const
