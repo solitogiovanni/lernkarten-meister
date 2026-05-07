@@ -17,6 +17,7 @@ export type Database = {
       nouns: {
         Row: {
           article: Database["public"]["Enums"]["german_article"] | null
+          comments: string | null
           created_at: string
           due_at: string
           ease: number
@@ -34,6 +35,7 @@ export type Database = {
         }
         Insert: {
           article?: Database["public"]["Enums"]["german_article"] | null
+          comments?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -51,6 +53,7 @@ export type Database = {
         }
         Update: {
           article?: Database["public"]["Enums"]["german_article"] | null
+          comments?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -70,6 +73,7 @@ export type Database = {
       }
       verbs: {
         Row: {
+          comments: string | null
           created_at: string
           due_at: string
           ease: number
@@ -88,6 +92,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          comments?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -106,6 +111,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          comments?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -127,6 +133,7 @@ export type Database = {
       }
       words: {
         Row: {
+          comments: string | null
           created_at: string
           due_at: string
           ease: number
@@ -143,6 +150,7 @@ export type Database = {
           word: string
         }
         Insert: {
+          comments?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -159,6 +167,7 @@ export type Database = {
           word: string
         }
         Update: {
+          comments?: string | null
           created_at?: string
           due_at?: string
           ease?: number

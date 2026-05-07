@@ -43,6 +43,7 @@ type Card = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string | null;
   ease: number;
   interval_days: number;
   reps: number;
@@ -85,13 +86,13 @@ function RunPage() {
       const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
       const [nRes, wRes, vRes] = await Promise.all([
         wantNoun
-          ? supabase.from("nouns").select("id,article,noun,plural,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").limit(2000)
+          ? supabase.from("nouns").select("id,article,noun,plural,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").limit(2000)
           : Promise.resolve({ data: [] as any[] }),
         wantWords
-          ? (supabase as any).from("words").select("id,kind,word,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds).limit(2000)
+          ? (supabase as any).from("words").select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds).limit(2000)
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? (supabase as any).from("verbs").select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").limit(2000)
+          ? (supabase as any).from("verbs").select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").limit(2000)
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
@@ -107,6 +108,7 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        comments: r.comments ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -125,6 +127,7 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        comments: r.comments ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -143,6 +146,7 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        comments: r.comments ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -345,6 +349,11 @@ function FlashcardView({
               {card.examples.length > 0 && (
                 <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md">
                   {card.examples[0]}
+                </div>
+              )}
+              {card.comments && (
+                <div className="text-sm text-amber-700 dark:text-amber-300 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2 mt-3 text-left max-w-md whitespace-pre-wrap">
+                  📝 {card.comments}
                 </div>
               )}
             </div>

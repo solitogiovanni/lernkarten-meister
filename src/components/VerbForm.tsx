@@ -20,6 +20,7 @@ export type VerbFormValue = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string;
 };
 
 export const emptyVerb: VerbFormValue = {
@@ -30,6 +31,7 @@ export const emptyVerb: VerbFormValue = {
   meanings: [],
   examples: [],
   themes: [],
+  comments: "",
 };
 
 function ChipInput({
@@ -232,6 +234,17 @@ export function VerbForm({
             <Plus className="h-4 w-4 mr-1" /> Add example
           </Button>
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="verb-comments" className="mb-2 block">Comments</Label>
+        <Textarea
+          id="verb-comments"
+          value={value.comments}
+          onChange={(e) => set("comments", e.target.value)}
+          placeholder="Notes from your teacher…"
+          rows={2}
+        />
       </div>
 
       <div>
