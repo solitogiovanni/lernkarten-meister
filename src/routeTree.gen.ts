@@ -9,7 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ImportRouteImport } from './routes/import'
+import { Route as ImportRouteImport } from './routes/import_'
 import { Route as CampaignRouteImport } from './routes/campaign'
 import { Route as AdverbsRouteImport } from './routes/adverbs'
 import { Route as AdjectivesRouteImport } from './routes/adjectives'
@@ -19,7 +19,7 @@ import { Route as ImportAdjectivesRouteImport } from './routes/import.adjectives
 import { Route as CampaignRunRouteImport } from './routes/campaign_.run'
 
 const ImportRoute = ImportRouteImport.update({
-  id: '/import',
+  id: '/import_',
   path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -64,7 +64,7 @@ export interface FileRoutesByFullPath {
   '/adjectives': typeof AdjectivesRoute
   '/adverbs': typeof AdverbsRoute
   '/campaign': typeof CampaignRoute
-  '/import': typeof ImportRouteWithChildren
+  '/import': typeof ImportRoute
   '/campaign/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
@@ -74,7 +74,7 @@ export interface FileRoutesByTo {
   '/adjectives': typeof AdjectivesRoute
   '/adverbs': typeof AdverbsRoute
   '/campaign': typeof CampaignRoute
-  '/import': typeof ImportRouteWithChildren
+  '/import': typeof ImportRoute
   '/campaign/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
@@ -85,7 +85,7 @@ export interface FileRoutesById {
   '/adjectives': typeof AdjectivesRoute
   '/adverbs': typeof AdverbsRoute
   '/campaign': typeof CampaignRoute
-  '/import': typeof ImportRouteWithChildren
+  '/import_': typeof ImportRoute
   '/campaign_/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
@@ -117,7 +117,7 @@ export interface FileRouteTypes {
     | '/adjectives'
     | '/adverbs'
     | '/campaign'
-    | '/import'
+    | '/import_'
     | '/campaign_/run'
     | '/import/adjectives'
     | '/import/adverbs'
@@ -128,14 +128,14 @@ export interface RootRouteChildren {
   AdjectivesRoute: typeof AdjectivesRoute
   AdverbsRoute: typeof AdverbsRoute
   CampaignRoute: typeof CampaignRoute
-  ImportRoute: typeof ImportRouteWithChildren
+  ImportRoute: typeof ImportRoute
   CampaignRunRoute: typeof CampaignRunRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/import': {
-      id: '/import'
+    '/import_': {
+      id: '/import_'
       path: '/import'
       fullPath: '/import'
       preLoaderRoute: typeof ImportRouteImport
@@ -193,27 +193,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface ImportRouteChildren {
-  ImportAdjectivesRoute: typeof ImportAdjectivesRoute
-  ImportAdverbsRoute: typeof ImportAdverbsRoute
-}
-
-const ImportRouteChildren: ImportRouteChildren = {
-  ImportAdjectivesRoute: ImportAdjectivesRoute,
-  ImportAdverbsRoute: ImportAdverbsRoute,
-}
-
-const ImportRouteWithChildren =
-  ImportRoute._addFileChildren(ImportRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdjectivesRoute: AdjectivesRoute,
   AdverbsRoute: AdverbsRoute,
   CampaignRoute: CampaignRoute,
-  ImportRoute: ImportRouteWithChildren,
+  ImportRoute: ImportRoute,
   CampaignRunRoute: CampaignRunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
