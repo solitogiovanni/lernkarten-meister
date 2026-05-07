@@ -128,7 +128,7 @@ export function WordImportPage({
       examples: [] as string[],
       themes: d.themes,
     }));
-    const { error } = await supabase.from("words").insert(rows);
+    const { error } = await (supabase as any).from("words").insert(rows);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success(`Saved ${rows.length} entries`);

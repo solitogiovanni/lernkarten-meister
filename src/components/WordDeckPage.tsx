@@ -121,7 +121,7 @@ export function WordDeckPage({
   const deleteEditing = async () => {
     if (!editing) return;
     if (!confirm(`Delete "${editing.word}"?`)) return;
-    const { error } = await supabase.from("words").delete().eq("id", editing.id);
+    const { error } = await (supabase as any).from("words").delete().eq("id", editing.id);
     if (error) return toast.error(error.message);
     setEditing(null);
     load();
@@ -137,7 +137,7 @@ export function WordDeckPage({
     if (rows.some((r) => r.word.trim().toLowerCase() === key)) {
       return toast.error(`"${newValue.word.trim()}" is already in your deck`);
     }
-    const { error } = await supabase.from("words").insert({
+    const { error } = await (supabase as any).from("words").insert({
       kind,
       word: newValue.word.trim(),
       meanings: newValue.meanings,
