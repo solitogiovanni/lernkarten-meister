@@ -202,8 +202,6 @@ function RunPage() {
     );
   }
 
-  const [editing, setEditing] = useState(false);
-
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
