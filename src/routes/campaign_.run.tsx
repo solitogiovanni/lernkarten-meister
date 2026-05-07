@@ -70,6 +70,7 @@ function RunPage() {
   const [idx, setIdx] = useState(0);
   const [stats, setStats] = useState({ correct: 0, wrong: 0 });
   const [done, setDone] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     (async () => {
