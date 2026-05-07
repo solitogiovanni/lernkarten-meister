@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, Pencil } from "lucide-react";
 import { applyRating, isDue, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
+import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
 
 const searchSchema = z.object({
   mode: fallback(z.enum(["flashcards", "quiz"]), "flashcards").default("flashcards"),
