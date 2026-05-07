@@ -10,7 +10,6 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, Check, X } from "lucide-react";
 import { applyRating, isDue, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
-import { toast } from "sonner";
 
 const searchSchema = z.object({
   mode: fallback(z.enum(["flashcards", "quiz"]), "flashcards").default("flashcards"),
@@ -18,6 +17,7 @@ const searchSchema = z.object({
   themes: fallback(z.string(), "").default(""),
   limit: fallback(z.number(), 20).default(20),
   direction: fallback(z.enum(["de2it", "it2de", "mixed"]), "de2it").default("de2it"),
+  kinds: fallback(z.string(), "noun,adjective,adverb").default("noun,adjective,adverb"),
 });
 
 export const Route = createFileRoute("/campaign_/run")({
@@ -26,13 +26,17 @@ export const Route = createFileRoute("/campaign_/run")({
   component: RunPage,
 });
 
+type Kind = "noun" | "adjective" | "adverb";
+
 type Card = {
   id: string;
+  kind: Kind;
   article: "der" | "die" | "das" | null;
-  noun: string;
+  word: string; // German term (noun or adj/adv)
   plural: string | null;
   meanings: string[];
   examples: string[];
+  themes: string[];
   ease: number;
   interval_days: number;
   reps: number;
@@ -56,8 +60,9 @@ const articleTextColor = {
 };
 
 function RunPage() {
-  const { mode, scope, themes, limit, direction } = Route.useSearch();
+  const { mode, scope, themes, limit, direction, kinds } = Route.useSearch();
   const themeList = themes ? themes.split(",").filter(Boolean) : [];
+  const kindList = (kinds ? kinds.split(",").filter(Boolean) : ["noun"]) as Kind[];
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,11 +72,50 @@ function RunPage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("nouns")
-        .select("id,article,noun,plural,meanings,examples,themes,ease,interval_days,reps,lapses,due_at")
-        .limit(2000);
-      let pool = ((data ?? []) as (Card & { themes: string[] })[]).filter((c) => {
+      const wantNoun = kindList.includes("noun");
+      const wantWords = kindList.includes("adjective") || kindList.includes("adverb");
+      const wordKinds = kindList.filter((k) => k !== "noun");
+      const [nRes, wRes] = await Promise.all([
+        wantNoun
+          ? supabase.from("nouns").select("id,article,noun,plural,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").limit(2000)
+          : Promise.resolve({ data: [] as any[] }),
+        wantWords
+          ? (supabase as any).from("words").select("id,kind,word,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds).limit(2000)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+
+      const nounCards: Card[] = (nRes.data ?? []).map((r: any) => ({
+        id: r.id,
+        kind: "noun",
+        article: r.article,
+        word: r.noun,
+        plural: r.plural,
+        meanings: r.meanings ?? [],
+        examples: r.examples ?? [],
+        themes: r.themes ?? [],
+        ease: r.ease,
+        interval_days: r.interval_days,
+        reps: r.reps,
+        lapses: r.lapses,
+        due_at: r.due_at,
+      }));
+      const wordCards: Card[] = (wRes.data ?? []).map((r: any) => ({
+        id: r.id,
+        kind: r.kind,
+        article: null,
+        word: r.word,
+        plural: null,
+        meanings: r.meanings ?? [],
+        examples: r.examples ?? [],
+        themes: r.themes ?? [],
+        ease: r.ease,
+        interval_days: r.interval_days,
+        reps: r.reps,
+        lapses: r.lapses,
+        due_at: r.due_at,
+      }));
+
+      let pool = [...nounCards, ...wordCards].filter((c) => {
         if (scope === "due" && !isDue(c.due_at)) return false;
         if (themeList.length > 0 && !c.themes.some((t) => themeList.includes(t))) return false;
         return true;
@@ -89,11 +133,19 @@ function RunPage() {
     else setIdx(idx + 1);
   };
 
+  const writeBack = async (card: Card, upd: any) => {
+    if (card.kind === "noun") {
+      await supabase.from("nouns").update(upd).eq("id", card.id);
+    } else {
+      await (supabase as any).from("words").update(upd).eq("id", card.id);
+    }
+  };
+
   const submitFlashRating = async (rating: Rating) => {
     if (!current) return;
     const upd = applyRating(current, rating);
     setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
-    await supabase.from("nouns").update(upd).eq("id", current.id);
+    await writeBack(current, upd);
     advance();
   };
 
@@ -102,7 +154,7 @@ function RunPage() {
     const rating: Rating = correct ? "good" : "again";
     const upd = applyRating(current, rating);
     setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
-    await supabase.from("nouns").update(upd).eq("id", current.id);
+    await writeBack(current, upd);
     advance();
   };
 
@@ -117,7 +169,7 @@ function RunPage() {
     return (
       <div className="max-w-md mx-auto text-center py-16">
         <h1 className="text-xl font-semibold mb-2">No cards match</h1>
-        <p className="text-muted-foreground mb-4">Try another scope or theme.</p>
+        <p className="text-muted-foreground mb-4">Try another scope, kind, or theme.</p>
         <Button onClick={() => navigate({ to: "/campaign" })}>Back to setup</Button>
       </div>
     );
@@ -141,12 +193,8 @@ function RunPage() {
         </div>
         <div className="text-lg">{pct}% accuracy</div>
         <div className="flex justify-center gap-2 pt-4">
-          <Button asChild variant="outline">
-            <Link to="/">Back to deck</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/campaign">New campaign</Link>
-          </Button>
+          <Button asChild variant="outline"><Link to="/">Back to deck</Link></Button>
+          <Button asChild><Link to="/campaign">New campaign</Link></Button>
         </div>
       </div>
     );
@@ -172,6 +220,11 @@ function RunPage() {
   );
 }
 
+function KindLabel({ kind }: { kind: Kind }) {
+  if (kind === "noun") return null;
+  return <p className="text-xs uppercase tracking-wider text-muted-foreground">{kind}</p>;
+}
+
 function FlashcardView({
   card,
   onRate,
@@ -182,10 +235,8 @@ function FlashcardView({
   direction: "de2it" | "it2de" | "mixed";
 }) {
   const [revealed, setRevealed] = useState(false);
-  // Decide direction for this specific card (mixed = random per card)
   const effectiveDir = useMemo<"de2it" | "it2de">(() => {
     if (direction === "mixed") return Math.random() < 0.5 ? "de2it" : "it2de";
-    // If IT→DE requested but no meanings, fall back to DE→IT
     if (direction === "it2de" && card.meanings.length === 0) return "de2it";
     return direction;
   }, [direction, card.id]);
@@ -198,28 +249,27 @@ function FlashcardView({
         {!revealed ? (
           isIt2De ? (
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Italian → German</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Italian → German ({card.kind})</p>
               <div className="text-3xl font-semibold tracking-tight">{card.meanings.join(" / ")}</div>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">German → Italian</p>
-              <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">German → Italian ({card.kind})</p>
+              <div className="text-4xl font-bold tracking-tight">{card.word}</div>
             </div>
           )
         ) : (
           <>
-            {card.article ? (
+            <KindLabel kind={card.kind} />
+            {card.kind === "noun" && card.article ? (
               <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
-                {card.article} {card.noun}
+                {card.article} {card.word}
               </div>
             ) : (
-              <div className="text-4xl font-bold tracking-tight">{card.noun}</div>
+              <div className="text-4xl font-bold tracking-tight">{card.word}</div>
             )}
             <div className="mt-6 space-y-3">
-              {card.plural && (
-                <div className="text-muted-foreground">Plural: {card.plural}</div>
-              )}
+              {card.plural && <div className="text-muted-foreground">Plural: {card.plural}</div>}
               {card.meanings.length > 0 && (
                 <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
               )}
@@ -252,8 +302,8 @@ type QuizType = (typeof QUIZ_TYPES)[number];
 function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean) => void }) {
   const possibleTypes = useMemo(() => {
     const t: QuizType[] = [];
-    if (card.article) t.push("article");
-    if (card.plural) t.push("plural");
+    if (card.kind === "noun" && card.article) t.push("article");
+    if (card.kind === "noun" && card.plural) t.push("plural");
     if (card.meanings.length > 0) {
       t.push("de2it");
       t.push("it2de");
@@ -279,8 +329,8 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
       correct = answersMatch(answer, card.meanings);
       expected = card.meanings.join(" / ");
     } else {
-      correct = normalizeAnswer(answer) === normalizeAnswer(card.noun);
-      expected = `${card.article ? card.article + " " : ""}${card.noun}`;
+      correct = normalizeAnswer(answer) === normalizeAnswer(card.word);
+      expected = `${card.article ? card.article + " " : ""}${card.word}`;
     }
     setResult({ correct, expected });
     setTimeout(() => onResult(correct), correct ? 700 : 1500);
@@ -289,10 +339,11 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
   return (
     <Card className="p-8 min-h-[320px] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <KindLabel kind={card.kind} />
         {qtype === "article" && (
           <>
             <p className="text-muted-foreground mb-3">Pick the article</p>
-            <div className="text-4xl font-bold mb-6">{card.noun}</div>
+            <div className="text-4xl font-bold mb-6">{card.word}</div>
             <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
               {(["der", "die", "das"] as const).map((a) => (
                 <Button
@@ -318,7 +369,7 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
             <p className="text-muted-foreground mb-3">Type the plural of</p>
             <div className="text-3xl font-bold mb-6">
               {card.article && <span className="text-muted-foreground mr-2">{card.article}</span>}
-              {card.noun}
+              {card.word}
             </div>
           </>
         )}
@@ -327,13 +378,13 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
             <p className="text-muted-foreground mb-3">Translate to Italian</p>
             <div className="text-3xl font-bold mb-6">
               {card.article && <span className="text-muted-foreground mr-2">{card.article}</span>}
-              {card.noun}
+              {card.word}
             </div>
           </>
         )}
         {qtype === "it2de" && (
           <>
-            <p className="text-muted-foreground mb-3">Translate to German (no need for article)</p>
+            <p className="text-muted-foreground mb-3">Translate to German{card.kind === "noun" ? " (no need for article)" : ""}</p>
             <div className="text-2xl font-semibold mb-6">{card.meanings.join(" / ")}</div>
           </>
         )}
@@ -363,7 +414,7 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
                   Answer:{" "}
                   {qtype === "it2de" && card.article ? (
                     <span className={articleTextColor[card.article]}>
-                      {card.article} {card.noun}
+                      {card.article} {card.word}
                     </span>
                   ) : (
                     result.expected
@@ -376,9 +427,7 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
       </div>
 
       {qtype !== "article" && !result && (
-        <Button size="lg" onClick={submit} disabled={!answer.trim()}>
-          Submit
-        </Button>
+        <Button size="lg" onClick={submit} disabled={!answer.trim()}>Submit</Button>
       )}
     </Card>
   );
