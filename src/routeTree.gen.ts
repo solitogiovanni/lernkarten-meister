@@ -11,7 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as CampaignRouteImport } from './routes/campaign'
+import { Route as AdverbsRouteImport } from './routes/adverbs'
+import { Route as AdjectivesRouteImport } from './routes/adjectives'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ImportAdverbsRouteImport } from './routes/import.adverbs'
+import { Route as ImportAdjectivesRouteImport } from './routes/import.adjectives'
 import { Route as CampaignRunRouteImport } from './routes/campaign_.run'
 
 const ImportRoute = ImportRouteImport.update({
@@ -24,10 +28,30 @@ const CampaignRoute = CampaignRouteImport.update({
   path: '/campaign',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdverbsRoute = AdverbsRouteImport.update({
+  id: '/adverbs',
+  path: '/adverbs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdjectivesRoute = AdjectivesRouteImport.update({
+  id: '/adjectives',
+  path: '/adjectives',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ImportAdverbsRoute = ImportAdverbsRouteImport.update({
+  id: '/adverbs',
+  path: '/adverbs',
+  getParentRoute: () => ImportRoute,
+} as any)
+const ImportAdjectivesRoute = ImportAdjectivesRouteImport.update({
+  id: '/adjectives',
+  path: '/adjectives',
+  getParentRoute: () => ImportRoute,
 } as any)
 const CampaignRunRoute = CampaignRunRouteImport.update({
   id: '/campaign_/run',
@@ -37,35 +61,74 @@ const CampaignRunRoute = CampaignRunRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adjectives': typeof AdjectivesRoute
+  '/adverbs': typeof AdverbsRoute
   '/campaign': typeof CampaignRoute
-  '/import': typeof ImportRoute
+  '/import': typeof ImportRouteWithChildren
   '/campaign/run': typeof CampaignRunRoute
+  '/import/adjectives': typeof ImportAdjectivesRoute
+  '/import/adverbs': typeof ImportAdverbsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adjectives': typeof AdjectivesRoute
+  '/adverbs': typeof AdverbsRoute
   '/campaign': typeof CampaignRoute
-  '/import': typeof ImportRoute
+  '/import': typeof ImportRouteWithChildren
   '/campaign/run': typeof CampaignRunRoute
+  '/import/adjectives': typeof ImportAdjectivesRoute
+  '/import/adverbs': typeof ImportAdverbsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adjectives': typeof AdjectivesRoute
+  '/adverbs': typeof AdverbsRoute
   '/campaign': typeof CampaignRoute
-  '/import': typeof ImportRoute
+  '/import': typeof ImportRouteWithChildren
   '/campaign_/run': typeof CampaignRunRoute
+  '/import/adjectives': typeof ImportAdjectivesRoute
+  '/import/adverbs': typeof ImportAdverbsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/campaign' | '/import' | '/campaign/run'
+  fullPaths:
+    | '/'
+    | '/adjectives'
+    | '/adverbs'
+    | '/campaign'
+    | '/import'
+    | '/campaign/run'
+    | '/import/adjectives'
+    | '/import/adverbs'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/campaign' | '/import' | '/campaign/run'
-  id: '__root__' | '/' | '/campaign' | '/import' | '/campaign_/run'
+  to:
+    | '/'
+    | '/adjectives'
+    | '/adverbs'
+    | '/campaign'
+    | '/import'
+    | '/campaign/run'
+    | '/import/adjectives'
+    | '/import/adverbs'
+  id:
+    | '__root__'
+    | '/'
+    | '/adjectives'
+    | '/adverbs'
+    | '/campaign'
+    | '/import'
+    | '/campaign_/run'
+    | '/import/adjectives'
+    | '/import/adverbs'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdjectivesRoute: typeof AdjectivesRoute
+  AdverbsRoute: typeof AdverbsRoute
   CampaignRoute: typeof CampaignRoute
-  ImportRoute: typeof ImportRoute
+  ImportRoute: typeof ImportRouteWithChildren
   CampaignRunRoute: typeof CampaignRunRoute
 }
 
@@ -85,12 +148,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CampaignRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adverbs': {
+      id: '/adverbs'
+      path: '/adverbs'
+      fullPath: '/adverbs'
+      preLoaderRoute: typeof AdverbsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adjectives': {
+      id: '/adjectives'
+      path: '/adjectives'
+      fullPath: '/adjectives'
+      preLoaderRoute: typeof AdjectivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/import/adverbs': {
+      id: '/import/adverbs'
+      path: '/adverbs'
+      fullPath: '/import/adverbs'
+      preLoaderRoute: typeof ImportAdverbsRouteImport
+      parentRoute: typeof ImportRoute
+    }
+    '/import/adjectives': {
+      id: '/import/adjectives'
+      path: '/adjectives'
+      fullPath: '/import/adjectives'
+      preLoaderRoute: typeof ImportAdjectivesRouteImport
+      parentRoute: typeof ImportRoute
     }
     '/campaign_/run': {
       id: '/campaign_/run'
@@ -102,12 +193,36 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ImportRouteChildren {
+  ImportAdjectivesRoute: typeof ImportAdjectivesRoute
+  ImportAdverbsRoute: typeof ImportAdverbsRoute
+}
+
+const ImportRouteChildren: ImportRouteChildren = {
+  ImportAdjectivesRoute: ImportAdjectivesRoute,
+  ImportAdverbsRoute: ImportAdverbsRoute,
+}
+
+const ImportRouteWithChildren =
+  ImportRoute._addFileChildren(ImportRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdjectivesRoute: AdjectivesRoute,
+  AdverbsRoute: AdverbsRoute,
   CampaignRoute: CampaignRoute,
-  ImportRoute: ImportRoute,
+  ImportRoute: ImportRouteWithChildren,
   CampaignRunRoute: CampaignRunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
