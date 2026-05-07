@@ -316,6 +316,10 @@ function VerbsPage() {
           <div className="mt-4">
             <VerbForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} />
             <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => aiFillCurrent("new")} disabled={aiBusy || !newValue.present.trim()}>
+                {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                AI fill
+              </Button>
               <Button onClick={createNew}>Add</Button>
             </div>
           </div>
