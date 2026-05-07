@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { VerbForm, type VerbFormValue, type VerbPrep, emptyVerb } from "@/components/VerbForm";
-import { Loader2, Plus, Trash2, Upload, Play, Search } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload, Play, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
+import { autofillVerbs } from "@/server/autofill.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/verbs")({
   head: () => ({
@@ -44,6 +46,34 @@ function VerbsPage() {
   const [editValue, setEditValue] = useState<VerbFormValue>(emptyVerb);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<VerbFormValue>(emptyVerb);
+  const [aiBusy, setAiBusy] = useState(false);
+  const autofillFn = useServerFn(autofillVerbs);
+
+  const aiFillCurrent = async (target: "edit" | "new") => {
+    const v = target === "edit" ? editValue : newValue;
+    if (!v.present.trim()) return toast.error("Type a verb first");
+    setAiBusy(true);
+    try {
+      const { results, error } = await autofillFn({ data: { verbs: [v.present.trim()] } });
+      if (error) return toast.error(error);
+      const r = results[0];
+      if (!r) return toast.error("No result");
+      const merged: VerbFormValue = {
+        present: r.present || v.present,
+        praeteritum: v.praeteritum || r.praeteritum || "",
+        perfect: v.perfect || r.perfect || "",
+        prepositions: v.prepositions.length ? v.prepositions : (r.prepositions ?? []),
+        meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
+        examples: v.examples,
+        themes: v.themes.length ? v.themes : r.themes ?? [],
+      };
+      if (target === "edit") setEditValue(merged);
+      else setNewValue(merged);
+      toast.success("Filled with AI");
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -268,7 +298,13 @@ function VerbsPage() {
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
               </Button>
-              <Button onClick={saveEdit}>Save</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => aiFillCurrent("edit")} disabled={aiBusy}>
+                  {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                  AI fill
+                </Button>
+                <Button onClick={saveEdit}>Save</Button>
+              </div>
             </div>
           </div>
         </SheetContent>
@@ -280,6 +316,10 @@ function VerbsPage() {
           <div className="mt-4">
             <VerbForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} />
             <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => aiFillCurrent("new")} disabled={aiBusy || !newValue.present.trim()}>
+                {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                AI fill
+              </Button>
               <Button onClick={createNew}>Add</Button>
             </div>
           </div>
