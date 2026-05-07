@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, Pencil } from "lucide-react";
 import { applyRating, isDue, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
+import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
 
 const searchSchema = z.object({
   mode: fallback(z.enum(["flashcards", "quiz"]), "flashcards").default("flashcards"),
@@ -200,14 +201,21 @@ function RunPage() {
     );
   }
 
+  const [editing, setEditing] = useState(false);
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
         <span>{idx + 1} / {cards.length}</span>
-        <span>
-          <span className="text-emerald-600 dark:text-emerald-400">{stats.correct}</span> ·{" "}
-          <span className="text-rose-600 dark:text-rose-400">{stats.wrong}</span>
-        </span>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-7 px-2">
+            <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+          </Button>
+          <span>
+            <span className="text-emerald-600 dark:text-emerald-400">{stats.correct}</span> ·{" "}
+            <span className="text-rose-600 dark:text-rose-400">{stats.wrong}</span>
+          </span>
+        </div>
       </div>
       <Progress value={((idx) / cards.length) * 100} className="mb-6" />
 
@@ -215,6 +223,17 @@ function RunPage() {
         <FlashcardView card={current} onRate={submitFlashRating} direction={direction} key={current.id} />
       ) : (
         <QuizView card={current} onResult={submitQuizResult} key={current.id} />
+      )}
+
+      {editing && (
+        <CardEditDialog
+          open={editing}
+          onOpenChange={setEditing}
+          card={current as EditableCard}
+          onSaved={(next) => {
+            setCards((prev) => prev.map((c, i) => (i === idx ? (next as Card) : c)));
+          }}
+        />
       )}
     </div>
   );
