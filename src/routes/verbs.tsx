@@ -46,6 +46,34 @@ function VerbsPage() {
   const [editValue, setEditValue] = useState<VerbFormValue>(emptyVerb);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<VerbFormValue>(emptyVerb);
+  const [aiBusy, setAiBusy] = useState(false);
+  const autofillFn = useServerFn(autofillVerbs);
+
+  const aiFillCurrent = async (target: "edit" | "new") => {
+    const v = target === "edit" ? editValue : newValue;
+    if (!v.present.trim()) return toast.error("Type a verb first");
+    setAiBusy(true);
+    try {
+      const { results, error } = await autofillFn({ data: { verbs: [v.present.trim()] } });
+      if (error) return toast.error(error);
+      const r = results[0];
+      if (!r) return toast.error("No result");
+      const merged: VerbFormValue = {
+        present: r.present || v.present,
+        praeteritum: v.praeteritum || r.praeteritum || "",
+        perfect: v.perfect || r.perfect || "",
+        prepositions: v.prepositions.length ? v.prepositions : (r.prepositions ?? []),
+        meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
+        examples: v.examples,
+        themes: v.themes.length ? v.themes : r.themes ?? [],
+      };
+      if (target === "edit") setEditValue(merged);
+      else setNewValue(merged);
+      toast.success("Filled with AI");
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
