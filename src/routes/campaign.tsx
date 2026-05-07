@@ -14,51 +14,75 @@ export const Route = createFileRoute("/campaign")({
   component: CampaignSetup,
 });
 
-type Row = { id: string; themes: string[]; due_at: string };
+type Item = { kind: "noun" | "adjective" | "adverb"; themes: string[]; due_at: string };
 
 function CampaignSetup() {
-  const [rows, setRows] = useState<Row[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<"flashcards" | "quiz">("flashcards");
   const [direction, setDirection] = useState<"de2it" | "it2de" | "mixed">("de2it");
   const [scope, setScope] = useState<"all" | "due">("due");
+  const [kinds, setKinds] = useState<Set<"noun" | "adjective" | "adverb">>(new Set(["noun", "adjective", "adverb"]));
   const [themes, setThemes] = useState<string[]>([]);
   const [size, setSize] = useState<number>(20);
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase
-      .from("nouns")
-      .select("id,themes,due_at")
-      .limit(2000)
-      .then(({ data }) => {
-        setRows((data ?? []) as Row[]);
-        setLoading(false);
-      });
+    (async () => {
+      const [nounsRes, wordsRes] = await Promise.all([
+        supabase.from("nouns").select("themes,due_at").limit(2000),
+        (supabase as any).from("words").select("kind,themes,due_at").limit(2000),
+      ]);
+      const all: Item[] = [
+        ...((nounsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
+        ...((wordsRes.data ?? []) as { kind: "adjective" | "adverb"; themes: string[]; due_at: string }[]).map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
+      ];
+      setItems(all);
+      setLoading(false);
+    })();
   }, []);
 
   const allThemes = useMemo(() => {
     const set = new Set<string>();
-    for (const r of rows) for (const t of r.themes) set.add(t);
+    for (const r of items) if (kinds.has(r.kind)) for (const t of r.themes) set.add(t);
     return Array.from(set).sort();
-  }, [rows]);
+  }, [items, kinds]);
 
   const matching = useMemo(() => {
-    return rows.filter((r) => {
+    return items.filter((r) => {
+      if (!kinds.has(r.kind)) return false;
       if (scope === "due" && !isDue(r.due_at)) return false;
       if (themes.length > 0 && !r.themes.some((t) => themes.includes(t))) return false;
       return true;
     });
-  }, [rows, scope, themes]);
+  }, [items, kinds, scope, themes]);
 
   const sizes = [10, 20, 50];
+
+  const toggleKind = (k: "noun" | "adjective" | "adverb") => {
+    const next = new Set(kinds);
+    if (next.has(k)) {
+      if (next.size === 1) return;
+      next.delete(k);
+    } else {
+      next.add(k);
+    }
+    setKinds(next);
+  };
 
   const start = () => {
     const limit = size === -1 ? matching.length : Math.min(size, matching.length);
     if (limit === 0) return;
     navigate({
       to: "/campaign/run",
-      search: { mode, scope, themes: themes.join(","), limit, direction: mode === "flashcards" ? direction : "de2it" },
+      search: {
+        mode,
+        scope,
+        themes: themes.join(","),
+        limit,
+        direction: mode === "flashcards" ? direction : "de2it",
+        kinds: Array.from(kinds).join(","),
+      },
     });
   };
 
@@ -69,12 +93,25 @@ function CampaignSetup() {
       </div>
     );
 
+  const kindLabel = { noun: "Nouns", adjective: "Adjectives", adverb: "Adverbs" } as const;
+
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Start a campaign</h1>
         <p className="text-sm text-muted-foreground">Pick how you want to study and what to study.</p>
       </div>
+
+      <Card className="p-4">
+        <Label className="mb-2 block">Include</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {(["noun", "adjective", "adverb"] as const).map((k) => (
+            <Button key={k} size="sm" variant={kinds.has(k) ? "default" : "outline"} onClick={() => toggleKind(k)}>
+              {kindLabel[k]}
+            </Button>
+          ))}
+        </div>
+      </Card>
 
       <Card className="p-4">
         <Label className="mb-2 block">Mode</Label>
@@ -90,15 +127,9 @@ function CampaignSetup() {
           <div className="mt-4">
             <Label className="mb-2 block text-sm text-muted-foreground">Direction</Label>
             <div className="grid grid-cols-3 gap-2">
-              <Button size="sm" variant={direction === "de2it" ? "default" : "outline"} onClick={() => setDirection("de2it")}>
-                DE → IT
-              </Button>
-              <Button size="sm" variant={direction === "it2de" ? "default" : "outline"} onClick={() => setDirection("it2de")}>
-                IT → DE
-              </Button>
-              <Button size="sm" variant={direction === "mixed" ? "default" : "outline"} onClick={() => setDirection("mixed")}>
-                Mixed
-              </Button>
+              <Button size="sm" variant={direction === "de2it" ? "default" : "outline"} onClick={() => setDirection("de2it")}>DE → IT</Button>
+              <Button size="sm" variant={direction === "it2de" ? "default" : "outline"} onClick={() => setDirection("it2de")}>IT → DE</Button>
+              <Button size="sm" variant={direction === "mixed" ? "default" : "outline"} onClick={() => setDirection("mixed")}>Mixed</Button>
             </div>
           </div>
         )}
@@ -107,12 +138,8 @@ function CampaignSetup() {
       <Card className="p-4">
         <Label className="mb-2 block">Scope</Label>
         <div className="grid grid-cols-2 gap-2 mb-3">
-          <Button variant={scope === "due" ? "default" : "outline"} onClick={() => setScope("due")}>
-            Due today
-          </Button>
-          <Button variant={scope === "all" ? "default" : "outline"} onClick={() => setScope("all")}>
-            All cards
-          </Button>
+          <Button variant={scope === "due" ? "default" : "outline"} onClick={() => setScope("due")}>Due today</Button>
+          <Button variant={scope === "all" ? "default" : "outline"} onClick={() => setScope("all")}>All cards</Button>
         </div>
 
         {allThemes.length > 0 && (
@@ -145,13 +172,9 @@ function CampaignSetup() {
         <Label className="mb-2 block">Session size</Label>
         <div className="grid grid-cols-4 gap-2">
           {sizes.map((s) => (
-            <Button key={s} variant={size === s ? "default" : "outline"} onClick={() => setSize(s)}>
-              {s}
-            </Button>
+            <Button key={s} variant={size === s ? "default" : "outline"} onClick={() => setSize(s)}>{s}</Button>
           ))}
-          <Button variant={size === -1 ? "default" : "outline"} onClick={() => setSize(-1)}>
-            All
-          </Button>
+          <Button variant={size === -1 ? "default" : "outline"} onClick={() => setSize(-1)}>All</Button>
         </div>
       </Card>
 
