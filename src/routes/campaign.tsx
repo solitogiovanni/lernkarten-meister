@@ -116,9 +116,12 @@ function CampaignSetup() {
         </div>
 
         {allThemes.length > 0 && (
-          <>
-            <Label className="mb-2 block text-sm text-muted-foreground">Themes (optional)</Label>
-            <div className="flex flex-wrap gap-1.5">
+          <details className="group">
+            <summary className="text-sm text-muted-foreground cursor-pointer select-none hover:text-foreground inline-flex items-center gap-1">
+              <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
+              Themes (optional){themes.length > 0 && <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{themes.length}</span>}
+            </summary>
+            <div className="flex flex-wrap gap-1.5 mt-2">
               {allThemes.map((t) => {
                 const on = themes.includes(t);
                 return (
@@ -134,7 +137,7 @@ function CampaignSetup() {
                 );
               })}
             </div>
-          </>
+          </details>
         )}
       </Card>
 

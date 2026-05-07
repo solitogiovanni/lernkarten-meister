@@ -196,18 +196,18 @@ function DeckPage() {
             {rows.length} {rows.length === 1 ? "noun" : "nouns"} · {dueCount} due today
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button variant="outline" asChild className="flex-1 sm:flex-initial">
             <Link to="/import">
-              <Upload className="h-4 w-4 mr-1" /> Import list
+              <Upload className="h-4 w-4 mr-1" /> Import
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="flex-1 sm:flex-initial">
             <Link to="/campaign">
               <Play className="h-4 w-4 mr-1" /> Campaign
             </Link>
           </Button>
-          <Button onClick={() => setCreating(true)}>
+          <Button onClick={() => setCreating(true)} className="flex-1 sm:flex-initial">
             <Plus className="h-4 w-4 mr-1" /> Add noun
           </Button>
         </div>
@@ -242,21 +242,27 @@ function DeckPage() {
           )}
         </div>
         {allThemes.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {allThemes.map((t) => (
-              <button
-                key={t}
-                onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: p.theme === t ? "" : t }) })}
-                className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                  theme === t
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+          <details className="mt-3 group">
+            <summary className="text-xs text-muted-foreground cursor-pointer select-none hover:text-foreground inline-flex items-center gap-1">
+              <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
+              Themes {theme && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{theme}</span>}
+            </summary>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {allThemes.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: p.theme === t ? "" : t }) })}
+                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                    theme === t
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </details>
         )}
       </Card>
 
