@@ -11,7 +11,7 @@ import { autofillNouns, type AutofilledNoun } from "@/server/autofill.functions"
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/import")({
+export const Route = createFileRoute("/import_")({
   head: () => ({
     meta: [{ title: "Import — Wortschatz" }, { name: "description", content: "Bulk import German nouns and let AI fill the gaps." }],
   }),

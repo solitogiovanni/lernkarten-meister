@@ -44,14 +44,14 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImportAdverbsRoute = ImportAdverbsRouteImport.update({
-  id: '/adverbs',
-  path: '/adverbs',
-  getParentRoute: () => ImportRoute,
+  id: '/import/adverbs',
+  path: '/import/adverbs',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ImportAdjectivesRoute = ImportAdjectivesRouteImport.update({
-  id: '/adjectives',
-  path: '/adjectives',
-  getParentRoute: () => ImportRoute,
+  id: '/import/adjectives',
+  path: '/import/adjectives',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignRunRoute = CampaignRunRouteImport.update({
   id: '/campaign_/run',
@@ -130,6 +130,8 @@ export interface RootRouteChildren {
   CampaignRoute: typeof CampaignRoute
   ImportRoute: typeof ImportRoute
   CampaignRunRoute: typeof CampaignRunRoute
+  ImportAdjectivesRoute: typeof ImportAdjectivesRoute
+  ImportAdverbsRoute: typeof ImportAdverbsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,17 +173,17 @@ declare module '@tanstack/react-router' {
     }
     '/import/adverbs': {
       id: '/import/adverbs'
-      path: '/adverbs'
+      path: '/import/adverbs'
       fullPath: '/import/adverbs'
       preLoaderRoute: typeof ImportAdverbsRouteImport
-      parentRoute: typeof ImportRoute
+      parentRoute: typeof rootRouteImport
     }
     '/import/adjectives': {
       id: '/import/adjectives'
-      path: '/adjectives'
+      path: '/import/adjectives'
       fullPath: '/import/adjectives'
       preLoaderRoute: typeof ImportAdjectivesRouteImport
-      parentRoute: typeof ImportRoute
+      parentRoute: typeof rootRouteImport
     }
     '/campaign_/run': {
       id: '/campaign_/run'
@@ -200,16 +202,9 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignRoute: CampaignRoute,
   ImportRoute: ImportRoute,
   CampaignRunRoute: CampaignRunRoute,
+  ImportAdjectivesRoute: ImportAdjectivesRoute,
+  ImportAdverbsRoute: ImportAdverbsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
