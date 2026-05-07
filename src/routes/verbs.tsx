@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { VerbForm, type VerbFormValue, type VerbPrep, emptyVerb } from "@/components/VerbForm";
-import { Loader2, Plus, Trash2, Upload, Play, Search } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload, Play, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
+import { autofillVerbs } from "@/server/autofill.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/verbs")({
   head: () => ({
