@@ -14,7 +14,7 @@ export const Route = createFileRoute("/campaign")({
   component: CampaignSetup,
 });
 
-type Item = { kind: "noun" | "adjective" | "adverb"; themes: string[]; due_at: string };
+type Item = { kind: "noun" | "adjective" | "adverb" | "verb"; themes: string[]; due_at: string };
 
 function CampaignSetup() {
   const [items, setItems] = useState<Item[]>([]);
@@ -22,20 +22,22 @@ function CampaignSetup() {
   const [mode, setMode] = useState<"flashcards" | "quiz">("flashcards");
   const [direction, setDirection] = useState<"de2it" | "it2de" | "mixed">("de2it");
   const [scope, setScope] = useState<"all" | "due">("due");
-  const [kinds, setKinds] = useState<Set<"noun" | "adjective" | "adverb">>(new Set(["noun", "adjective", "adverb"]));
+  const [kinds, setKinds] = useState<Set<"noun" | "adjective" | "adverb" | "verb">>(new Set(["noun", "adjective", "adverb", "verb"]));
   const [themes, setThemes] = useState<string[]>([]);
   const [size, setSize] = useState<number>(20);
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
-      const [nounsRes, wordsRes] = await Promise.all([
+      const [nounsRes, wordsRes, verbsRes] = await Promise.all([
         supabase.from("nouns").select("themes,due_at").limit(2000),
         (supabase as any).from("words").select("kind,themes,due_at").limit(2000),
+        (supabase as any).from("verbs").select("themes,due_at").limit(2000),
       ]);
       const all: Item[] = [
         ...((nounsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
         ...((wordsRes.data ?? []) as { kind: "adjective" | "adverb"; themes: string[]; due_at: string }[]).map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
+        ...((verbsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at })),
       ];
       setItems(all);
       setLoading(false);
@@ -59,7 +61,7 @@ function CampaignSetup() {
 
   const sizes = [10, 20, 50];
 
-  const toggleKind = (k: "noun" | "adjective" | "adverb") => {
+  const toggleKind = (k: "noun" | "adjective" | "adverb" | "verb") => {
     const next = new Set(kinds);
     if (next.has(k)) {
       if (next.size === 1) return;
@@ -93,7 +95,7 @@ function CampaignSetup() {
       </div>
     );
 
-  const kindLabel = { noun: "Nouns", adjective: "Adjectives", adverb: "Adverbs" } as const;
+  const kindLabel = { noun: "Nouns", adjective: "Adjectives", adverb: "Adverbs", verb: "Verbs" } as const;
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
@@ -104,8 +106,8 @@ function CampaignSetup() {
 
       <Card className="p-4">
         <Label className="mb-2 block">Include</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {(["noun", "adjective", "adverb"] as const).map((k) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {(["noun", "adjective", "adverb", "verb"] as const).map((k) => (
             <Button key={k} size="sm" variant={kinds.has(k) ? "default" : "outline"} onClick={() => toggleKind(k)}>
               {kindLabel[k]}
             </Button>

@@ -1,90 +1,113 @@
-# Extend Wortschatz to Adjectives & Adverbs
 
-Add full support for German adjectives and adverbs alongside the existing nouns: separate decks, separate import flows, and a unified campaign that can mix any combination of word kinds.
+## Goal
 
-## Data model
+Add German **verbs** as a third card type alongside nouns and adjectives/adverbs, with their own import tool, deck page, and campaign support.
 
-Add a single new table `words` for both adjectives and adverbs (their structure is identical: just a word and meanings, no article/plural). Keeps the existing `nouns` table untouched.
+## Verb card fields
 
-```text
-type word_kind = 'adjective' | 'adverb'
+- `present` — infinitive / present base form (e.g. `gehen`)
+- `praeteritum` — Präteritum 3rd person sg. (e.g. `ging`)
+- `perfect` — Perfekt with auxiliary, stored as one string (e.g. `ist gegangen`, `hat gemacht`). The auxiliary (`sein`/`haben`) is part of this field.
+- `prepositions` — array of `{ preposition: string; case?: 'akk'|'dat'|'gen'|null; meaning?: string }` (multiple lines, one per preposition; e.g. `warten auf + Akk = aspettare`)
+- `meanings` — Italian translations (string[])
+- `examples` — German example sentences (string[])
+- `themes` — Italian thematic tags (string[])
+- Plus standard SRS columns (`ease`, `interval_days`, `due_at`, `reps`, `lapses`, `last_rated_at`).
 
-words
-  id uuid pk
-  kind word_kind NOT NULL
-  word text NOT NULL
-  meanings text[] NOT NULL default '{}'
-  examples text[] NOT NULL default '{}'
-  themes text[] NOT NULL default '{}'
-  ease, interval_days, due_at, reps, lapses, last_rated_at, created_at, updated_at
-  -- same SRS columns and defaults as nouns
-  -- RLS: public read/insert/update/delete (matches current nouns policies)
-  -- indexes on (kind), (kind, due_at)
-```
+## Database
 
-Migration creates the enum, table, RLS policies, and the `set_updated_at` trigger.
-
-## Routes (new)
+New table `public.verbs`:
 
 ```text
-src/routes/
-  adjectives.tsx          deck for adjectives (kind='adjective')
-  adverbs.tsx             deck for adverbs    (kind='adverb')
-  import.adjectives.tsx   bulk import for adjectives
-  import.adverbs.tsx      bulk import for adverbs
+id uuid pk
+present text not null
+praeteritum text
+perfect text          -- includes auxiliary, e.g. "ist gegangen"
+prepositions jsonb not null default '[]'  -- array of {preposition, case, meaning}
+meanings text[] not null default '{}'
+examples text[] not null default '{}'
+themes text[] not null default '{}'
+ease real not null default 2.5
+interval_days int not null default 0
+due_at timestamptz not null default now()
+reps int not null default 0
+lapses int not null default 0
+last_rated_at timestamptz
+created_at timestamptz not null default now()
+updated_at timestamptz not null default now()
 ```
 
-The deck pages reuse the same UI as the noun deck (search, theme filter as collapsible, due-today filter, add/edit drawer) but read/write the `words` table filtered by `kind`. They show `word` (no article styling). Theme aggregation is per-kind.
+- RLS enabled with same public select/insert/update/delete policies as `nouns`/`words` (matches current app model).
+- `set_updated_at` trigger.
 
-The import pages parse the simpler format `word = meaning1, meaning2, ...` (no article). Same duplicate-detection behavior as nouns (check existing rows in `words` for that `kind` plus draft list, amber highlight, exclude from save).
+## Server: AI autofill for verbs
 
-## Reusable form
+Extend `src/server/autofill.functions.ts` with `autofillVerbs` (createServerFn):
 
-Add `src/components/WordForm.tsx` — a stripped-down `NounForm`: fields are `word`, `meanings[]`, `examples[]`, `themes[]`. Used in both the adjective and adverb add/edit drawers.
+- Input: `{ verbs: string[] }` (max 50)
+- Calls Lovable AI Gateway (`google/gemini-2.5-flash`) with a tool schema returning, per item:
+  - `present`, `praeteritum`, `perfect` (with `ist`/`hat`), `prepositions: [{preposition, case, meaning}]`, `meanings`, `themes`
+- Same error handling pattern (429 / 402 / generic).
 
-## AI autofill
+## Import UI
 
-Add `src/server/autofill.functions.ts` export `autofillWords` (POST server fn) that takes `{ words: string[]; kind: 'adjective' | 'adverb' }`. Same Lovable AI gateway call pattern as `autofillNouns`, with a kind-aware system prompt that returns only `{ word, meanings (1–4 Italian), themes (1–3 Italian) }`. Tool-call schema mirrors current one minus article/plural.
+New route **`src/routes/import.verbs.tsx`** (matches sibling `import.adjectives.tsx`, `import.adverbs.tsx`).
 
-## Navigation
+- Textarea: one verb per line, free-form (`gehen = andare`, `warten auf = aspettare`, etc.).
+- Buttons: **Auto-fill with AI** and **Skip AI**.
+- Drafts table per row, editable:
+  - `present`, `praeteritum`, `perfect` inputs
+  - **Prepositions block**: list of editable rows, each with `preposition` input + `case` selector (Akk/Dat/Gen/—) + `meaning` input + remove button, plus an **+ Add preposition** button
+  - `meanings` (comma list)
+  - `themes` (chips with `+ theme`)
+- Duplicate detection by `present` (lowercased) against existing rows in `verbs`.
+- **Save all** → `supabase.from('verbs').insert(rows)` → navigate to `/verbs`.
 
-`src/routes/__root.tsx`: header gets `Nouns`, `Adjectives`, `Adverbs`, `Import`, `Campaign`. Import becomes a small dropdown (or sub-links) listing the three import targets. On mobile the nav already wraps; we'll add `flex-wrap` and tighter padding so all entries stay reachable.
+Also update **`src/routes/import_.tsx`** (the import hub) to add a "Verbs" card linking to `/import/verbs`, alongside existing Nouns/Adjectives/Adverbs entries.
 
-## Campaign updates
+## Verb deck page
 
-`src/routes/campaign.tsx`:
-- New "Include" card with three toggles: Nouns / Adjectives / Adverbs (default: all on). At least one must be selected.
-- Themes list aggregates across the selected kinds and sources (queries `nouns` + `words` filtered by chosen kinds).
-- Mode/Direction/Scope/Size unchanged. Direction selector for Flashcards stays.
-- Passes `kinds=noun,adjective,adverb` (CSV) in the search params to the run page.
+New route **`src/routes/verbs.tsx`** that renders a new component **`src/components/VerbDeckPage.tsx`** (similar shape to `WordDeckPage`):
 
-`src/routes/campaign_.run.tsx`:
-- `searchSchema` adds `kinds: fallback(z.string(), "noun").default("noun")`.
-- Loader queries `nouns` and `words` (parallel) according to selected kinds, normalizes both into a single `Card` shape with a `kind` discriminator (`'noun' | 'adjective' | 'adverb'`), filters by scope/themes, shuffles, slices to `limit`.
-- SRS update: writes back to the correct table (`nouns` vs `words`) based on `card.kind`.
-- Flashcard front: nouns keep article styling; adjectives/adverbs show the bare word with a small kind label ("adjective" / "adverb") above. IT→DE direction works for all kinds (front = meanings, back = word).
-- Quiz: builds `possibleTypes` per card — `article` and `plural` only for nouns; `de2it` / `it2de` for any card with meanings. Adjectives/adverbs effectively get translation-only quizzes.
+- List/grid of verb cards showing `present` prominently, with `praeteritum` and `perfect` underneath, prepositions as small chips, meanings + themes.
+- Search by present/meaning, theme filter, due-only filter (matching existing deck UX).
+- Edit dialog (reuse pattern from `CardEditDialog` — see "Editing & type changes" below).
+- "Import verbs" link to `/import/verbs`.
 
-## Files to add / change
+Add a **Verbs** link in the top nav (`src/routes/__root.tsx`).
 
-Add:
-- `supabase/migrations/<ts>_words_table.sql`
-- `src/components/WordForm.tsx`
-- `src/routes/adjectives.tsx`
-- `src/routes/adverbs.tsx`
-- `src/routes/import.adjectives.tsx`
-- `src/routes/import.adverbs.tsx`
+## Campaign integration
 
-Edit:
-- `src/server/autofill.functions.ts` — add `autofillWords` (export, keep `autofillNouns`)
-- `src/routes/__root.tsx` — nav entries
-- `src/routes/campaign.tsx` — kind toggles, cross-table theme aggregation, pass `kinds`
-- `src/routes/campaign_.run.tsx` — load+merge from both tables, kind-aware quiz/flashcard, kind-aware SRS update
+In `src/routes/campaign.tsx`:
+- Extend `Item['kind']` and the `kinds` set to include `"verb"`.
+- Fetch verbs alongside nouns/words.
+- Add a "Verbs" toggle button.
 
-`src/integrations/supabase/types.ts` regenerates automatically after the migration.
+In `src/routes/campaign_.run.tsx`:
+- Load verbs when `kinds` includes `verb`.
+- Render verb cards: front shows `present` (or Italian meanings for IT→DE), back shows full conjugation (`present` / `praeteritum` / `perfect`), prepositions, meanings, examples.
+- SRS rating writes back to the `verbs` table.
 
-## Out of scope
+## Editing & type changes
 
-- Conjugation/comparative/superlative storage for adjectives (can be added later as optional fields).
-- Migrating existing nouns into a unified table.
+Update `src/components/CardEditDialog.tsx` to support `verb` as a third kind:
+- Type selector now Noun / Adjective / Adverb / **Verb**.
+- New `VerbForm` component (`src/components/VerbForm.tsx`) used when `kind === 'verb'` with fields above (incl. repeatable prepositions block).
+- Migration logic: switching to/from `verb` moves the row between `nouns`/`words`/`verbs` while preserving SRS metadata, mirroring the existing noun↔word migration.
 
+## Files touched
+
+- **New**: SQL migration for `verbs` table + RLS + trigger
+- **New**: `src/routes/import.verbs.tsx`
+- **New**: `src/routes/verbs.tsx`
+- **New**: `src/components/VerbDeckPage.tsx`
+- **New**: `src/components/VerbForm.tsx`
+- **Edit**: `src/server/autofill.functions.ts` (add `autofillVerbs`)
+- **Edit**: `src/routes/import_.tsx` (add Verbs entry to hub)
+- **Edit**: `src/routes/__root.tsx` (nav link)
+- **Edit**: `src/routes/campaign.tsx` and `src/routes/campaign_.run.tsx` (verb support)
+- **Edit**: `src/components/CardEditDialog.tsx` (verb option + migration)
+
+## Open question
+
+For the SM-2 spaced-repetition data, OK to keep SRS state per row in the `verbs` table just like `nouns`/`words`? (Plan assumes yes — same pattern.)

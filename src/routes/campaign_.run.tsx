@@ -18,7 +18,7 @@ const searchSchema = z.object({
   themes: fallback(z.string(), "").default(""),
   limit: fallback(z.number(), 20).default(20),
   direction: fallback(z.enum(["de2it", "it2de", "mixed"]), "de2it").default("de2it"),
-  kinds: fallback(z.string(), "noun,adjective,adverb").default("noun,adjective,adverb"),
+  kinds: fallback(z.string(), "noun,adjective,adverb,verb").default("noun,adjective,adverb,verb"),
 });
 
 export const Route = createFileRoute("/campaign_/run")({
@@ -27,14 +27,19 @@ export const Route = createFileRoute("/campaign_/run")({
   component: RunPage,
 });
 
-type Kind = "noun" | "adjective" | "adverb";
+type Kind = "noun" | "adjective" | "adverb" | "verb";
+
+type VerbPrep = { preposition: string; case: "akk" | "dat" | "gen" | null; meaning: string };
 
 type Card = {
   id: string;
   kind: Kind;
   article: "der" | "die" | "das" | null;
-  word: string; // German term (noun or adj/adv)
+  word: string; // German term — for verbs this is "present"
   plural: string | null;
+  praeteritum: string | null;
+  perfect: string | null;
+  prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
   themes: string[];
@@ -76,13 +81,17 @@ function RunPage() {
     (async () => {
       const wantNoun = kindList.includes("noun");
       const wantWords = kindList.includes("adjective") || kindList.includes("adverb");
-      const wordKinds = kindList.filter((k) => k !== "noun");
-      const [nRes, wRes] = await Promise.all([
+      const wantVerb = kindList.includes("verb");
+      const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
+      const [nRes, wRes, vRes] = await Promise.all([
         wantNoun
           ? supabase.from("nouns").select("id,article,noun,plural,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").limit(2000)
           : Promise.resolve({ data: [] as any[] }),
         wantWords
           ? (supabase as any).from("words").select("id,kind,word,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds).limit(2000)
+          : Promise.resolve({ data: [] as any[] }),
+        wantVerb
+          ? (supabase as any).from("verbs").select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,ease,interval_days,reps,lapses,due_at").limit(2000)
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
@@ -92,6 +101,9 @@ function RunPage() {
         article: r.article,
         word: r.noun,
         plural: r.plural,
+        praeteritum: null,
+        perfect: null,
+        prepositions: [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
@@ -107,6 +119,27 @@ function RunPage() {
         article: null,
         word: r.word,
         plural: null,
+        praeteritum: null,
+        perfect: null,
+        prepositions: [],
+        meanings: r.meanings ?? [],
+        examples: r.examples ?? [],
+        themes: r.themes ?? [],
+        ease: r.ease,
+        interval_days: r.interval_days,
+        reps: r.reps,
+        lapses: r.lapses,
+        due_at: r.due_at,
+      }));
+      const verbCards: Card[] = (vRes.data ?? []).map((r: any) => ({
+        id: r.id,
+        kind: "verb",
+        article: null,
+        word: r.present,
+        plural: null,
+        praeteritum: r.praeteritum,
+        perfect: r.perfect,
+        prepositions: r.prepositions ?? [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
@@ -117,7 +150,7 @@ function RunPage() {
         due_at: r.due_at,
       }));
 
-      let pool = [...nounCards, ...wordCards].filter((c) => {
+      let pool = [...nounCards, ...wordCards, ...verbCards].filter((c) => {
         if (scope === "due" && !isDue(c.due_at)) return false;
         if (themeList.length > 0 && !c.themes.some((t) => themeList.includes(t))) return false;
         return true;
@@ -138,6 +171,8 @@ function RunPage() {
   const writeBack = async (card: Card, upd: any) => {
     if (card.kind === "noun") {
       await supabase.from("nouns").update(upd).eq("id", card.id);
+    } else if (card.kind === "verb") {
+      await (supabase as any).from("verbs").update(upd).eq("id", card.id);
     } else {
       await (supabase as any).from("words").update(upd).eq("id", card.id);
     }
@@ -288,6 +323,22 @@ function FlashcardView({
             )}
             <div className="mt-6 space-y-3">
               {card.plural && <div className="text-muted-foreground">Plural: {card.plural}</div>}
+              {card.kind === "verb" && (card.praeteritum || card.perfect) && (
+                <div className="text-muted-foreground space-y-0.5">
+                  {card.praeteritum && <div>Präteritum: <span className="font-medium text-foreground">{card.praeteritum}</span></div>}
+                  {card.perfect && <div>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></div>}
+                </div>
+              )}
+              {card.kind === "verb" && card.prepositions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {card.prepositions.map((p, i) => (
+                    <span key={i} className="text-xs px-2 py-0.5 rounded-full border bg-muted">
+                      {p.preposition}{p.case ? ` +${p.case.charAt(0).toUpperCase() + p.case.slice(1)}` : ""}
+                      {p.meaning && <span className="text-muted-foreground"> — {p.meaning}</span>}
+                    </span>
+                  ))}
+                </div>
+              )}
               {card.meanings.length > 0 && (
                 <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
               )}

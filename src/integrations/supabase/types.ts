@@ -68,6 +68,63 @@ export type Database = {
         }
         Relationships: []
       }
+      verbs: {
+        Row: {
+          created_at: string
+          due_at: string
+          ease: number
+          examples: string[]
+          id: string
+          interval_days: number
+          lapses: number
+          last_rated_at: string | null
+          meanings: string[]
+          perfect: string | null
+          praeteritum: string | null
+          prepositions: Json
+          present: string
+          reps: number
+          themes: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_at?: string
+          ease?: number
+          examples?: string[]
+          id?: string
+          interval_days?: number
+          lapses?: number
+          last_rated_at?: string | null
+          meanings?: string[]
+          perfect?: string | null
+          praeteritum?: string | null
+          prepositions?: Json
+          present: string
+          reps?: number
+          themes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string
+          ease?: number
+          examples?: string[]
+          id?: string
+          interval_days?: number
+          lapses?: number
+          last_rated_at?: string | null
+          meanings?: string[]
+          perfect?: string | null
+          praeteritum?: string | null
+          prepositions?: Json
+          present?: string
+          reps?: number
+          themes?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       words: {
         Row: {
           created_at: string

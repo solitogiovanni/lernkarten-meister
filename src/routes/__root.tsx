@@ -87,6 +87,7 @@ function RootComponent() {
             <NavLink to="/" label="Nouns" />
             <NavLink to="/adjectives" label="Adjectives" />
             <NavLink to="/adverbs" label="Adverbs" />
+            <NavLink to="/verbs" label="Verbs" />
             <NavLink to="/import" label="Import" />
             <NavLink to="/campaign" label="Campaign" />
           </nav>
