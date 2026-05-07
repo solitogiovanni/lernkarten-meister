@@ -32,6 +32,7 @@ type Row = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string | null;
   due_at: string;
   reps: number;
 };
@@ -66,6 +67,7 @@ function VerbsPage() {
         meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
         examples: v.examples,
         themes: v.themes.length ? v.themes : r.themes ?? [],
+        comments: v.comments,
       };
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
@@ -79,7 +81,7 @@ function VerbsPage() {
     setLoading(true);
     const { data, error } = await (supabase as any)
       .from("verbs")
-      .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,due_at,reps")
+      .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
       .order("present", { ascending: true })
       .limit(1000);
     if (error) toast.error(error.message);
@@ -120,6 +122,7 @@ function VerbsPage() {
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      comments: r.comments ?? "",
     });
   };
 
@@ -136,6 +139,7 @@ function VerbsPage() {
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        comments: editValue.comments.trim() || null,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -167,6 +171,7 @@ function VerbsPage() {
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      comments: newValue.comments.trim() || null,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");

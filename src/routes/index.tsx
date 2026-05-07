@@ -23,6 +23,7 @@ type NounRow = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string | null;
   due_at: string;
   reps: number;
 };
@@ -63,7 +64,7 @@ function DeckPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("nouns")
-      .select("id,article,noun,plural,meanings,examples,themes,due_at,reps")
+      .select("id,article,noun,plural,meanings,examples,themes,comments,due_at,reps")
       .order("noun", { ascending: true })
       .limit(1000);
     if (error) toast.error(error.message);
@@ -105,13 +106,14 @@ function DeckPage() {
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      comments: r.comments ?? "",
     });
   };
 
   const saveEdit = async () => {
     if (!editing) return;
     if (!editValue.noun.trim()) return toast.error("Noun is required");
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("nouns")
       .update({
         article: editValue.article,
@@ -120,6 +122,7 @@ function DeckPage() {
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        comments: editValue.comments.trim() || null,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -143,13 +146,14 @@ function DeckPage() {
     if (rows.some((r) => r.noun.trim().toLowerCase() === key)) {
       return toast.error(`"${newValue.noun.trim()}" is already in your deck`);
     }
-    const { error } = await supabase.from("nouns").insert({
+    const { error } = await (supabase as any).from("nouns").insert({
       article: newValue.article,
       noun: newValue.noun.trim(),
       plural: newValue.plural.trim() || null,
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      comments: newValue.comments.trim() || null,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");
@@ -178,6 +182,7 @@ function DeckPage() {
         meanings: v.meanings.length ? v.meanings : r.meanings,
         examples: v.examples,
         themes: v.themes.length ? v.themes : r.themes,
+        comments: v.comments,
       };
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);

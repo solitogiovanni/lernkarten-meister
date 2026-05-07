@@ -21,6 +21,7 @@ type Row = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string | null;
   due_at: string;
   reps: number;
 };
@@ -56,7 +57,7 @@ export function WordDeckPage({
     setLoading(true);
     const { data, error } = await (supabase as any)
       .from("words")
-      .select("id,word,meanings,examples,themes,due_at,reps")
+      .select("id,word,meanings,examples,themes,comments,due_at,reps")
       .eq("kind", kind)
       .order("word", { ascending: true })
       .limit(1000);
@@ -97,6 +98,7 @@ export function WordDeckPage({
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      comments: r.comments ?? "",
     });
   };
 
@@ -110,6 +112,7 @@ export function WordDeckPage({
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        comments: editValue.comments.trim() || null,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -143,6 +146,7 @@ export function WordDeckPage({
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      comments: newValue.comments.trim() || null,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");
@@ -165,6 +169,7 @@ export function WordDeckPage({
         meanings: v.meanings.length ? v.meanings : r.meanings,
         examples: v.examples,
         themes: v.themes.length ? v.themes : r.themes,
+        comments: v.comments,
       };
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
