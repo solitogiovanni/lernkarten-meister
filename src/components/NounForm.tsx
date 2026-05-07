@@ -13,6 +13,7 @@ export type NounFormValue = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string;
 };
 
 export const emptyNoun: NounFormValue = {
@@ -22,6 +23,7 @@ export const emptyNoun: NounFormValue = {
   meanings: [],
   examples: [],
   themes: [],
+  comments: "",
 };
 
 function ChipInput({
@@ -172,6 +174,17 @@ export function NounForm({
             <Plus className="h-4 w-4 mr-1" /> Add example
           </Button>
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="noun-comments" className="mb-2 block">Comments</Label>
+        <Textarea
+          id="noun-comments"
+          value={value.comments}
+          onChange={(e) => set("comments", e.target.value)}
+          placeholder="Notes from your teacher…"
+          rows={2}
+        />
       </div>
 
       <div>

@@ -11,6 +11,7 @@ export type WordFormValue = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  comments: string;
 };
 
 export const emptyWord: WordFormValue = {
@@ -18,6 +19,7 @@ export const emptyWord: WordFormValue = {
   meanings: [],
   examples: [],
   themes: [],
+  comments: "",
 };
 
 function ChipInput({
@@ -144,6 +146,17 @@ export function WordForm({
             <Plus className="h-4 w-4 mr-1" /> Add example
           </Button>
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="word-comments" className="mb-2 block">Comments</Label>
+        <Textarea
+          id="word-comments"
+          value={value.comments}
+          onChange={(e) => set("comments", e.target.value)}
+          placeholder="Notes from your teacher…"
+          rows={2}
+        />
       </div>
 
       <div>
