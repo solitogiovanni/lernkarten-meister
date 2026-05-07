@@ -171,6 +171,8 @@ function RunPage() {
   const writeBack = async (card: Card, upd: any) => {
     if (card.kind === "noun") {
       await supabase.from("nouns").update(upd).eq("id", card.id);
+    } else if (card.kind === "verb") {
+      await (supabase as any).from("verbs").update(upd).eq("id", card.id);
     } else {
       await (supabase as any).from("words").update(upd).eq("id", card.id);
     }
