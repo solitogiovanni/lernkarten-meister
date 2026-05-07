@@ -5,17 +5,21 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NounForm, type NounFormValue } from "@/components/NounForm";
 import { WordForm, type WordFormValue } from "@/components/WordForm";
+import { VerbForm, type VerbFormValue, type VerbPrep } from "@/components/VerbForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export type Kind = "noun" | "adjective" | "adverb";
+export type Kind = "noun" | "adjective" | "adverb" | "verb";
 
 export type EditableCard = {
   id: string;
   kind: Kind;
   article: "der" | "die" | "das" | null;
-  word: string;
+  word: string; // for verbs this is "present"
   plural: string | null;
+  praeteritum?: string | null;
+  perfect?: string | null;
+  prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
   themes: string[];
@@ -52,7 +56,22 @@ export function CardEditDialog({
     examples: card.examples,
     themes: card.themes,
   });
+  const [verb, setVerb] = useState<VerbFormValue>({
+    present: card.word,
+    praeteritum: card.praeteritum ?? "",
+    perfect: card.perfect ?? "",
+    prepositions: card.prepositions ?? [],
+    meanings: card.meanings,
+    examples: card.examples,
+    themes: card.themes,
+  });
   const [saving, setSaving] = useState(false);
+
+  const deleteOldRow = async (oldKind: Kind, id: string) => {
+    if (oldKind === "noun") await supabase.from("nouns").delete().eq("id", id);
+    else if (oldKind === "verb") await (supabase as any).from("verbs").delete().eq("id", id);
+    else await (supabase as any).from("words").delete().eq("id", id);
+  };
 
   const save = async () => {
     setSaving(true);
@@ -78,36 +97,46 @@ export function CardEditDialog({
         };
         if (!payload.noun) throw new Error("Noun is required");
         if (kindChanged) {
-          const { data, error } = await supabase
-            .from("nouns")
-            .insert({ ...payload, ...srs })
-            .select()
-            .single();
+          const { data, error } = await supabase.from("nouns").insert({ ...payload, ...srs }).select().single();
           if (error) throw error;
-          await (supabase as any).from("words").delete().eq("id", card.id);
+          await deleteOldRow(card.kind, card.id);
           next = {
-            ...card,
-            id: data.id,
-            kind: "noun",
-            article: data.article,
-            word: data.noun,
-            plural: data.plural,
-            meanings: data.meanings ?? [],
-            examples: data.examples ?? [],
-            themes: data.themes ?? [],
+            ...card, id: data.id, kind: "noun", article: data.article, word: data.noun, plural: data.plural,
+            praeteritum: null, perfect: null, prepositions: [],
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [],
           };
         } else {
           const { error } = await supabase.from("nouns").update(payload).eq("id", card.id);
           if (error) throw error;
+          next = { ...card, article: payload.article, word: payload.noun, plural: payload.plural,
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes };
+        }
+      } else if (kind === "verb") {
+        const payload = {
+          present: verb.present.trim(),
+          praeteritum: verb.praeteritum.trim() || null,
+          perfect: verb.perfect.trim() || null,
+          prepositions: verb.prepositions.filter((p) => p.preposition.trim()),
+          meanings: verb.meanings,
+          examples: verb.examples.filter((e) => e.trim()),
+          themes: verb.themes,
+        };
+        if (!payload.present) throw new Error("Present is required");
+        if (kindChanged) {
+          const { data, error } = await (supabase as any).from("verbs").insert({ ...payload, ...srs }).select().single();
+          if (error) throw error;
+          await deleteOldRow(card.kind, card.id);
           next = {
-            ...card,
-            article: payload.article,
-            word: payload.noun,
-            plural: payload.plural,
-            meanings: payload.meanings,
-            examples: payload.examples,
-            themes: payload.themes,
+            ...card, id: data.id, kind: "verb", article: null, word: data.present, plural: null,
+            praeteritum: data.praeteritum, perfect: data.perfect, prepositions: data.prepositions ?? [],
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [],
           };
+        } else {
+          const { error } = await (supabase as any).from("verbs").update(payload).eq("id", card.id);
+          if (error) throw error;
+          next = { ...card, kind: "verb", article: null, plural: null, word: payload.present,
+            praeteritum: payload.praeteritum, perfect: payload.perfect, prepositions: payload.prepositions,
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes };
         }
       } else {
         const payload = {
@@ -118,38 +147,20 @@ export function CardEditDialog({
           themes: word.themes,
         };
         if (!payload.word) throw new Error("Word is required");
-        if (kindChanged && card.kind === "noun") {
-          const { data, error } = await (supabase as any)
-            .from("words")
-            .insert({ ...payload, ...srs })
-            .select()
-            .single();
+        if (kindChanged) {
+          const { data, error } = await (supabase as any).from("words").insert({ ...payload, ...srs }).select().single();
           if (error) throw error;
-          await supabase.from("nouns").delete().eq("id", card.id);
+          await deleteOldRow(card.kind, card.id);
           next = {
-            ...card,
-            id: data.id,
-            kind,
-            article: null,
-            word: data.word,
-            plural: null,
-            meanings: data.meanings ?? [],
-            examples: data.examples ?? [],
-            themes: data.themes ?? [],
+            ...card, id: data.id, kind, article: null, word: data.word, plural: null,
+            praeteritum: null, perfect: null, prepositions: [],
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [],
           };
         } else {
           const { error } = await (supabase as any).from("words").update(payload).eq("id", card.id);
           if (error) throw error;
-          next = {
-            ...card,
-            kind,
-            article: null,
-            plural: null,
-            word: payload.word,
-            meanings: payload.meanings,
-            examples: payload.examples,
-            themes: payload.themes,
-          };
+          next = { ...card, kind, article: null, plural: null, word: payload.word,
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes };
         }
       }
 
@@ -179,12 +190,15 @@ export function CardEditDialog({
                 <SelectItem value="noun">Noun</SelectItem>
                 <SelectItem value="adjective">Adjective</SelectItem>
                 <SelectItem value="adverb">Adverb</SelectItem>
+                <SelectItem value="verb">Verb</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {kind === "noun" ? (
             <NounForm value={noun} onChange={setNoun} />
+          ) : kind === "verb" ? (
+            <VerbForm value={verb} onChange={setVerb} />
           ) : (
             <WordForm
               value={word}
