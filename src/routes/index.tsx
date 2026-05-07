@@ -196,18 +196,18 @@ function DeckPage() {
             {rows.length} {rows.length === 1 ? "noun" : "nouns"} · {dueCount} due today
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button variant="outline" asChild className="flex-1 sm:flex-initial">
             <Link to="/import">
-              <Upload className="h-4 w-4 mr-1" /> Import list
+              <Upload className="h-4 w-4 mr-1" /> Import
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="flex-1 sm:flex-initial">
             <Link to="/campaign">
               <Play className="h-4 w-4 mr-1" /> Campaign
             </Link>
           </Button>
-          <Button onClick={() => setCreating(true)}>
+          <Button onClick={() => setCreating(true)} className="flex-1 sm:flex-initial">
             <Plus className="h-4 w-4 mr-1" /> Add noun
           </Button>
         </div>
