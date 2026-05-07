@@ -298,7 +298,13 @@ function VerbsPage() {
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
               </Button>
-              <Button onClick={saveEdit}>Save</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => aiFillCurrent("edit")} disabled={aiBusy}>
+                  {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                  AI fill
+                </Button>
+                <Button onClick={saveEdit}>Save</Button>
+              </div>
             </div>
           </div>
         </SheetContent>
