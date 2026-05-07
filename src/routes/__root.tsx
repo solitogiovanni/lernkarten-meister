@@ -83,8 +83,10 @@ function RootComponent() {
           <Link to="/" className="font-bold text-lg tracking-tight">
             Wort<span className="text-primary">schatz</span>
           </Link>
-          <nav className="flex items-center gap-1">
-            <NavLink to="/" label="Deck" />
+          <nav className="flex flex-wrap items-center gap-1">
+            <NavLink to="/" label="Nouns" />
+            <NavLink to="/adjectives" label="Adjectives" />
+            <NavLink to="/adverbs" label="Adverbs" />
             <NavLink to="/import" label="Import" />
             <NavLink to="/campaign" label="Campaign" />
           </nav>
