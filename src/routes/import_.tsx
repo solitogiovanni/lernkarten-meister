@@ -161,6 +161,12 @@ function ImportPage() {
         <p className="text-sm text-muted-foreground">
           One noun per line. Format: <code>article Noun = meaning1, meaning2</code> (article and meanings optional).
         </p>
+        <div className="flex flex-wrap gap-2 mt-3 text-sm">
+          <span className="text-muted-foreground">Other importers:</span>
+          <Link to="/import/adjectives" className="text-primary hover:underline">Adjectives</Link>
+          <Link to="/import/adverbs" className="text-primary hover:underline">Adverbs</Link>
+          <Link to="/import/verbs" className="text-primary hover:underline">Verbs</Link>
+        </div>
       </div>
 
       {drafts.length === 0 ? (
