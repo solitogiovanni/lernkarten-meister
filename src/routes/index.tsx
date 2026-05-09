@@ -55,6 +55,7 @@ function DeckPage() {
   const navigate = useNavigate({ from: "/" });
   const [rows, setRows] = useState<NounRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [themeFilter, setThemeFilter] = useState("");
   const [editing, setEditing] = useState<NounRow | null>(null);
   const [editValue, setEditValue] = useState<NounFormValue>(emptyNoun);
   const [previewing, setPreviewing] = useState<NounRow | null>(null);

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { isDue } from "@/lib/srs";
 import { Loader2, Play } from "lucide-react";
 
@@ -24,6 +25,7 @@ function CampaignSetup() {
   const [scope, setScope] = useState<"all" | "due">("due");
   const [kinds, setKinds] = useState<Set<"noun" | "adjective" | "adverb" | "verb">>(new Set(["noun", "adjective", "adverb", "verb"]));
   const [themes, setThemes] = useState<string[]>([]);
+  const [themeFilter, setThemeFilter] = useState("");
   const [size, setSize] = useState<number>(20);
   const navigate = useNavigate();
 
@@ -150,8 +152,14 @@ function CampaignSetup() {
               <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
               Themes (optional){themes.length > 0 && <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{themes.length}</span>}
             </summary>
+            <Input
+              value={themeFilter}
+              onChange={(e) => setThemeFilter(e.target.value)}
+              placeholder="Filter themes…"
+              className="mt-2 h-8 text-sm"
+            />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {allThemes.map((t) => {
+              {allThemes.filter((t) => t.toLowerCase().includes(themeFilter.toLowerCase())).map((t) => {
                 const on = themes.includes(t);
                 return (
                   <button
