@@ -26,6 +26,7 @@ export const autofillNouns = createServerFn({ method: "POST" })
 - plural: the German plural form (e.g. "Häuser"), or null if uncountable
 - meanings: 1 to 4 Italian translations, each a short noun phrase
 - themes: 1 to 3 short Italian thematic tags (e.g. "casa", "cibo", "lavoro", "tempo", "natura", "corpo", "famiglia"), lowercase
+- examples: exactly 2 short, natural German example sentences using the noun
 
 Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use it as the article.`;
 
