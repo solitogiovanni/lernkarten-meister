@@ -15,6 +15,7 @@ import { isDue } from "@/lib/srs";
 import { autofillNouns } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
+import { CardRevealDialog } from "@/components/CardReveal";
 
 type NounRow = {
   id: string;
@@ -56,6 +57,7 @@ function DeckPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<NounRow | null>(null);
   const [editValue, setEditValue] = useState<NounFormValue>(emptyNoun);
+  const [previewing, setPreviewing] = useState<NounRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<NounFormValue>(emptyNoun);
   const [aiBusy, setAiBusy] = useState(false);
@@ -296,7 +298,7 @@ function DeckPage() {
           {filtered.map((r) => (
             <button
               key={r.id}
-              onClick={() => openEdit(r)}
+              onClick={() => setPreviewing(r)}
               className="text-left"
             >
               <Card className="p-4 hover:border-primary transition-colors h-full">
@@ -335,6 +337,29 @@ function DeckPage() {
           ))}
         </div>
       )}
+
+      {/* Reveal preview */}
+      <CardRevealDialog
+        open={!!previewing}
+        onOpenChange={(o) => !o && setPreviewing(null)}
+        card={previewing ? {
+          kind: "noun",
+          article: previewing.article,
+          word: previewing.noun,
+          plural: previewing.plural,
+          meanings: previewing.meanings,
+          examples: previewing.examples,
+          themes: previewing.themes,
+          comments: previewing.comments,
+        } : null}
+        onEdit={() => {
+          if (previewing) {
+            const r = previewing;
+            setPreviewing(null);
+            openEdit(r);
+          }
+        }}
+      />
 
       {/* Edit drawer */}
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>

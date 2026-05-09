@@ -13,6 +13,7 @@ import { isDue } from "@/lib/srs";
 import { autofillVerbs } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
+import { CardRevealDialog } from "@/components/CardReveal";
 
 export const Route = createFileRoute("/verbs")({
   head: () => ({
@@ -45,6 +46,7 @@ function VerbsPage() {
   const [theme, setTheme] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [previewing, setPreviewing] = useState<Row | null>(null);
   const [editValue, setEditValue] = useState<VerbFormValue>(emptyVerb);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<VerbFormValue>(emptyVerb);
@@ -257,7 +259,7 @@ function VerbsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((r) => (
-            <button key={r.id} onClick={() => openEdit(r)} className="text-left">
+            <button key={r.id} onClick={() => setPreviewing(r)} className="text-left">
               <Card className="p-4 hover:border-primary transition-colors h-full">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="font-semibold text-lg">{r.present}</div>
@@ -300,6 +302,29 @@ function VerbsPage() {
           ))}
         </div>
       )}
+
+      <CardRevealDialog
+        open={!!previewing}
+        onOpenChange={(o) => !o && setPreviewing(null)}
+        card={previewing ? {
+          kind: "verb",
+          word: previewing.present,
+          praeteritum: previewing.praeteritum,
+          perfect: previewing.perfect,
+          prepositions: previewing.prepositions,
+          meanings: previewing.meanings,
+          examples: previewing.examples,
+          themes: previewing.themes,
+          comments: previewing.comments,
+        } : null}
+        onEdit={() => {
+          if (previewing) {
+            const r = previewing;
+            setPreviewing(null);
+            openEdit(r);
+          }
+        }}
+      />
 
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <SheetContent className="overflow-y-auto sm:max-w-xl">

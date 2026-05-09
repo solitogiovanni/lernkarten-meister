@@ -13,6 +13,7 @@ import { isDue } from "@/lib/srs";
 import { autofillWords } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
+import { CardRevealDialog } from "@/components/CardReveal";
 
 export type Kind = "adjective" | "adverb";
 
@@ -48,6 +49,7 @@ export function WordDeckPage({
   const [theme, setTheme] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [previewing, setPreviewing] = useState<Row | null>(null);
   const [editValue, setEditValue] = useState<WordFormValue>(emptyWord);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<WordFormValue>(emptyWord);
@@ -271,7 +273,7 @@ export function WordDeckPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((r) => (
-            <button key={r.id} onClick={() => openEdit(r)} className="text-left">
+            <button key={r.id} onClick={() => setPreviewing(r)} className="text-left">
               <Card className="p-4 hover:border-primary transition-colors h-full">
                 <div className="flex items-baseline gap-2 mb-1">
                   <span className="font-semibold text-lg">{r.word}</span>
@@ -295,6 +297,26 @@ export function WordDeckPage({
           ))}
         </div>
       )}
+
+      <CardRevealDialog
+        open={!!previewing}
+        onOpenChange={(o) => !o && setPreviewing(null)}
+        card={previewing ? {
+          kind,
+          word: previewing.word,
+          meanings: previewing.meanings,
+          examples: previewing.examples,
+          themes: previewing.themes,
+          comments: previewing.comments,
+        } : null}
+        onEdit={() => {
+          if (previewing) {
+            const r = previewing;
+            setPreviewing(null);
+            openEdit(r);
+          }
+        }}
+      />
 
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <SheetContent className="overflow-y-auto sm:max-w-lg">
