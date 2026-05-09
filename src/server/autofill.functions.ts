@@ -12,6 +12,7 @@ export type AutofilledNoun = {
   plural: string | null;
   meanings: string[];
   themes: string[];
+  examples: string[];
 };
 
 export const autofillNouns = createServerFn({ method: "POST" })
