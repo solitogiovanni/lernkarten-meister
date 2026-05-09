@@ -170,9 +170,10 @@ function RunPage() {
 
   const current = cards[idx];
 
-  const advance = () => {
-    if (idx + 1 >= cards.length) setDone(true);
-    else setIdx(idx + 1);
+  const goPrev = () => { if (idx > 0) setIdx(idx - 1); };
+  const goNext = () => {
+    if (idx + 1 < cards.length) setIdx(idx + 1);
+    else if (!reviewMode) setDone(true);
   };
 
   const writeBack = async (card: Card, upd: any) => {
@@ -187,19 +188,35 @@ function RunPage() {
 
   const submitFlashRating = async (rating: Rating) => {
     if (!current) return;
-    const upd = applyRating(current, rating);
-    setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
-    await writeBack(current, upd);
-    advance();
+    const isFirst = ratings[idx] == null;
+    if (isFirst) {
+      const upd = applyRating(current, rating);
+      setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
+      await writeBack(current, upd);
+    }
+    setRatings((r) => ({ ...r, [idx]: rating }));
+    if (idx + 1 < cards.length) setIdx(idx + 1);
+    else if (!reviewMode) setDone(true);
   };
 
   const submitQuizResult = async (correct: boolean) => {
     if (!current) return;
+    const isFirst = ratings[idx] == null;
     const rating: Rating = correct ? "good" : "again";
-    const upd = applyRating(current, rating);
-    setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
-    await writeBack(current, upd);
-    advance();
+    if (isFirst) {
+      const upd = applyRating(current, rating);
+      setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
+      await writeBack(current, upd);
+    }
+    setRatings((r) => ({ ...r, [idx]: rating }));
+    if (idx + 1 < cards.length) setIdx(idx + 1);
+    else if (!reviewMode) setDone(true);
+  };
+
+  const startReview = () => {
+    setReviewMode(true);
+    setDone(false);
+    setIdx(0);
   };
 
   if (loading)
