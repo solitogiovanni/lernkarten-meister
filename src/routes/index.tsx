@@ -338,6 +338,29 @@ function DeckPage() {
         </div>
       )}
 
+      {/* Reveal preview */}
+      <CardRevealDialog
+        open={!!previewing}
+        onOpenChange={(o) => !o && setPreviewing(null)}
+        card={previewing ? {
+          kind: "noun",
+          article: previewing.article,
+          word: previewing.noun,
+          plural: previewing.plural,
+          meanings: previewing.meanings,
+          examples: previewing.examples,
+          themes: previewing.themes,
+          comments: previewing.comments,
+        } : null}
+        onEdit={() => {
+          if (previewing) {
+            const r = previewing;
+            setPreviewing(null);
+            openEdit(r);
+          }
+        }}
+      />
+
       {/* Edit drawer */}
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <SheetContent className="overflow-y-auto sm:max-w-lg">
