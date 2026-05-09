@@ -78,6 +78,8 @@ function RunPage() {
   const [stats, setStats] = useState({ correct: 0, wrong: 0 });
   const [done, setDone] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [ratings, setRatings] = useState<Record<number, Rating>>({});
+  const [reviewMode, setReviewMode] = useState(false);
 
   useEffect(() => {
     (async () => {
