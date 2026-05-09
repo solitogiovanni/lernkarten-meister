@@ -13,6 +13,7 @@ import { isDue } from "@/lib/srs";
 import { autofillVerbs } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
+import { CardRevealDialog } from "@/components/CardReveal";
 
 export const Route = createFileRoute("/verbs")({
   head: () => ({
