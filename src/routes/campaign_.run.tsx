@@ -421,6 +421,17 @@ function FlashcardView({
       </div>
       {!revealed ? (
         <Button size="lg" onClick={() => setRevealed(true)}>Show answer</Button>
+      ) : isRated ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm text-muted-foreground">
+            Rated: <span className="font-medium text-foreground capitalize">{existingRating}</span>
+          </span>
+          {!reviewMode && onNext && (
+            <Button onClick={onNext}>Next →</Button>
+          )}
+        </div>
+      ) : reviewMode ? (
+        <div className="text-sm text-muted-foreground text-center">Not rated</div>
       ) : (
         <div className="grid grid-cols-4 gap-2">
           <Button variant="destructive" onClick={() => onRate("again")}>Again</Button>
