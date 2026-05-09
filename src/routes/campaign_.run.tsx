@@ -264,9 +264,18 @@ function RunPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
-        <span>{idx + 1} / {cards.length}</span>
+      <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground gap-2">
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={goPrev} disabled={idx === 0} className="h-7 px-2">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="tabular-nums">{idx + 1} / {cards.length}</span>
+          <Button variant="ghost" size="sm" onClick={goNext} disabled={idx + 1 >= cards.length && reviewMode} className="h-7 px-2">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="flex items-center gap-3">
+          {reviewMode && <span className="text-xs uppercase tracking-wider">Review</span>}
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-7 px-2">
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
@@ -274,14 +283,27 @@ function RunPage() {
             <span className="text-emerald-600 dark:text-emerald-400">{stats.correct}</span> ·{" "}
             <span className="text-rose-600 dark:text-rose-400">{stats.wrong}</span>
           </span>
+          {reviewMode && (
+            <Button variant="outline" size="sm" onClick={() => setDone(true)} className="h-7 px-2">
+              Finish
+            </Button>
+          )}
         </div>
       </div>
       <Progress value={((idx) / cards.length) * 100} className="mb-6" />
 
-      {mode === "flashcards" ? (
-        <FlashcardView card={current} onRate={submitFlashRating} direction={direction} key={current.id} />
+      {(reviewMode || mode === "flashcards") ? (
+        <FlashcardView
+          card={current}
+          onRate={submitFlashRating}
+          direction={direction}
+          existingRating={ratings[idx] ?? null}
+          reviewMode={reviewMode}
+          onNext={goNext}
+          key={current.id + ":" + idx}
+        />
       ) : (
-        <QuizView card={current} onResult={submitQuizResult} key={current.id} />
+        <QuizView card={current} onResult={submitQuizResult} key={current.id + ":" + idx} />
       )}
 
       {editing && (
