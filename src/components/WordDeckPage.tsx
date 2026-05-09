@@ -13,6 +13,7 @@ import { isDue } from "@/lib/srs";
 import { autofillWords } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
+import { CardRevealDialog } from "@/components/CardReveal";
 
 export type Kind = "adjective" | "adverb";
 
