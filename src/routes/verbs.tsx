@@ -46,6 +46,7 @@ function VerbsPage() {
   const [theme, setTheme] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [previewing, setPreviewing] = useState<Row | null>(null);
   const [editValue, setEditValue] = useState<VerbFormValue>(emptyVerb);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<VerbFormValue>(emptyVerb);
