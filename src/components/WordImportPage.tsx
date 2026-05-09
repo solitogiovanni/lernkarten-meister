@@ -108,6 +108,7 @@ export function WordImportPage({
           word: p.word,
           meanings: p.meanings,
           themes: [],
+          examples: [],
           include: !dupExisting,
         };
       })
