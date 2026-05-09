@@ -90,6 +90,7 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
         plural: it.plural ?? null,
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
+        examples: it.examples ?? [],
       }));
       return { results, error: null };
     } catch (e) {
