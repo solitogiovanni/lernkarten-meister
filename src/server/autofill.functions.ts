@@ -109,6 +109,7 @@ export type AutofilledWord = {
   word: string;
   meanings: string[];
   themes: string[];
+  examples: string[];
 };
 
 export const autofillWords = createServerFn({ method: "POST" })
@@ -122,6 +123,7 @@ export const autofillWords = createServerFn({ method: "POST" })
 - word: the ${kindLabel} in correct German base form (lowercase)
 - meanings: 1 to 4 Italian translations, each a short phrase
 - themes: 1 to 3 short Italian thematic tags (e.g. "qualità", "tempo", "frequenza", "modo", "luogo", "quantità"), lowercase
+- examples: exactly 2 short, natural German example sentences using the ${kindLabel}
 
 Be accurate.`;
 
