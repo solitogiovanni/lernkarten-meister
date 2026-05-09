@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
@@ -76,14 +78,15 @@ function NavLink({ to, label }: { to: string; label: string }) {
 }
 
 function RootComponent() {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b sticky top-0 z-30 bg-background/80 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="font-bold text-lg tracking-tight">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
+          <Link to="/" className="font-bold text-lg tracking-tight shrink-0">
             Wort<span className="text-primary">schatz</span>
           </Link>
-          <nav className="flex flex-wrap items-center gap-1">
+          <nav className="hidden md:flex flex-wrap items-center gap-1">
             <NavLink to="/" label="Nouns" />
             <NavLink to="/adjectives" label="Adjectives" />
             <NavLink to="/adverbs" label="Adverbs" />
@@ -91,7 +94,26 @@ function RootComponent() {
             <NavLink to="/import" label="Import" />
             <NavLink to="/campaign" label="Campaign" />
           </nav>
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-accent"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+        {menuOpen && (
+          <nav className="md:hidden border-t bg-background px-4 py-2 flex flex-col gap-1" onClick={() => setMenuOpen(false)}>
+            <NavLink to="/" label="Nouns" />
+            <NavLink to="/adjectives" label="Adjectives" />
+            <NavLink to="/adverbs" label="Adverbs" />
+            <NavLink to="/verbs" label="Verbs" />
+            <NavLink to="/import" label="Import" />
+            <NavLink to="/campaign" label="Campaign" />
+          </nav>
+        )}
       </header>
       <main className="max-w-6xl mx-auto px-4 py-6">
         <Outlet />
