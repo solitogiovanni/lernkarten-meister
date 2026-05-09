@@ -355,8 +355,10 @@ function FlashcardView({
                 <div className="text-lg text-muted-foreground">{card.meanings.join(" · ")}</div>
               )}
               {card.examples.length > 0 && (
-                <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md">
-                  {card.examples[0]}
+                <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md space-y-1">
+                  {card.examples.map((ex, i) => (
+                    <div key={i}>{ex}</div>
+                  ))}
                 </div>
               )}
               {card.comments && (
