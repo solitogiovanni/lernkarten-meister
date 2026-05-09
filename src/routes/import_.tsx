@@ -126,6 +126,7 @@ function ImportPage() {
           plural: null,
           meanings: p.meanings,
           themes: [],
+          examples: [],
           include: !dupExisting,
         };
       })
