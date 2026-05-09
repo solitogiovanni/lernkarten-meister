@@ -248,6 +248,7 @@ function VerbsPage() {
           </details>
         )}
       </Card>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-16 text-muted-foreground">
