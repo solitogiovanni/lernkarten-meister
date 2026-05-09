@@ -298,6 +298,26 @@ export function WordDeckPage({
         </div>
       )}
 
+      <CardRevealDialog
+        open={!!previewing}
+        onOpenChange={(o) => !o && setPreviewing(null)}
+        card={previewing ? {
+          kind,
+          word: previewing.word,
+          meanings: previewing.meanings,
+          examples: previewing.examples,
+          themes: previewing.themes,
+          comments: previewing.comments,
+        } : null}
+        onEdit={() => {
+          if (previewing) {
+            const r = previewing;
+            setPreviewing(null);
+            openEdit(r);
+          }
+        }}
+      />
+
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <SheetContent className="overflow-y-auto sm:max-w-lg">
           <SheetHeader>
