@@ -15,6 +15,7 @@ import { isDue } from "@/lib/srs";
 import { autofillNouns } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
+import { CardRevealDialog } from "@/components/CardReveal";
 
 type NounRow = {
   id: string;
