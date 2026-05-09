@@ -146,7 +146,7 @@ export function CrossDeckSearch({
         </Link>
       )),
     },
-  ].filter((g) => g.kind !== currentKind);
+  ] as { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[]).filter((g) => g.kind !== currentKind);
 
   const otherTotal = nouns.length + verbs.length + words.length;
 
