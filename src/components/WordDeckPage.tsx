@@ -14,6 +14,7 @@ import { autofillWords } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
+import { CrossDeckSearch, ADD_PREFILL_KEY } from "@/components/CrossDeckSearch";
 
 export type Kind = "adjective" | "adverb";
 
@@ -72,6 +73,19 @@ export function WordDeckPage({
 
   useEffect(() => {
     load();
+  }, [kind]);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem(ADD_PREFILL_KEY);
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw) as { kind: string; word: string };
+      if (p.kind === kind && p.word) {
+        setNewValue({ ...emptyWord, word: p.word });
+        setCreating(true);
+      }
+    } catch {}
+    sessionStorage.removeItem(ADD_PREFILL_KEY);
   }, [kind]);
 
   const allThemes = useMemo(() => {
@@ -306,6 +320,8 @@ export function WordDeckPage({
           ))}
         </div>
       )}
+
+      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} />
 
       <CardRevealDialog
         open={!!previewing}
