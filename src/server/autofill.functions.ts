@@ -182,6 +182,7 @@ Be accurate.`;
         word: it.word,
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
+        examples: it.examples ?? [],
       }));
       return { results, error: null };
     } catch (e) {
