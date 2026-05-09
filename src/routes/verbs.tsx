@@ -303,6 +303,29 @@ function VerbsPage() {
         </div>
       )}
 
+      <CardRevealDialog
+        open={!!previewing}
+        onOpenChange={(o) => !o && setPreviewing(null)}
+        card={previewing ? {
+          kind: "verb",
+          word: previewing.present,
+          praeteritum: previewing.praeteritum,
+          perfect: previewing.perfect,
+          prepositions: previewing.prepositions,
+          meanings: previewing.meanings,
+          examples: previewing.examples,
+          themes: previewing.themes,
+          comments: previewing.comments,
+        } : null}
+        onEdit={() => {
+          if (previewing) {
+            const r = previewing;
+            setPreviewing(null);
+            openEdit(r);
+          }
+        }}
+      />
+
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader><SheetTitle>Edit verb</SheetTitle></SheetHeader>
