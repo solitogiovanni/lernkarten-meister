@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Check, X, Pencil } from "lucide-react";
+import { Loader2, Check, X, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { applyRating, isDue, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
 import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
@@ -78,6 +78,8 @@ function RunPage() {
   const [stats, setStats] = useState({ correct: 0, wrong: 0 });
   const [done, setDone] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [ratings, setRatings] = useState<Record<number, Rating>>({});
+  const [reviewMode, setReviewMode] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -168,9 +170,10 @@ function RunPage() {
 
   const current = cards[idx];
 
-  const advance = () => {
-    if (idx + 1 >= cards.length) setDone(true);
-    else setIdx(idx + 1);
+  const goPrev = () => { if (idx > 0) setIdx(idx - 1); };
+  const goNext = () => {
+    if (idx + 1 < cards.length) setIdx(idx + 1);
+    else if (!reviewMode) setDone(true);
   };
 
   const writeBack = async (card: Card, upd: any) => {
@@ -185,19 +188,35 @@ function RunPage() {
 
   const submitFlashRating = async (rating: Rating) => {
     if (!current) return;
-    const upd = applyRating(current, rating);
-    setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
-    await writeBack(current, upd);
-    advance();
+    const isFirst = ratings[idx] == null;
+    if (isFirst) {
+      const upd = applyRating(current, rating);
+      setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
+      await writeBack(current, upd);
+    }
+    setRatings((r) => ({ ...r, [idx]: rating }));
+    if (idx + 1 < cards.length) setIdx(idx + 1);
+    else if (!reviewMode) setDone(true);
   };
 
   const submitQuizResult = async (correct: boolean) => {
     if (!current) return;
+    const isFirst = ratings[idx] == null;
     const rating: Rating = correct ? "good" : "again";
-    const upd = applyRating(current, rating);
-    setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
-    await writeBack(current, upd);
-    advance();
+    if (isFirst) {
+      const upd = applyRating(current, rating);
+      setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
+      await writeBack(current, upd);
+    }
+    setRatings((r) => ({ ...r, [idx]: rating }));
+    if (idx + 1 < cards.length) setIdx(idx + 1);
+    else if (!reviewMode) setDone(true);
+  };
+
+  const startReview = () => {
+    setReviewMode(true);
+    setDone(false);
+    setIdx(0);
   };
 
   if (loading)
@@ -234,7 +253,8 @@ function RunPage() {
           </Card>
         </div>
         <div className="text-lg">{pct}% accuracy</div>
-        <div className="flex justify-center gap-2 pt-4">
+        <div className="flex flex-wrap justify-center gap-2 pt-4">
+          <Button variant="outline" onClick={startReview}>Review cards</Button>
           <Button asChild variant="outline"><Link to="/">Back to deck</Link></Button>
           <Button asChild><Link to="/campaign">New campaign</Link></Button>
         </div>
@@ -244,9 +264,18 @@ function RunPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
-        <span>{idx + 1} / {cards.length}</span>
+      <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground gap-2">
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={goPrev} disabled={idx === 0} className="h-7 px-2">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="tabular-nums">{idx + 1} / {cards.length}</span>
+          <Button variant="ghost" size="sm" onClick={goNext} disabled={idx + 1 >= cards.length && reviewMode} className="h-7 px-2">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="flex items-center gap-3">
+          {reviewMode && <span className="text-xs uppercase tracking-wider">Review</span>}
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-7 px-2">
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
@@ -254,14 +283,27 @@ function RunPage() {
             <span className="text-emerald-600 dark:text-emerald-400">{stats.correct}</span> ·{" "}
             <span className="text-rose-600 dark:text-rose-400">{stats.wrong}</span>
           </span>
+          {reviewMode && (
+            <Button variant="outline" size="sm" onClick={() => setDone(true)} className="h-7 px-2">
+              Finish
+            </Button>
+          )}
         </div>
       </div>
       <Progress value={((idx) / cards.length) * 100} className="mb-6" />
 
-      {mode === "flashcards" ? (
-        <FlashcardView card={current} onRate={submitFlashRating} direction={direction} key={current.id} />
+      {(reviewMode || mode === "flashcards") ? (
+        <FlashcardView
+          card={current}
+          onRate={submitFlashRating}
+          direction={direction}
+          existingRating={ratings[idx] ?? null}
+          reviewMode={reviewMode}
+          onNext={goNext}
+          key={current.id + ":" + idx}
+        />
       ) : (
-        <QuizView card={current} onResult={submitQuizResult} key={current.id} />
+        <QuizView card={current} onResult={submitQuizResult} key={current.id + ":" + idx} />
       )}
 
       {editing && (
@@ -287,12 +329,19 @@ function FlashcardView({
   card,
   onRate,
   direction,
+  existingRating,
+  reviewMode,
+  onNext,
 }: {
   card: Card;
   onRate: (r: Rating) => void;
   direction: "de2it" | "it2de" | "mixed";
+  existingRating?: Rating | null;
+  reviewMode?: boolean;
+  onNext?: () => void;
 }) {
-  const [revealed, setRevealed] = useState(false);
+  const isRated = !!existingRating;
+  const [revealed, setRevealed] = useState(isRated || reviewMode);
   const effectiveDir = useMemo<"de2it" | "it2de">(() => {
     if (direction === "mixed") return Math.random() < 0.5 ? "de2it" : "it2de";
     if (direction === "it2de" && card.meanings.length === 0) return "de2it";
@@ -372,6 +421,17 @@ function FlashcardView({
       </div>
       {!revealed ? (
         <Button size="lg" onClick={() => setRevealed(true)}>Show answer</Button>
+      ) : isRated ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm text-muted-foreground">
+            Rated: <span className="font-medium text-foreground capitalize">{existingRating}</span>
+          </span>
+          {!reviewMode && onNext && (
+            <Button onClick={onNext}>Next →</Button>
+          )}
+        </div>
+      ) : reviewMode ? (
+        <div className="text-sm text-muted-foreground text-center">Not rated</div>
       ) : (
         <div className="grid grid-cols-4 gap-2">
           <Button variant="destructive" onClick={() => onRate("again")}>Again</Button>
