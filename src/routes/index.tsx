@@ -55,6 +55,7 @@ function DeckPage() {
   const navigate = useNavigate({ from: "/" });
   const [rows, setRows] = useState<NounRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [themeFilter, setThemeFilter] = useState("");
   const [editing, setEditing] = useState<NounRow | null>(null);
   const [editValue, setEditValue] = useState<NounFormValue>(emptyNoun);
   const [previewing, setPreviewing] = useState<NounRow | null>(null);
@@ -255,8 +256,14 @@ function DeckPage() {
               <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
               Themes {theme && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{theme}</span>}
             </summary>
+            <Input
+              value={themeFilter}
+              onChange={(e) => setThemeFilter(e.target.value)}
+              placeholder="Filter themes…"
+              className="mt-2 h-8 text-xs"
+            />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {allThemes.map((t) => (
+              {allThemes.filter((t) => t.toLowerCase().includes(themeFilter.toLowerCase())).map((t) => (
                 <button
                   key={t}
                   onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: p.theme === t ? "" : t }) })}

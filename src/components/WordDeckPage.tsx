@@ -47,6 +47,7 @@ export function WordDeckPage({
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [theme, setTheme] = useState("");
+  const [themeFilter, setThemeFilter] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
   const [previewing, setPreviewing] = useState<Row | null>(null);
@@ -234,8 +235,14 @@ export function WordDeckPage({
               <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
               Themes {theme && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{theme}</span>}
             </summary>
+            <Input
+              value={themeFilter}
+              onChange={(e) => setThemeFilter(e.target.value)}
+              placeholder="Filter themes…"
+              className="mt-2 h-8 text-xs"
+            />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {allThemes.map((t) => (
+              {allThemes.filter((t) => t.toLowerCase().includes(themeFilter.toLowerCase())).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTheme(theme === t ? "" : t)}
