@@ -259,7 +259,7 @@ function VerbsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((r) => (
-            <button key={r.id} onClick={() => openEdit(r)} className="text-left">
+            <button key={r.id} onClick={() => setPreviewing(r)} className="text-left">
               <Card className="p-4 hover:border-primary transition-colors h-full">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="font-semibold text-lg">{r.present}</div>
