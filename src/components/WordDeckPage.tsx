@@ -49,6 +49,7 @@ export function WordDeckPage({
   const [theme, setTheme] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [previewing, setPreviewing] = useState<Row | null>(null);
   const [editValue, setEditValue] = useState<WordFormValue>(emptyWord);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<WordFormValue>(emptyWord);
