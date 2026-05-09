@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
