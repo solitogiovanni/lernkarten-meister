@@ -113,6 +113,7 @@ function ImportVerbsPage() {
           prepositions: [],
           meanings: p.meanings,
           themes: [],
+          examples: [],
           include: !dupExisting,
         };
       })
