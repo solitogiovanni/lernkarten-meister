@@ -90,6 +90,7 @@ function ImportVerbsPage() {
           prepositions: r?.prepositions ?? [],
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
+          examples: r?.examples ?? [],
           include: !dupExisting,
         };
       });
