@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
 import { autofillVerbs } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { SpeakButton } from "@/components/SpeakButton";
 
 export const Route = createFileRoute("/verbs")({
   head: () => ({
@@ -258,7 +259,13 @@ function VerbsPage() {
           {filtered.map((r) => (
             <button key={r.id} onClick={() => openEdit(r)} className="text-left">
               <Card className="p-4 hover:border-primary transition-colors h-full">
-                <div className="font-semibold text-lg mb-1">{r.present}</div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="font-semibold text-lg">{r.present}</div>
+                  <SpeakButton
+                    text={[r.present, r.praeteritum, r.perfect].filter(Boolean).join(", ")}
+                    className="ml-auto"
+                  />
+                </div>
                 {(r.praeteritum || r.perfect) && (
                   <div className="text-xs text-muted-foreground">
                     {r.praeteritum && <span>{r.praeteritum}</span>}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
 import { autofillWords } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { SpeakButton } from "@/components/SpeakButton";
 
 export type Kind = "adjective" | "adverb";
 
@@ -274,6 +275,7 @@ export function WordDeckPage({
               <Card className="p-4 hover:border-primary transition-colors h-full">
                 <div className="flex items-baseline gap-2 mb-1">
                   <span className="font-semibold text-lg">{r.word}</span>
+                  <SpeakButton text={r.word} className="ml-auto" />
                 </div>
                 {r.meanings.length > 0 && (
                   <p className="text-sm text-muted-foreground line-clamp-2">{r.meanings.join(", ")}</p>

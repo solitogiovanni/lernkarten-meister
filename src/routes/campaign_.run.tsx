@@ -11,6 +11,7 @@ import { Loader2, Check, X, Pencil } from "lucide-react";
 import { applyRating, isDue, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
 import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
+import { SpeakButton } from "@/components/SpeakButton";
 
 const searchSchema = z.object({
   mode: fallback(z.enum(["flashcards", "quiz"]), "flashcards").default("flashcards"),
@@ -318,13 +319,20 @@ function FlashcardView({
         ) : (
           <>
             <KindLabel kind={card.kind} />
-            {card.kind === "noun" && card.article ? (
-              <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
-                {card.article} {card.word}
-              </div>
-            ) : (
-              <div className="text-4xl font-bold tracking-tight">{card.word}</div>
-            )}
+            <div className="flex items-center justify-center gap-2">
+              {card.kind === "noun" && card.article ? (
+                <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>
+                  {card.article} {card.word}
+                </div>
+              ) : (
+                <div className="text-4xl font-bold tracking-tight">{card.word}</div>
+              )}
+              <SpeakButton
+                text={card.kind === "noun" && card.article ? `${card.article} ${card.word}` : card.word}
+                size="icon"
+                variant="ghost"
+              />
+            </div>
             <div className="mt-6 space-y-3">
               {card.plural && <div className="text-muted-foreground">Plural: {card.plural}</div>}
               {card.kind === "verb" && (card.praeteritum || card.perfect) && (

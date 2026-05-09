@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
 import { autofillNouns } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { SpeakButton } from "@/components/SpeakButton";
 
 type NounRow = {
   id: string;
@@ -307,6 +308,10 @@ function DeckPage() {
                   )}
                   <span className="font-semibold text-lg">{r.noun}</span>
                   {r.plural && <span className="text-sm text-muted-foreground">/ {r.plural}</span>}
+                  <SpeakButton
+                    text={r.article ? `${r.article} ${r.noun}` : r.noun}
+                    className="ml-auto"
+                  />
                 </div>
                 {r.meanings.length > 0 && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
