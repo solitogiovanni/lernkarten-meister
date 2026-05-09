@@ -329,12 +329,19 @@ function FlashcardView({
   card,
   onRate,
   direction,
+  existingRating,
+  reviewMode,
+  onNext,
 }: {
   card: Card;
   onRate: (r: Rating) => void;
   direction: "de2it" | "it2de" | "mixed";
+  existingRating?: Rating | null;
+  reviewMode?: boolean;
+  onNext?: () => void;
 }) {
-  const [revealed, setRevealed] = useState(false);
+  const isRated = !!existingRating;
+  const [revealed, setRevealed] = useState(isRated || reviewMode);
   const effectiveDir = useMemo<"de2it" | "it2de">(() => {
     if (direction === "mixed") return Math.random() < 0.5 ? "de2it" : "it2de";
     if (direction === "it2de" && card.meanings.length === 0) return "de2it";
