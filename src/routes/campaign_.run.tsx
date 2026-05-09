@@ -253,7 +253,8 @@ function RunPage() {
           </Card>
         </div>
         <div className="text-lg">{pct}% accuracy</div>
-        <div className="flex justify-center gap-2 pt-4">
+        <div className="flex flex-wrap justify-center gap-2 pt-4">
+          <Button variant="outline" onClick={startReview}>Review cards</Button>
           <Button asChild variant="outline"><Link to="/">Back to deck</Link></Button>
           <Button asChild><Link to="/campaign">New campaign</Link></Button>
         </div>
