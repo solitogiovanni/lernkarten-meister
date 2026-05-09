@@ -89,7 +89,7 @@ export function CrossDeckSearch({
   const adjectives = words.filter((w) => w.kind === "adjective");
   const adverbs = words.filter((w) => w.kind === "adverb");
 
-  const groups: { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[] = [
+  const groups: { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[] = ([
     {
       kind: "noun",
       label: labelFor.noun,
