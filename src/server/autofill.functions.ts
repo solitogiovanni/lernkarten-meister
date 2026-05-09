@@ -212,6 +212,162 @@ export type AutofilledVerb = {
   examples: string[];
 };
 
+// ============ Mixed import (auto-classify) ============
+
+const MixedInput = z.object({
+  lines: z.array(z.string().min(1)).min(1).max(50),
+});
+
+export type MixedKind = "noun" | "verb" | "adjective" | "adverb";
+
+export type MixedItem = {
+  input: string;
+  kind: MixedKind;
+  // noun
+  noun?: string;
+  article?: "der" | "die" | "das" | null;
+  plural?: string | null;
+  // verb
+  present?: string;
+  praeteritum?: string | null;
+  perfect?: string | null;
+  prepositions?: VerbPreposition[];
+  // adjective/adverb
+  word?: string;
+  // common
+  meanings: string[];
+  themes: string[];
+  examples: string[];
+};
+
+export const autofillMixed = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => MixedInput.parse(data))
+  .handler(async ({ data }): Promise<{ results: MixedItem[]; error: string | null }> => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) return { results: [], error: "LOVABLE_API_KEY not configured" };
+
+    const systemPrompt = `You are a meticulous German linguistics assistant. For EACH input line, decide whether it is a German noun, verb, adjective, or adverb, then return an item with the appropriate fields.
+
+Each input may be just the German word, or "word = meaning1, meaning2", or "der Word = meaning". Strip any "= meaning" part — those meanings are user-provided and should be ignored here (they will be merged on the client). Identify the German word and classify it.
+
+For EVERY item return:
+- input: the original line, exactly as given
+- kind: "noun" | "verb" | "adjective" | "adverb"
+- meanings: 1 to 4 short Italian translations
+- themes: 1 to 3 short lowercase Italian thematic tags
+- examples: at least 2 short, natural German example sentences using the word
+
+If kind = "noun", also return:
+- noun: capitalized singular German noun
+- article: "der" | "die" | "das"
+- plural: German plural form, or null if uncountable
+
+If kind = "verb", also return:
+- present: infinitive, lowercase
+- praeteritum: 3rd person singular Präteritum
+- perfect: Perfekt 3rd person singular WITH the auxiliary verb (e.g. "ist gegangen")
+- prepositions: array of {preposition, case ("akk"|"dat"|"gen"), meaning}, only for prepositions the verb genuinely governs. Empty array if none. If non-empty, include at least one example per preposition (total examples = max(2, number_of_prepositions + 1)).
+
+If kind = "adjective" or "adverb", also return:
+- word: base form, lowercase
+
+Be accurate. Lowercase verbs/adjectives/adverbs, capitalize nouns.`;
+
+    try {
+      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Process these inputs:\n${data.lines.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "return_mixed",
+              description: "Return classified and enriched items",
+              parameters: {
+                type: "object",
+                properties: {
+                  items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        input: { type: "string" },
+                        kind: { type: "string", enum: ["noun", "verb", "adjective", "adverb"] },
+                        noun: { type: "string" },
+                        article: { type: "string", enum: ["der", "die", "das"] },
+                        plural: { type: "string" },
+                        present: { type: "string" },
+                        praeteritum: { type: "string" },
+                        perfect: { type: "string" },
+                        prepositions: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              preposition: { type: "string" },
+                              case: { type: "string", enum: ["akk", "dat", "gen"] },
+                              meaning: { type: "string" },
+                            },
+                            required: ["preposition"],
+                          },
+                        },
+                        word: { type: "string" },
+                        meanings: { type: "array", items: { type: "string" } },
+                        themes: { type: "array", items: { type: "string" } },
+                        examples: { type: "array", items: { type: "string" } },
+                      },
+                      required: ["input", "kind", "meanings", "themes", "examples"],
+                    },
+                  },
+                },
+                required: ["items"],
+              },
+            },
+          }],
+          tool_choice: { type: "function", function: { name: "return_mixed" } },
+        }),
+      });
+      if (!resp.ok) {
+        if (resp.status === 429) return { results: [], error: "AI rate limit hit, please try again in a moment." };
+        if (resp.status === 402) return { results: [], error: "AI credits exhausted. Add credits in Settings → Workspace → Usage." };
+        return { results: [], error: `AI error (${resp.status})` };
+      }
+      const json = await resp.json();
+      const args = json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+      if (!args) return { results: [], error: "AI did not return data" };
+      const parsed = JSON.parse(args);
+      const items = (parsed.items ?? []) as Array<any>;
+      const results: MixedItem[] = items.map((it) => ({
+        input: String(it.input ?? ""),
+        kind: (it.kind as MixedKind) ?? "noun",
+        noun: it.noun ?? undefined,
+        article: (it.article as "der" | "die" | "das" | undefined) ?? null,
+        plural: it.plural ?? null,
+        present: it.present ?? undefined,
+        praeteritum: it.praeteritum ?? null,
+        perfect: it.perfect ?? null,
+        prepositions: (it.prepositions ?? []).map((p: any) => ({
+          preposition: p.preposition ?? "",
+          case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
+          meaning: p.meaning ?? "",
+        })),
+        word: it.word ?? undefined,
+        meanings: it.meanings ?? [],
+        themes: it.themes ?? [],
+        examples: it.examples ?? [],
+      }));
+      return { results, error: null };
+    } catch (e) {
+      console.error("autofillMixed failed:", e);
+      return { results: [], error: e instanceof Error ? e.message : "Unknown error" };
+    }
+  });
+
 export const autofillVerbs = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => VerbsInput.parse(data))
   .handler(async ({ data }): Promise<{ results: AutofilledVerb[]; error: string | null }> => {
