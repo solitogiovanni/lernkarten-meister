@@ -185,6 +185,7 @@ export function WordDeckPage({
 
   return (
     <div className="space-y-4">
+      <div className="sticky top-14 z-20 -mx-4 px-4 bg-background pt-2 pb-3 space-y-4 border-b max-h-[calc(100vh-3.5rem)] overflow-y-auto">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
