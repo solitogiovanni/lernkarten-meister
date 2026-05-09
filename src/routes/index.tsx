@@ -198,7 +198,7 @@ function DeckPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="sticky top-14 z-20 -mx-4 px-4 bg-background pt-2 pb-3 space-y-4 border-b max-h-[calc(100vh-3.5rem)] overflow-y-auto">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Your noun deck</h1>
           <p className="text-sm text-muted-foreground">
