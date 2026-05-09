@@ -298,7 +298,7 @@ function DeckPage() {
           {filtered.map((r) => (
             <button
               key={r.id}
-              onClick={() => openEdit(r)}
+              onClick={() => setPreviewing(r)}
               className="text-left"
             >
               <Card className="p-4 hover:border-primary transition-colors h-full">
