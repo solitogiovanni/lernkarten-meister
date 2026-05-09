@@ -209,6 +209,7 @@ export type AutofilledVerb = {
   prepositions: VerbPreposition[];
   meanings: string[];
   themes: string[];
+  examples: string[];
 };
 
 export const autofillVerbs = createServerFn({ method: "POST" })
@@ -224,6 +225,7 @@ export const autofillVerbs = createServerFn({ method: "POST" })
 - prepositions: array of objects {preposition, case, meaning}. Include ONLY prepositions that the verb genuinely governs. case is one of "akk", "dat", "gen". meaning is a short Italian gloss for that construction. Empty array if the verb takes no preposition.
 - meanings: 1 to 4 Italian translations, each a short verb phrase (infinitive)
 - themes: 1 to 3 short Italian thematic tags, lowercase (e.g. "movimento", "comunicazione", "emozioni", "lavoro", "quotidiano")
+- examples: at least 2 short, natural German example sentences using the verb. If the verb governs prepositions, you MUST include at least one additional example for EACH preposition that clearly uses the verb together with that preposition in the correct case. Total examples = max(2, number_of_prepositions + 1) at minimum.
 
 Be accurate. If the input includes a preposition (e.g. "warten auf"), use the bare infinitive as present and add the preposition to the prepositions list.`;
 
