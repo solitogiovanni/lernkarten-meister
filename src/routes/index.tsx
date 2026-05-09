@@ -57,6 +57,7 @@ function DeckPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<NounRow | null>(null);
   const [editValue, setEditValue] = useState<NounFormValue>(emptyNoun);
+  const [previewing, setPreviewing] = useState<NounRow | null>(null);
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<NounFormValue>(emptyNoun);
   const [aiBusy, setAiBusy] = useState(false);
