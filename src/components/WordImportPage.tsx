@@ -88,6 +88,7 @@ export function WordImportPage({
           word,
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
+          examples: r?.examples ?? [],
           include: !dupExisting,
         };
       });
@@ -107,6 +108,7 @@ export function WordImportPage({
           word: p.word,
           meanings: p.meanings,
           themes: [],
+          examples: [],
           include: !dupExisting,
         };
       })

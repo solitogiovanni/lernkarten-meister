@@ -104,6 +104,7 @@ function ImportPage() {
           plural: r?.plural ?? null,
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
+          examples: r?.examples ?? [],
           include: !dupExisting,
         };
       });
@@ -125,6 +126,7 @@ function ImportPage() {
           plural: null,
           meanings: p.meanings,
           themes: [],
+          examples: [],
           include: !dupExisting,
         };
       })

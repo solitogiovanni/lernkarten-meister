@@ -12,6 +12,7 @@ export type AutofilledNoun = {
   plural: string | null;
   meanings: string[];
   themes: string[];
+  examples: string[];
 };
 
 export const autofillNouns = createServerFn({ method: "POST" })
@@ -26,6 +27,7 @@ export const autofillNouns = createServerFn({ method: "POST" })
 - plural: the German plural form (e.g. "Häuser"), or null if uncountable
 - meanings: 1 to 4 Italian translations, each a short noun phrase
 - themes: 1 to 3 short Italian thematic tags (e.g. "casa", "cibo", "lavoro", "tempo", "natura", "corpo", "famiglia"), lowercase
+- examples: exactly 2 short, natural German example sentences using the noun
 
 Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use it as the article.`;
 
@@ -58,8 +60,9 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
                         plural: { type: "string" },
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
+                        examples: { type: "array", items: { type: "string" } },
                       },
-                      required: ["input", "noun", "meanings", "themes"],
+                      required: ["input", "noun", "meanings", "themes", "examples"],
                     },
                   },
                 },
@@ -87,6 +90,7 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
         plural: it.plural ?? null,
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
+        examples: it.examples ?? [],
       }));
       return { results, error: null };
     } catch (e) {
@@ -105,6 +109,7 @@ export type AutofilledWord = {
   word: string;
   meanings: string[];
   themes: string[];
+  examples: string[];
 };
 
 export const autofillWords = createServerFn({ method: "POST" })
@@ -118,6 +123,7 @@ export const autofillWords = createServerFn({ method: "POST" })
 - word: the ${kindLabel} in correct German base form (lowercase)
 - meanings: 1 to 4 Italian translations, each a short phrase
 - themes: 1 to 3 short Italian thematic tags (e.g. "qualità", "tempo", "frequenza", "modo", "luogo", "quantità"), lowercase
+- examples: exactly 2 short, natural German example sentences using the ${kindLabel}
 
 Be accurate.`;
 
@@ -148,8 +154,9 @@ Be accurate.`;
                         word: { type: "string" },
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
+                        examples: { type: "array", items: { type: "string" } },
                       },
-                      required: ["input", "word", "meanings", "themes"],
+                      required: ["input", "word", "meanings", "themes", "examples"],
                     },
                   },
                 },
@@ -175,6 +182,7 @@ Be accurate.`;
         word: it.word,
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
+        examples: it.examples ?? [],
       }));
       return { results, error: null };
     } catch (e) {
@@ -201,6 +209,7 @@ export type AutofilledVerb = {
   prepositions: VerbPreposition[];
   meanings: string[];
   themes: string[];
+  examples: string[];
 };
 
 export const autofillVerbs = createServerFn({ method: "POST" })
@@ -216,6 +225,7 @@ export const autofillVerbs = createServerFn({ method: "POST" })
 - prepositions: array of objects {preposition, case, meaning}. Include ONLY prepositions that the verb genuinely governs. case is one of "akk", "dat", "gen". meaning is a short Italian gloss for that construction. Empty array if the verb takes no preposition.
 - meanings: 1 to 4 Italian translations, each a short verb phrase (infinitive)
 - themes: 1 to 3 short Italian thematic tags, lowercase (e.g. "movimento", "comunicazione", "emozioni", "lavoro", "quotidiano")
+- examples: at least 2 short, natural German example sentences using the verb. If the verb governs prepositions, you MUST include at least one additional example for EACH preposition that clearly uses the verb together with that preposition in the correct case. Total examples = max(2, number_of_prepositions + 1) at minimum.
 
 Be accurate. If the input includes a preposition (e.g. "warten auf"), use the bare infinitive as present and add the preposition to the prepositions list.`;
 
@@ -260,8 +270,9 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
                         },
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
+                        examples: { type: "array", items: { type: "string" } },
                       },
-                      required: ["input", "present", "meanings", "themes"],
+                      required: ["input", "present", "meanings", "themes", "examples"],
                     },
                   },
                 },
@@ -294,6 +305,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         })),
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
+        examples: it.examples ?? [],
       }));
       return { results, error: null };
     } catch (e) {

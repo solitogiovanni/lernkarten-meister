@@ -171,7 +171,7 @@ export function WordDeckPage({
       const merged: WordFormValue = {
         word: r.word || v.word,
         meanings: v.meanings.length ? v.meanings : r.meanings,
-        examples: v.examples,
+        examples: v.examples.length ? v.examples : r.examples ?? [],
         themes: v.themes.length ? v.themes : r.themes,
         comments: v.comments,
       };
