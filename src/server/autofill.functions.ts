@@ -305,6 +305,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         })),
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
+        examples: it.examples ?? [],
       }));
       return { results, error: null };
     } catch (e) {
