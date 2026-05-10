@@ -37,13 +37,9 @@ function ImportVerbsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    (supabase as any)
-      .from("verbs")
-      .select("present")
-      .limit(5000)
-      .then(({ data }: { data: Array<{ present: string }> | null }) => {
-        setExisting(new Set((data ?? []).map((r) => r.present.trim().toLowerCase())));
-      });
+    fetchAll<{ present: string }>("verbs", (q) => q.select("present")).then(({ data }) => {
+      setExisting(new Set(data.map((r) => r.present.trim().toLowerCase())));
+    });
   }, []);
 
   const isDuplicate = (present: string, idx: number) => {
