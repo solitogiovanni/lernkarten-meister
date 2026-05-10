@@ -61,14 +61,13 @@ export function WordDeckPage({
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("words")
-      .select("id,word,meanings,examples,themes,comments,due_at,reps")
-      .eq("kind", kind)
-      .order("word", { ascending: true })
-      .limit(1000);
+    const { data, error } = await fetchAll<Row>("words", (q) =>
+      q.select("id,word,meanings,examples,themes,comments,due_at,reps")
+        .eq("kind", kind)
+        .order("word", { ascending: true }),
+    );
     if (error) toast.error(error.message);
-    setRows((data ?? []) as Row[]);
+    setRows(data);
     setLoading(false);
   };
 
