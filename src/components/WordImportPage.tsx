@@ -35,14 +35,9 @@ export function WordImportPage({
   const navigate = useNavigate();
 
   useEffect(() => {
-    (supabase as any)
-      .from("words")
-      .select("word")
-      .eq("kind", kind)
-      .limit(5000)
-      .then(({ data }: { data: Array<{ word: string }> | null }) => {
-        setExisting(new Set((data ?? []).map((r) => r.word.trim().toLowerCase())));
-      });
+    fetchAll<{ word: string }>("words", (q) => q.select("word").eq("kind", kind)).then(({ data }) => {
+      setExisting(new Set(data.map((r) => r.word.trim().toLowerCase())));
+    });
   }, [kind]);
 
   const isDuplicate = (word: string, idx: number) => {
