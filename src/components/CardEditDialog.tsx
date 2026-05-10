@@ -8,6 +8,9 @@ import { WordForm, type WordFormValue } from "@/components/WordForm";
 import { VerbForm, type VerbFormValue, type VerbPrep } from "@/components/VerbForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { autofillNouns, autofillVerbs, autofillWords } from "@/server/autofill.functions";
+import { Loader2, Sparkles } from "lucide-react";
 
 export type Kind = "noun" | "adjective" | "adverb" | "verb";
 
@@ -70,6 +73,64 @@ export function CardEditDialog({
     comments: card.comments ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const autofillNounsFn = useServerFn(autofillNouns);
+  const autofillVerbsFn = useServerFn(autofillVerbs);
+  const autofillWordsFn = useServerFn(autofillWords);
+
+  const aiFill = async () => {
+    setAiBusy(true);
+    try {
+      if (kind === "noun") {
+        if (!noun.noun.trim()) return toast.error("Type a noun first");
+        const { results, error } = await autofillNounsFn({ data: { nouns: [noun.noun.trim()] } });
+        if (error) return toast.error(error);
+        const r = results[0];
+        if (!r) return toast.error("No result");
+        setNoun({
+          article: noun.article ?? r.article,
+          noun: r.noun || noun.noun,
+          plural: noun.plural || r.plural || "",
+          meanings: noun.meanings.length ? noun.meanings : r.meanings,
+          examples: noun.examples.length ? noun.examples : r.examples ?? [],
+          themes: noun.themes.length ? noun.themes : r.themes,
+          comments: noun.comments,
+        });
+      } else if (kind === "verb") {
+        if (!verb.present.trim()) return toast.error("Type a verb first");
+        const { results, error } = await autofillVerbsFn({ data: { verbs: [verb.present.trim()] } });
+        if (error) return toast.error(error);
+        const r = results[0];
+        if (!r) return toast.error("No result");
+        setVerb({
+          present: r.present || verb.present,
+          praeteritum: verb.praeteritum || r.praeteritum || "",
+          perfect: verb.perfect || r.perfect || "",
+          prepositions: verb.prepositions.length ? verb.prepositions : (r.prepositions ?? []),
+          meanings: verb.meanings.length ? verb.meanings : r.meanings ?? [],
+          examples: verb.examples.length ? verb.examples : r.examples ?? [],
+          themes: verb.themes.length ? verb.themes : r.themes ?? [],
+          comments: verb.comments,
+        });
+      } else {
+        if (!word.word.trim()) return toast.error("Type a word first");
+        const { results, error } = await autofillWordsFn({ data: { kind, words: [word.word.trim()] } });
+        if (error) return toast.error(error);
+        const r = results[0];
+        if (!r) return toast.error("No result");
+        setWord({
+          word: r.word || word.word,
+          meanings: word.meanings.length ? word.meanings : r.meanings,
+          examples: word.examples.length ? word.examples : r.examples ?? [],
+          themes: word.themes.length ? word.themes : r.themes,
+          comments: word.comments,
+        });
+      }
+      toast.success("Filled with AI");
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const deleteOldRow = async (oldKind: Kind, id: string) => {
     if (oldKind === "noun") await supabase.from("nouns").delete().eq("id", id);
@@ -216,9 +277,14 @@ export function CardEditDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
-          <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="secondary" onClick={aiFill} disabled={aiBusy || saving}>
+            {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />} AI fill
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+            <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
