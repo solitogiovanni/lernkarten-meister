@@ -227,45 +227,18 @@ export function CrossDeckSearch({
   ] as { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[]).filter((g) => g.kind !== currentKind);
 
   const otherTotal = nouns.length + verbs.length + words.length;
+  const term = q.trim();
 
   if (busy && otherTotal === 0 && hasLocalMatches) return null;
 
-  if (!hasLocalMatches && otherTotal === 0 && !busy) {
-    const term = q.trim();
-    const proposeAdd = (kind: DeckKind) => {
-      if (kind === currentKind && onProposeAdd) {
-        onProposeAdd(kind, term);
-        return;
-      }
-      sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term }));
-      navigate({ to: targetFor[kind] });
-    };
-    return (
-      <Card className="p-6 text-center">
-        <p className="text-muted-foreground mb-4">
-          No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere. Add it as:
-        </p>
-        <div className="flex flex-wrap justify-center gap-2 mb-3">
-          {(["noun", "verb", "adjective", "adverb"] as DeckKind[]).map((k) => (
-            <Button key={k} variant={k === currentKind ? "default" : "outline"} size="sm" onClick={() => proposeAdd(k)}>
-              <Plus className="h-4 w-4 mr-1" /> {labelFor[k].slice(0, -1)}
-            </Button>
-          ))}
-        </div>
-        <div className="flex justify-center">
-          <Button variant="secondary" size="sm" onClick={() => setAutoDetect(true)}>
-            <Sparkles className="h-4 w-4 mr-1" /> Auto-detect type
-          </Button>
-        </div>
-        <AutoDetectDialog
-          open={autoDetect}
-          onOpenChange={setAutoDetect}
-          word={term}
-          onSaved={() => { if (typeof window !== "undefined") window.location.reload(); }}
-        />
-      </Card>
-    );
-  }
+  const proposeAdd = (kind: DeckKind) => {
+    if (kind === currentKind && onProposeAdd) {
+      onProposeAdd(kind, term);
+      return;
+    }
+    sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term }));
+    navigate({ to: targetFor[kind] });
+  };
 
   const onEditPreview = () => {
     if (!preview) return;
@@ -273,6 +246,38 @@ export function CrossDeckSearch({
     setPreview(null);
     navigate({ to: targetFor[preview.kind] });
   };
+
+  const noMatchAnywhere = !hasLocalMatches && otherTotal === 0 && !busy;
+
+  const addBar = (
+    <Card className="p-6 text-center mt-6">
+      <p className="text-muted-foreground mb-4">
+        {noMatchAnywhere ? (
+          <>No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere. Add it as:</>
+        ) : (
+          <>Add "<span className="font-medium text-foreground">{term}</span>" as:</>
+        )}
+      </p>
+      <div className="flex flex-wrap justify-center gap-2 mb-3">
+        {(["noun", "verb", "adjective", "adverb"] as DeckKind[]).map((k) => (
+          <Button key={k} variant={k === currentKind ? "default" : "outline"} size="sm" onClick={() => proposeAdd(k)}>
+            <Plus className="h-4 w-4 mr-1" /> {labelFor[k].slice(0, -1)}
+          </Button>
+        ))}
+      </div>
+      <div className="flex justify-center">
+        <Button variant="secondary" size="sm" onClick={() => setAutoDetect(true)}>
+          <Sparkles className="h-4 w-4 mr-1" /> Auto-detect type
+        </Button>
+      </div>
+      <AutoDetectDialog
+        open={autoDetect}
+        onOpenChange={setAutoDetect}
+        word={term}
+        onSaved={() => { if (typeof window !== "undefined") window.location.reload(); }}
+      />
+    </Card>
+  );
 
   return (
     <>
@@ -297,6 +302,7 @@ export function CrossDeckSearch({
           ))}
         </div>
       )}
+      {!busy && addBar}
       <CardRevealDialog
         open={!!preview}
         onOpenChange={(o) => !o && setPreview(null)}
