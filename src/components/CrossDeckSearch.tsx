@@ -76,6 +76,7 @@ export function CrossDeckSearch({
   const [verbs, setVerbs] = useState<VerbHit[]>([]);
   const [words, setWords] = useState<WordHit[]>([]);
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
+  const [autoDetect, setAutoDetect] = useState(false);
 
   useEffect(() => {
     const term = q.trim();
