@@ -469,3 +469,127 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
       return { results: [], error: e instanceof Error ? e.message : "Unknown error" };
     }
   });
+
+// ============ Single-word kind detection (with alternates) ============
+
+const DetectInput = z.object({
+  word: z.string().min(1).max(100),
+});
+
+export const detectWordKinds = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => DetectInput.parse(data))
+  .handler(async ({ data }): Promise<{ results: MixedItem[]; error: string | null }> => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) return { results: [], error: "LOVABLE_API_KEY not configured" };
+
+    const systemPrompt = `You are a meticulous German linguistics assistant. The user gives ONE German word that could be ambiguous between multiple parts of speech (e.g. "schnell" is an adjective AND adverb; "Essen" is a noun and also relates to verb "essen"; "laut" can be adjective, adverb, or preposition).
+
+Return ALL plausible classifications as separate items (1 to 3 items). Each item must be filled as if it were a standalone entry in that category.
+
+For EACH item return:
+- input: the original word
+- kind: "noun" | "verb" | "adjective" | "adverb"
+- meanings: 1 to 4 short Italian translations specific to that part of speech
+- themes: 1 to 3 short lowercase Italian thematic tags
+- examples: at least 2 short, natural German example sentences using the word AS that part of speech
+
+If kind = "noun": noun (capitalized singular), article (der/die/das), plural (or null).
+If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), prepositions (array, possibly empty).
+If kind = "adjective" or "adverb": word (lowercase base form).
+
+Only include kinds the word genuinely could be. If the word is unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
+
+    try {
+      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Classify: ${data.word}` },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "return_candidates",
+              description: "Return all plausible classifications",
+              parameters: {
+                type: "object",
+                properties: {
+                  items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        input: { type: "string" },
+                        kind: { type: "string", enum: ["noun", "verb", "adjective", "adverb"] },
+                        noun: { type: "string" },
+                        article: { type: "string", enum: ["der", "die", "das"] },
+                        plural: { type: "string" },
+                        present: { type: "string" },
+                        praeteritum: { type: "string" },
+                        perfect: { type: "string" },
+                        prepositions: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              preposition: { type: "string" },
+                              case: { type: "string", enum: ["akk", "dat", "gen"] },
+                              meaning: { type: "string" },
+                            },
+                            required: ["preposition"],
+                          },
+                        },
+                        word: { type: "string" },
+                        meanings: { type: "array", items: { type: "string" } },
+                        themes: { type: "array", items: { type: "string" } },
+                        examples: { type: "array", items: { type: "string" } },
+                      },
+                      required: ["input", "kind", "meanings", "themes", "examples"],
+                    },
+                  },
+                },
+                required: ["items"],
+              },
+            },
+          }],
+          tool_choice: { type: "function", function: { name: "return_candidates" } },
+        }),
+      });
+      if (!resp.ok) {
+        if (resp.status === 429) return { results: [], error: "AI rate limit hit, please try again in a moment." };
+        if (resp.status === 402) return { results: [], error: "AI credits exhausted. Add credits in Settings → Workspace → Usage." };
+        return { results: [], error: `AI error (${resp.status})` };
+      }
+      const json = await resp.json();
+      const args = json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+      if (!args) return { results: [], error: "AI did not return data" };
+      const parsed = JSON.parse(args);
+      const items = (parsed.items ?? []) as Array<any>;
+      const results: MixedItem[] = items.map((it) => ({
+        input: String(it.input ?? data.word),
+        kind: (it.kind as MixedKind) ?? "noun",
+        noun: it.noun ?? undefined,
+        article: (it.article as "der" | "die" | "das" | undefined) ?? null,
+        plural: it.plural ?? null,
+        present: it.present ?? undefined,
+        praeteritum: it.praeteritum ?? null,
+        perfect: it.perfect ?? null,
+        prepositions: (it.prepositions ?? []).map((p: any) => ({
+          preposition: p.preposition ?? "",
+          case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
+          meaning: p.meaning ?? "",
+        })),
+        word: it.word ?? undefined,
+        meanings: it.meanings ?? [],
+        themes: it.themes ?? [],
+        examples: it.examples ?? [],
+      }));
+      return { results, error: null };
+    } catch (e) {
+      console.error("detectWordKinds failed:", e);
+      return { results: [], error: e instanceof Error ? e.message : "Unknown error" };
+    }
+  });
