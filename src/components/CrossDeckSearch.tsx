@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Sparkles } from "lucide-react";
 import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
+import { AutoDetectDialog } from "@/components/AutoDetectDialog";
 import type { VerbPrep } from "@/components/VerbForm";
 
 export type DeckKind = "noun" | "verb" | "adjective" | "adverb";
