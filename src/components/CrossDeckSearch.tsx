@@ -32,10 +32,12 @@ export function CrossDeckSearch({
   q,
   currentKind,
   hasLocalMatches,
+  onProposeAdd,
 }: {
   q: string;
   currentKind: DeckKind;
   hasLocalMatches: boolean;
+  onProposeAdd?: (kind: DeckKind, word: string) => void;
 }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -155,6 +157,10 @@ export function CrossDeckSearch({
   if (!hasLocalMatches && otherTotal === 0 && !busy) {
     const term = q.trim();
     const proposeAdd = (kind: DeckKind) => {
+      if (kind === currentKind && onProposeAdd) {
+        onProposeAdd(kind, term);
+        return;
+      }
       sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term }));
       navigate({ to: targetFor[kind] });
     };

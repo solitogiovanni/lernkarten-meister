@@ -326,7 +326,7 @@ function VerbsPage() {
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind="verb" hasLocalMatches={filtered.length > 0} />
+      <CrossDeckSearch q={q} currentKind="verb" hasLocalMatches={filtered.length > 0} onProposeAdd={(_, word) => { setNewValue({ ...emptyVerb, present: word }); setCreating(true); }} />
 
       <CardRevealDialog
         open={!!previewing}
