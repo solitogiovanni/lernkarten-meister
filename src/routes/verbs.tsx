@@ -84,13 +84,12 @@ function VerbsPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("verbs")
-      .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
-      .order("present", { ascending: true })
-      .limit(1000);
+    const { data, error } = await fetchAll<Row>("verbs", (q) =>
+      q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
+        .order("present", { ascending: true }),
+    );
     if (error) toast.error(error.message);
-    setRows((data ?? []) as Row[]);
+    setRows(data);
     setLoading(false);
   };
 
