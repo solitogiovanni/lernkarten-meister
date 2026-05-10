@@ -321,7 +321,7 @@ export function WordDeckPage({
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} />
+      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onProposeAdd={(_, word) => { setNewValue({ ...emptyWord, word }); setCreating(true); }} />
 
       <CardRevealDialog
         open={!!previewing}
