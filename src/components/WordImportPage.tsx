@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { autofillWords, type AutofilledWord } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 
 type Kind = "adjective" | "adverb";
 type Draft = AutofilledWord & { include: boolean };
