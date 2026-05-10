@@ -73,6 +73,64 @@ export function CardEditDialog({
     comments: card.comments ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const autofillNounsFn = useServerFn(autofillNouns);
+  const autofillVerbsFn = useServerFn(autofillVerbs);
+  const autofillWordsFn = useServerFn(autofillWords);
+
+  const aiFill = async () => {
+    setAiBusy(true);
+    try {
+      if (kind === "noun") {
+        if (!noun.noun.trim()) return toast.error("Type a noun first");
+        const { results, error } = await autofillNounsFn({ data: { nouns: [noun.noun.trim()] } });
+        if (error) return toast.error(error);
+        const r = results[0];
+        if (!r) return toast.error("No result");
+        setNoun({
+          article: noun.article ?? r.article,
+          noun: r.noun || noun.noun,
+          plural: noun.plural || r.plural || "",
+          meanings: noun.meanings.length ? noun.meanings : r.meanings,
+          examples: noun.examples.length ? noun.examples : r.examples ?? [],
+          themes: noun.themes.length ? noun.themes : r.themes,
+          comments: noun.comments,
+        });
+      } else if (kind === "verb") {
+        if (!verb.present.trim()) return toast.error("Type a verb first");
+        const { results, error } = await autofillVerbsFn({ data: { verbs: [verb.present.trim()] } });
+        if (error) return toast.error(error);
+        const r = results[0];
+        if (!r) return toast.error("No result");
+        setVerb({
+          present: r.present || verb.present,
+          praeteritum: verb.praeteritum || r.praeteritum || "",
+          perfect: verb.perfect || r.perfect || "",
+          prepositions: verb.prepositions.length ? verb.prepositions : (r.prepositions ?? []),
+          meanings: verb.meanings.length ? verb.meanings : r.meanings ?? [],
+          examples: verb.examples.length ? verb.examples : r.examples ?? [],
+          themes: verb.themes.length ? verb.themes : r.themes ?? [],
+          comments: verb.comments,
+        });
+      } else {
+        if (!word.word.trim()) return toast.error("Type a word first");
+        const { results, error } = await autofillWordsFn({ data: { kind, words: [word.word.trim()] } });
+        if (error) return toast.error(error);
+        const r = results[0];
+        if (!r) return toast.error("No result");
+        setWord({
+          word: r.word || word.word,
+          meanings: word.meanings.length ? word.meanings : r.meanings,
+          examples: word.examples.length ? word.examples : r.examples ?? [],
+          themes: word.themes.length ? word.themes : r.themes,
+          comments: word.comments,
+        });
+      }
+      toast.success("Filled with AI");
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const deleteOldRow = async (oldKind: Kind, id: string) => {
     if (oldKind === "noun") await supabase.from("nouns").delete().eq("id", id);
