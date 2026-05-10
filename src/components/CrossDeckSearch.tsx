@@ -32,10 +32,12 @@ export function CrossDeckSearch({
   q,
   currentKind,
   hasLocalMatches,
+  onProposeAdd,
 }: {
   q: string;
   currentKind: DeckKind;
   hasLocalMatches: boolean;
+  onProposeAdd?: (kind: DeckKind, word: string) => void;
 }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
