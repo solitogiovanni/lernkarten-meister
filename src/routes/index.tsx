@@ -94,6 +94,20 @@ function DeckPage() {
     sessionStorage.removeItem(ADD_PREFILL_KEY);
   }, []);
 
+  useEffect(() => {
+    if (loading || rows.length === 0) return;
+    const raw = sessionStorage.getItem(EDIT_PREFILL_KEY);
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw) as { kind: string; id: string };
+      if (p.kind === "noun" && p.id) {
+        const r = rows.find((x) => x.id === p.id);
+        if (r) openEdit(r);
+      }
+    } catch {}
+    sessionStorage.removeItem(EDIT_PREFILL_KEY);
+  }, [loading, rows]);
+
   const allThemes = useMemo(() => {
     const set = new Set<string>();
     for (const r of rows) for (const t of r.themes) set.add(t);
