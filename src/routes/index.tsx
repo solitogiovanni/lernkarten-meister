@@ -67,13 +67,12 @@ function DeckPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("nouns")
-      .select("id,article,noun,plural,meanings,examples,themes,comments,due_at,reps")
-      .order("noun", { ascending: true })
-      .limit(1000);
+    const { data, error } = await fetchAll<NounRow>("nouns", (q) =>
+      q.select("id,article,noun,plural,meanings,examples,themes,comments,due_at,reps")
+        .order("noun", { ascending: true }),
+    );
     if (error) toast.error(error.message);
-    setRows((data ?? []) as NounRow[]);
+    setRows(data);
     setLoading(false);
   };
 
