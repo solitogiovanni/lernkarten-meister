@@ -245,13 +245,24 @@ export function CrossDeckSearch({
         <p className="text-muted-foreground mb-4">
           No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere. Add it as:
         </p>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2 mb-3">
           {(["noun", "verb", "adjective", "adverb"] as DeckKind[]).map((k) => (
             <Button key={k} variant={k === currentKind ? "default" : "outline"} size="sm" onClick={() => proposeAdd(k)}>
               <Plus className="h-4 w-4 mr-1" /> {labelFor[k].slice(0, -1)}
             </Button>
           ))}
         </div>
+        <div className="flex justify-center">
+          <Button variant="secondary" size="sm" onClick={() => setAutoDetect(true)}>
+            <Sparkles className="h-4 w-4 mr-1" /> Auto-detect type
+          </Button>
+        </div>
+        <AutoDetectDialog
+          open={autoDetect}
+          onOpenChange={setAutoDetect}
+          word={term}
+          onSaved={() => { if (typeof window !== "undefined") window.location.reload(); }}
+        />
       </Card>
     );
   }
