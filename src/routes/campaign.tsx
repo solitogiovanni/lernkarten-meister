@@ -38,9 +38,9 @@ function CampaignSetup() {
         fetchAll<{ themes: string[]; due_at: string }>("verbs", (q) => q.select("themes,due_at")),
       ]);
       const all: Item[] = [
-        ...((nounsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
-        ...((wordsRes.data ?? []) as { kind: "adjective" | "adverb"; themes: string[]; due_at: string }[]).map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
-        ...((verbsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at })),
+        ...nounsRes.data.map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
+        ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
+        ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at })),
       ];
       setItems(all);
       setLoading(false);
