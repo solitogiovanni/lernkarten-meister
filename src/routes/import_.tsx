@@ -85,9 +85,9 @@ function ImportPage() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("nouns").select("noun").limit(5000),
-      supabase.from("verbs").select("present").limit(5000),
-      (supabase as any).from("words").select("word, kind").limit(10000),
+      fetchAll<{ noun: string }>("nouns", (q) => q.select("noun")),
+      fetchAll<{ present: string }>("verbs", (q) => q.select("present")),
+      fetchAll<{ word: string; kind: string }>("words", (q) => q.select("word, kind")),
     ]).then(([n, v, w]: any[]) => {
       const adj = new Set<string>();
       const adv = new Set<string>();
