@@ -90,13 +90,13 @@ function RunPage() {
       const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
       const [nRes, wRes, vRes] = await Promise.all([
         wantNoun
-          ? supabase.from("nouns").select("id,article,noun,plural,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").limit(2000)
+          ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
         wantWords
-          ? (supabase as any).from("words").select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds).limit(2000)
+          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? (supabase as any).from("verbs").select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").limit(2000)
+          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
