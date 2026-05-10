@@ -17,7 +17,7 @@ import { autofillNouns } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
-import { CrossDeckSearch, ADD_PREFILL_KEY } from "@/components/CrossDeckSearch";
+import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 
 type NounRow = {
   id: string;
@@ -93,6 +93,20 @@ function DeckPage() {
     } catch {}
     sessionStorage.removeItem(ADD_PREFILL_KEY);
   }, []);
+
+  useEffect(() => {
+    if (loading || rows.length === 0) return;
+    const raw = sessionStorage.getItem(EDIT_PREFILL_KEY);
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw) as { kind: string; id: string };
+      if (p.kind === "noun" && p.id) {
+        const r = rows.find((x) => x.id === p.id);
+        if (r) openEdit(r);
+      }
+    } catch {}
+    sessionStorage.removeItem(EDIT_PREFILL_KEY);
+  }, [loading, rows]);
 
   const allThemes = useMemo(() => {
     const set = new Set<string>();

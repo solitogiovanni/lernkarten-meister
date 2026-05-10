@@ -1,16 +1,45 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
+import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
+import type { VerbPrep } from "@/components/VerbForm";
 
 export type DeckKind = "noun" | "verb" | "adjective" | "adverb";
 
-type NounHit = { id: string; article: string | null; noun: string; meanings: string[] };
-type VerbHit = { id: string; present: string; meanings: string[] };
-type WordHit = { id: string; word: string; kind: "adjective" | "adverb"; meanings: string[] };
+type NounHit = {
+  id: string;
+  article: "der" | "die" | "das" | null;
+  noun: string;
+  plural: string | null;
+  meanings: string[];
+  examples: string[];
+  themes: string[];
+  comments: string | null;
+};
+type VerbHit = {
+  id: string;
+  present: string;
+  praeteritum: string | null;
+  perfect: string | null;
+  prepositions: VerbPrep[];
+  meanings: string[];
+  examples: string[];
+  themes: string[];
+  comments: string | null;
+};
+type WordHit = {
+  id: string;
+  word: string;
+  kind: "adjective" | "adverb";
+  meanings: string[];
+  examples: string[];
+  themes: string[];
+  comments: string | null;
+};
 
 const targetFor: Record<DeckKind, "/" | "/verbs" | "/adjectives" | "/adverbs"> = {
   noun: "/",
@@ -27,6 +56,7 @@ const labelFor: Record<DeckKind, string> = {
 };
 
 export const ADD_PREFILL_KEY = "wortschatz:addPrefill";
+export const EDIT_PREFILL_KEY = "wortschatz:editPrefill";
 
 export function CrossDeckSearch({
   q,
@@ -44,6 +74,7 @@ export function CrossDeckSearch({
   const [nouns, setNouns] = useState<NounHit[]>([]);
   const [verbs, setVerbs] = useState<VerbHit[]>([]);
   const [words, setWords] = useState<WordHit[]>([]);
+  const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
 
   useEffect(() => {
     const term = q.trim();
@@ -60,19 +91,19 @@ export function CrossDeckSearch({
           ? Promise.resolve({ data: [] as NounHit[] })
           : (supabase as any)
               .from("nouns")
-              .select("id,article,noun,meanings")
+              .select("id,article,noun,plural,meanings,examples,themes,comments")
               .or(`noun.ilike.${like},meanings.cs.{${term}}`)
               .limit(20),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
           : (supabase as any)
               .from("verbs")
-              .select("id,present,meanings")
+              .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments")
               .or(`present.ilike.${like},meanings.cs.{${term}}`)
               .limit(20),
         (supabase as any)
           .from("words")
-          .select("id,word,kind,meanings")
+          .select("id,word,kind,meanings,examples,themes,comments")
           .or(`word.ilike.${like},meanings.cs.{${term}}`)
           .limit(40),
       ]);
@@ -91,14 +122,57 @@ export function CrossDeckSearch({
   const adjectives = words.filter((w) => w.kind === "adjective");
   const adverbs = words.filter((w) => w.kind === "adverb");
 
+  const openNoun = (r: NounHit) => setPreview({
+    kind: "noun",
+    id: r.id,
+    card: {
+      kind: "noun",
+      article: r.article,
+      word: r.noun,
+      plural: r.plural,
+      meanings: r.meanings ?? [],
+      examples: r.examples ?? [],
+      themes: r.themes ?? [],
+      comments: r.comments,
+    },
+  });
+  const openVerb = (r: VerbHit) => setPreview({
+    kind: "verb",
+    id: r.id,
+    card: {
+      kind: "verb",
+      word: r.present,
+      praeteritum: r.praeteritum,
+      perfect: r.perfect,
+      prepositions: r.prepositions ?? [],
+      meanings: r.meanings ?? [],
+      examples: r.examples ?? [],
+      themes: r.themes ?? [],
+      comments: r.comments,
+    },
+  });
+  const openWord = (r: WordHit) => setPreview({
+    kind: r.kind,
+    id: r.id,
+    card: {
+      kind: r.kind,
+      word: r.word,
+      meanings: r.meanings ?? [],
+      examples: r.examples ?? [],
+      themes: r.themes ?? [],
+      comments: r.comments,
+    },
+  });
+
+  const cardCls = "block w-full text-left p-3 rounded-md border bg-card hover:border-primary transition-colors";
+
   const groups: { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[] = ([
     {
       kind: "noun",
       label: labelFor.noun,
       count: nouns.length,
       render: () => nouns.map((r) => (
-        <Link key={r.id} to="/" search={{ q: r.noun, theme: "", due: false }}
-          className="block p-3 rounded-md border bg-card hover:border-primary transition-colors">
+        <button key={r.id} type="button" onClick={() => openNoun(r)} className={cardCls}>
           <div className="text-sm font-medium">
             {r.article && <span className="text-muted-foreground mr-1">{r.article}</span>}
             {r.noun}
@@ -106,7 +180,7 @@ export function CrossDeckSearch({
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
-        </Link>
+        </button>
       )),
     },
     {
@@ -114,12 +188,12 @@ export function CrossDeckSearch({
       label: labelFor.verb,
       count: verbs.length,
       render: () => verbs.map((r) => (
-        <Link key={r.id} to="/verbs" className="block p-3 rounded-md border bg-card hover:border-primary transition-colors">
+        <button key={r.id} type="button" onClick={() => openVerb(r)} className={cardCls}>
           <div className="text-sm font-medium">{r.present}</div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
-        </Link>
+        </button>
       )),
     },
     {
@@ -127,12 +201,12 @@ export function CrossDeckSearch({
       label: labelFor.adjective,
       count: adjectives.length,
       render: () => adjectives.map((r) => (
-        <Link key={r.id} to="/adjectives" className="block p-3 rounded-md border bg-card hover:border-primary transition-colors">
+        <button key={r.id} type="button" onClick={() => openWord(r)} className={cardCls}>
           <div className="text-sm font-medium">{r.word}</div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
-        </Link>
+        </button>
       )),
     },
     {
@@ -140,12 +214,12 @@ export function CrossDeckSearch({
       label: labelFor.adverb,
       count: adverbs.length,
       render: () => adverbs.map((r) => (
-        <Link key={r.id} to="/adverbs" className="block p-3 rounded-md border bg-card hover:border-primary transition-colors">
+        <button key={r.id} type="button" onClick={() => openWord(r)} className={cardCls}>
           <div className="text-sm font-medium">{r.word}</div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
-        </Link>
+        </button>
       )),
     },
   ] as { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[]).filter((g) => g.kind !== currentKind);
@@ -180,27 +254,42 @@ export function CrossDeckSearch({
     );
   }
 
-  if (otherTotal === 0) return null;
+  const onEditPreview = () => {
+    if (!preview) return;
+    sessionStorage.setItem(EDIT_PREFILL_KEY, JSON.stringify({ kind: preview.kind, id: preview.id }));
+    setPreview(null);
+    navigate({ to: targetFor[preview.kind] });
+  };
 
   return (
-    <div className="space-y-4 mt-6">
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Other matches
-        </h2>
-        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-      </div>
-      {groups.filter((g) => g.count > 0).map((g) => (
-        <div key={g.kind} className="space-y-2">
+    <>
+      {otherTotal > 0 && (
+        <div className="space-y-4 mt-6">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium">{g.label}</h3>
-            <Badge variant="secondary" className="text-[10px]">{g.count}</Badge>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Other matches
+            </h2>
+            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {g.render()}
-          </div>
+          {groups.filter((g) => g.count > 0).map((g) => (
+            <div key={g.kind} className="space-y-2">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-medium">{g.label}</h3>
+                <Badge variant="secondary" className="text-[10px]">{g.count}</Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {g.render()}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      )}
+      <CardRevealDialog
+        open={!!preview}
+        onOpenChange={(o) => !o && setPreview(null)}
+        card={preview?.card ?? null}
+        onEdit={onEditPreview}
+      />
+    </>
   );
 }
