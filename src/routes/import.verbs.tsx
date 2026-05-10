@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { autofillVerbs, type AutofilledVerb, type VerbPreposition } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 
 export const Route = createFileRoute("/import/verbs")({
   head: () => ({
