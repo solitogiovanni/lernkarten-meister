@@ -157,6 +157,10 @@ export function CrossDeckSearch({
   if (!hasLocalMatches && otherTotal === 0 && !busy) {
     const term = q.trim();
     const proposeAdd = (kind: DeckKind) => {
+      if (kind === currentKind && onProposeAdd) {
+        onProposeAdd(kind, term);
+        return;
+      }
       sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term }));
       navigate({ to: targetFor[kind] });
     };
