@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Sparkles } from "lucide-react";
 import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
+import { AutoDetectDialog } from "@/components/AutoDetectDialog";
 import type { VerbPrep } from "@/components/VerbForm";
 
 export type DeckKind = "noun" | "verb" | "adjective" | "adverb";
@@ -75,6 +76,7 @@ export function CrossDeckSearch({
   const [verbs, setVerbs] = useState<VerbHit[]>([]);
   const [words, setWords] = useState<WordHit[]>([]);
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
+  const [autoDetect, setAutoDetect] = useState(false);
 
   useEffect(() => {
     const term = q.trim();
@@ -243,13 +245,24 @@ export function CrossDeckSearch({
         <p className="text-muted-foreground mb-4">
           No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere. Add it as:
         </p>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2 mb-3">
           {(["noun", "verb", "adjective", "adverb"] as DeckKind[]).map((k) => (
             <Button key={k} variant={k === currentKind ? "default" : "outline"} size="sm" onClick={() => proposeAdd(k)}>
               <Plus className="h-4 w-4 mr-1" /> {labelFor[k].slice(0, -1)}
             </Button>
           ))}
         </div>
+        <div className="flex justify-center">
+          <Button variant="secondary" size="sm" onClick={() => setAutoDetect(true)}>
+            <Sparkles className="h-4 w-4 mr-1" /> Auto-detect type
+          </Button>
+        </div>
+        <AutoDetectDialog
+          open={autoDetect}
+          onOpenChange={setAutoDetect}
+          word={term}
+          onSaved={() => { if (typeof window !== "undefined") window.location.reload(); }}
+        />
       </Card>
     );
   }
