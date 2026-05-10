@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { autofillMixed, type MixedItem, type MixedKind, type VerbPreposition } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 
 export const Route = createFileRoute("/import_")({
   head: () => ({
@@ -84,9 +85,9 @@ function ImportPage() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("nouns").select("noun").limit(5000),
-      supabase.from("verbs").select("present").limit(5000),
-      (supabase as any).from("words").select("word, kind").limit(10000),
+      fetchAll<{ noun: string }>("nouns", (q) => q.select("noun")),
+      fetchAll<{ present: string }>("verbs", (q) => q.select("present")),
+      fetchAll<{ word: string; kind: string }>("words", (q) => q.select("word, kind")),
     ]).then(([n, v, w]: any[]) => {
       const adj = new Set<string>();
       const adv = new Set<string>();

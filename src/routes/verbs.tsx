@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -84,13 +85,12 @@ function VerbsPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("verbs")
-      .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
-      .order("present", { ascending: true })
-      .limit(1000);
+    const { data, error } = await fetchAll<Row>("verbs", (q) =>
+      q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
+        .order("present", { ascending: true }),
+    );
     if (error) toast.error(error.message);
-    setRows((data ?? []) as Row[]);
+    setRows(data);
     setLoading(false);
   };
 

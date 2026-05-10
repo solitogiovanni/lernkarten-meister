@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { autofillWords, type AutofilledWord } from "@/server/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 
 type Kind = "adjective" | "adverb";
 type Draft = AutofilledWord & { include: boolean };
@@ -34,14 +35,9 @@ export function WordImportPage({
   const navigate = useNavigate();
 
   useEffect(() => {
-    (supabase as any)
-      .from("words")
-      .select("word")
-      .eq("kind", kind)
-      .limit(5000)
-      .then(({ data }: { data: Array<{ word: string }> | null }) => {
-        setExisting(new Set((data ?? []).map((r) => r.word.trim().toLowerCase())));
-      });
+    fetchAll<{ word: string }>("words", (q) => q.select("word").eq("kind", kind)).then(({ data }) => {
+      setExisting(new Set(data.map((r) => r.word.trim().toLowerCase())));
+    });
   }, [kind]);
 
   const isDuplicate = (word: string, idx: number) => {

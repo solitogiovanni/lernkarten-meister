@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -32,14 +33,14 @@ function CampaignSetup() {
   useEffect(() => {
     (async () => {
       const [nounsRes, wordsRes, verbsRes] = await Promise.all([
-        supabase.from("nouns").select("themes,due_at").limit(2000),
-        (supabase as any).from("words").select("kind,themes,due_at").limit(2000),
-        (supabase as any).from("verbs").select("themes,due_at").limit(2000),
+        fetchAll<{ themes: string[]; due_at: string }>("nouns", (q) => q.select("themes,due_at")),
+        fetchAll<{ kind: "adjective" | "adverb"; themes: string[]; due_at: string }>("words", (q) => q.select("kind,themes,due_at")),
+        fetchAll<{ themes: string[]; due_at: string }>("verbs", (q) => q.select("themes,due_at")),
       ]);
       const all: Item[] = [
-        ...((nounsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
-        ...((wordsRes.data ?? []) as { kind: "adjective" | "adverb"; themes: string[]; due_at: string }[]).map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
-        ...((verbsRes.data ?? []) as { themes: string[]; due_at: string }[]).map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at })),
+        ...nounsRes.data.map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
+        ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
+        ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at })),
       ];
       setItems(all);
       setLoading(false);
