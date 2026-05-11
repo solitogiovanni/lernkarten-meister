@@ -288,7 +288,7 @@ function ImportPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Import</h1>
         <p className="text-sm text-muted-foreground">
-          Paste any mix of German words — one per line. AI classifies each as noun, verb, adjective or adverb and saves it to the right deck.
+          Paste any mix of German words — one per line. AI classifies each as noun, verb, adjective, adverb, preposition, pronoun or conjunction and saves it to the right deck.
           Optional format: <code>der Wort = meaning1, meaning2</code>.
         </p>
       </div>
