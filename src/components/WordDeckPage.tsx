@@ -17,7 +17,7 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 
-export type Kind = "adjective" | "adverb";
+export type Kind = "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
 
 type Row = {
   id: string;
