@@ -9,7 +9,7 @@ import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
 import { AutoDetectDialog } from "@/components/AutoDetectDialog";
 import type { VerbPrep } from "@/components/VerbForm";
 
-export type DeckKind = "noun" | "verb" | "adjective" | "adverb";
+export type DeckKind = "noun" | "verb" | "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
 
 type NounHit = {
   id: string;
