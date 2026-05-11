@@ -100,7 +100,7 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
   });
 
 const WordsInput = z.object({
-  kind: z.enum(["adjective", "adverb"]),
+  kind: z.enum(["adjective", "adverb", "preposition", "pronoun", "conjunction"]),
   words: z.array(z.string().min(1)).min(1).max(50),
 });
 

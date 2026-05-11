@@ -12,7 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { autofillNouns, autofillVerbs, autofillWords } from "@/server/autofill.functions";
 import { Loader2, Sparkles } from "lucide-react";
 
-export type Kind = "noun" | "adjective" | "adverb" | "verb";
+export type Kind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
 
 export type EditableCard = {
   id: string;
@@ -259,6 +259,9 @@ export function CardEditDialog({
                 <SelectItem value="adjective">Adjective</SelectItem>
                 <SelectItem value="adverb">Adverb</SelectItem>
                 <SelectItem value="verb">Verb</SelectItem>
+                <SelectItem value="preposition">Preposition</SelectItem>
+                <SelectItem value="pronoun">Pronoun</SelectItem>
+                <SelectItem value="conjunction">Conjunction</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -271,8 +274,8 @@ export function CardEditDialog({
             <WordForm
               value={word}
               onChange={setWord}
-              label={kind === "adjective" ? "Adjective" : "Adverb"}
-              placeholder={kind === "adjective" ? "schön" : "schnell"}
+              label={kind.charAt(0).toUpperCase() + kind.slice(1)}
+              placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}
         </div>

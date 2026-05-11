@@ -12,7 +12,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";
 
-type Kind = "adjective" | "adverb";
+type Kind = "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
+
+const DECK_PATH: Record<Kind, "/adjectives" | "/adverbs" | "/prepositions" | "/pronouns" | "/conjunctions"> = {
+  adjective: "/adjectives",
+  adverb: "/adverbs",
+  preposition: "/prepositions",
+  pronoun: "/pronouns",
+  conjunction: "/conjunctions",
+};
 type Draft = AutofilledWord & { include: boolean };
 
 export function WordImportPage({
@@ -130,7 +138,7 @@ export function WordImportPage({
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success(`Saved ${rows.length} entries`);
-    navigate({ to: kind === "adjective" ? "/adjectives" : "/adverbs" });
+    navigate({ to: DECK_PATH[kind] });
   };
 
   return (
@@ -233,7 +241,7 @@ export function WordImportPage({
           </div>
 
           <div className="text-center pt-2">
-            <Link to={kind === "adjective" ? "/adjectives" : "/adverbs"} className="text-sm text-muted-foreground hover:text-foreground">
+            <Link to={DECK_PATH[kind]} className="text-sm text-muted-foreground hover:text-foreground">
               ← Back to deck
             </Link>
           </div>

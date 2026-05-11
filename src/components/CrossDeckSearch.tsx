@@ -9,7 +9,7 @@ import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
 import { AutoDetectDialog } from "@/components/AutoDetectDialog";
 import type { VerbPrep } from "@/components/VerbForm";
 
-export type DeckKind = "noun" | "verb" | "adjective" | "adverb";
+export type DeckKind = "noun" | "verb" | "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
 
 type NounHit = {
   id: string;
@@ -35,18 +35,21 @@ type VerbHit = {
 type WordHit = {
   id: string;
   word: string;
-  kind: "adjective" | "adverb";
+  kind: "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
   meanings: string[];
   examples: string[];
   themes: string[];
   comments: string | null;
 };
 
-const targetFor: Record<DeckKind, "/" | "/verbs" | "/adjectives" | "/adverbs"> = {
+const targetFor: Record<DeckKind, "/" | "/verbs" | "/adjectives" | "/adverbs" | "/prepositions" | "/pronouns" | "/conjunctions"> = {
   noun: "/",
   verb: "/verbs",
   adjective: "/adjectives",
   adverb: "/adverbs",
+  preposition: "/prepositions",
+  pronoun: "/pronouns",
+  conjunction: "/conjunctions",
 };
 
 const labelFor: Record<DeckKind, string> = {
@@ -54,6 +57,9 @@ const labelFor: Record<DeckKind, string> = {
   verb: "Verbs",
   adjective: "Adjectives",
   adverb: "Adverbs",
+  preposition: "Prepositions",
+  pronoun: "Pronouns",
+  conjunction: "Conjunctions",
 };
 
 export const ADD_PREFILL_KEY = "wortschatz:addPrefill";
@@ -123,6 +129,9 @@ export function CrossDeckSearch({
 
   const adjectives = words.filter((w) => w.kind === "adjective");
   const adverbs = words.filter((w) => w.kind === "adverb");
+  const prepositions = words.filter((w) => w.kind === "preposition");
+  const pronouns = words.filter((w) => w.kind === "pronoun");
+  const conjunctions = words.filter((w) => w.kind === "conjunction");
 
   const openNoun = (r: NounHit) => setPreview({
     kind: "noun",
@@ -224,6 +233,19 @@ export function CrossDeckSearch({
         </button>
       )),
     },
+    ...(["preposition", "pronoun", "conjunction"] as const).map((kk) => ({
+      kind: kk,
+      label: labelFor[kk],
+      count: words.filter((w) => w.kind === kk).length,
+      render: () => words.filter((w) => w.kind === kk).map((r) => (
+        <button key={r.id} type="button" onClick={() => openWord(r)} className={cardCls}>
+          <div className="text-sm font-medium">{r.word}</div>
+          {r.meanings.length > 0 && (
+            <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
+          )}
+        </button>
+      )),
+    })),
   ] as { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[]).filter((g) => g.kind !== currentKind);
 
   const otherTotal = nouns.length + verbs.length + words.length;

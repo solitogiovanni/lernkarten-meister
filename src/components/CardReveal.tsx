@@ -5,7 +5,7 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { Pencil } from "lucide-react";
 import type { VerbPrep } from "@/components/VerbForm";
 
-export type RevealKind = "noun" | "adjective" | "adverb" | "verb";
+export type RevealKind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
 
 export type RevealCard = {
   kind: RevealKind;
@@ -32,6 +32,9 @@ const kindLabel: Record<RevealKind, string> = {
   adjective: "Adjective",
   adverb: "Adverb",
   verb: "Verb",
+  preposition: "Preposition",
+  pronoun: "Pronoun",
+  conjunction: "Conjunction",
 };
 
 export function CardRevealDialog({

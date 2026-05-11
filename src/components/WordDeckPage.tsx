@@ -17,7 +17,7 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 
-export type Kind = "adjective" | "adverb";
+export type Kind = "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
 
 type Row = {
   id: string;
@@ -40,7 +40,7 @@ export function WordDeckPage({
 }: {
   kind: Kind;
   title: string;
-  importTo: "/import/adjectives" | "/import/adverbs";
+  importTo: "/import/adjectives" | "/import/adverbs" | "/import/prepositions" | "/import/pronouns" | "/import/conjunctions";
   formLabel: string;
   formPlaceholder: string;
   addLabel: string;
