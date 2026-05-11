@@ -91,6 +91,9 @@ function RootComponent() {
             <NavLink to="/adjectives" label="Adjectives" />
             <NavLink to="/adverbs" label="Adverbs" />
             <NavLink to="/verbs" label="Verbs" />
+            <NavLink to="/prepositions" label="Prepositions" />
+            <NavLink to="/pronouns" label="Pronouns" />
+            <NavLink to="/conjunctions" label="Conjunctions" />
             <NavLink to="/import" label="Import" />
             <NavLink to="/campaign" label="Campaign" />
           </nav>
