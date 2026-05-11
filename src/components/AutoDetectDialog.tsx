@@ -110,7 +110,8 @@ export function AutoDetectDialog({
         examples: d.examples,
         themes: d.themes,
       }));
-      const words = valid.filter((d) => d.kind === "adjective" || d.kind === "adverb").map((d) => ({
+      const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
+      const words = valid.filter((d) => WORD_KINDS.includes(d.kind)).map((d) => ({
         kind: d.kind,
         word: (d.word ?? "").trim(),
         meanings: d.meanings,
