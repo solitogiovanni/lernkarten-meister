@@ -12,7 +12,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";
 
-type Kind = "adjective" | "adverb";
+type Kind = "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
+
+const DECK_PATH: Record<Kind, "/adjectives" | "/adverbs" | "/prepositions" | "/pronouns" | "/conjunctions"> = {
+  adjective: "/adjectives",
+  adverb: "/adverbs",
+  preposition: "/prepositions",
+  pronoun: "/pronouns",
+  conjunction: "/conjunctions",
+};
 type Draft = AutofilledWord & { include: boolean };
 
 export function WordImportPage({
