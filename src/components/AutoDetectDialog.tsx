@@ -16,6 +16,9 @@ const KIND_LABEL: Record<MixedKind, string> = {
   verb: "Verb",
   adjective: "Adjective",
   adverb: "Adverb",
+  preposition: "Preposition",
+  pronoun: "Pronoun",
+  conjunction: "Conjunction",
 };
 
 const KIND_COLOR: Record<MixedKind, string> = {
@@ -23,6 +26,9 @@ const KIND_COLOR: Record<MixedKind, string> = {
   verb: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
   adjective: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
   adverb: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  preposition: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  pronoun: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
+  conjunction: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
 };
 
 const articleColor = {
@@ -104,7 +110,8 @@ export function AutoDetectDialog({
         examples: d.examples,
         themes: d.themes,
       }));
-      const words = valid.filter((d) => d.kind === "adjective" || d.kind === "adverb").map((d) => ({
+      const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
+      const words = valid.filter((d) => WORD_KINDS.includes(d.kind)).map((d) => ({
         kind: d.kind,
         word: (d.word ?? "").trim(),
         meanings: d.meanings,
@@ -222,7 +229,7 @@ export function AutoDetectDialog({
                       </>
                     )}
 
-                    {(d.kind === "adjective" || d.kind === "adverb") && (
+                    {(d.kind === "adjective" || d.kind === "adverb" || d.kind === "preposition" || d.kind === "pronoun" || d.kind === "conjunction") && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <Input value={d.word ?? ""} onChange={(e) => updateDraft(i, { word: e.target.value })} placeholder="Word" />
                         <Input value={d.meanings.join(", ")} onChange={(e) => updateDraft(i, { meanings: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="meanings (comma)" />

@@ -29,6 +29,9 @@ const KIND_LABEL: Record<MixedKind, string> = {
   verb: "Verb",
   adjective: "Adjective",
   adverb: "Adverb",
+  preposition: "Preposition",
+  pronoun: "Pronoun",
+  conjunction: "Conjunction",
 };
 
 const KIND_COLOR: Record<MixedKind, string> = {
@@ -36,6 +39,9 @@ const KIND_COLOR: Record<MixedKind, string> = {
   verb: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
   adjective: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
   adverb: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  preposition: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  pronoun: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
+  conjunction: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
 };
 
 const articleColor = {
@@ -79,6 +85,9 @@ function ImportPage() {
     verb: new Set(),
     adjective: new Set(),
     adverb: new Set(),
+    preposition: new Set(),
+    pronoun: new Set(),
+    conjunction: new Set(),
   });
   const autofillFn = useServerFn(autofillMixed);
   const navigate = useNavigate();
@@ -89,18 +98,21 @@ function ImportPage() {
       fetchAll<{ present: string }>("verbs", (q) => q.select("present")),
       fetchAll<{ word: string; kind: string }>("words", (q) => q.select("word, kind")),
     ]).then(([n, v, w]: any[]) => {
-      const adj = new Set<string>();
-      const adv = new Set<string>();
+      const buckets: Record<string, Set<string>> = {
+        adjective: new Set(), adverb: new Set(), preposition: new Set(), pronoun: new Set(), conjunction: new Set(),
+      };
       for (const row of (w.data ?? []) as Array<{ word: string; kind: string }>) {
         const k = row.word.trim().toLowerCase();
-        if (row.kind === "adjective") adj.add(k);
-        else if (row.kind === "adverb") adv.add(k);
+        if (buckets[row.kind]) buckets[row.kind].add(k);
       }
       setExisting({
         noun: new Set(((n.data ?? []) as Array<{ noun: string }>).map((r) => r.noun.trim().toLowerCase())),
         verb: new Set(((v.data ?? []) as Array<{ present: string }>).map((r) => r.present.trim().toLowerCase())),
-        adjective: adj,
-        adverb: adv,
+        adjective: buckets.adjective,
+        adverb: buckets.adverb,
+        preposition: buckets.preposition,
+        pronoun: buckets.pronoun,
+        conjunction: buckets.conjunction,
       });
     });
   }, []);
@@ -160,10 +172,10 @@ function ImportPage() {
       setDrafts(merged);
       const counts = merged.reduce<Record<MixedKind, number>>(
         (acc, d) => ({ ...acc, [d.kind]: (acc[d.kind] ?? 0) + 1 }),
-        { noun: 0, verb: 0, adjective: 0, adverb: 0 }
+        { noun: 0, verb: 0, adjective: 0, adverb: 0, preposition: 0, pronoun: 0, conjunction: 0 }
       );
       toast.success(
-        `Classified ${merged.length}: ${counts.noun} nouns, ${counts.verb} verbs, ${counts.adjective} adj, ${counts.adverb} adv`
+        `Classified ${merged.length}: ${counts.noun}N · ${counts.verb}V · ${counts.adjective}Adj · ${counts.adverb}Adv · ${counts.preposition}Prep · ${counts.pronoun}Pron · ${counts.conjunction}Conj`
       );
     } finally {
       setBusy(false);
@@ -236,8 +248,9 @@ function ImportPage() {
         examples: d.examples,
         themes: d.themes,
       }));
+      const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
       const words = valid
-        .filter((d) => d.kind === "adjective" || d.kind === "adverb")
+        .filter((d) => WORD_KINDS.includes(d.kind))
         .map((d) => ({
           kind: d.kind,
           word: (d.word ?? "").trim(),
@@ -260,8 +273,9 @@ function ImportPage() {
         if (error) errors.push(`words: ${error.message}`);
       }
       if (errors.length) return toast.error(errors.join("; "));
+      const c = (k: string) => words.filter((w) => w.kind === k).length;
       toast.success(
-        `Saved ${nouns.length + verbs.length + words.length} (${nouns.length}N · ${verbs.length}V · ${words.filter((w) => w.kind === "adjective").length}Adj · ${words.filter((w) => w.kind === "adverb").length}Adv)`
+        `Saved ${nouns.length + verbs.length + words.length} (${nouns.length}N · ${verbs.length}V · ${c("adjective")}Adj · ${c("adverb")}Adv · ${c("preposition")}Prep · ${c("pronoun")}Pron · ${c("conjunction")}Conj)`
       );
       navigate({ to: "/" });
     } finally {
@@ -274,7 +288,7 @@ function ImportPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Import</h1>
         <p className="text-sm text-muted-foreground">
-          Paste any mix of German words — one per line. AI classifies each as noun, verb, adjective or adverb and saves it to the right deck.
+          Paste any mix of German words — one per line. AI classifies each as noun, verb, adjective, adverb, preposition, pronoun or conjunction and saves it to the right deck.
           Optional format: <code>der Wort = meaning1, meaning2</code>.
         </p>
       </div>
