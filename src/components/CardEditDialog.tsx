@@ -274,8 +274,8 @@ export function CardEditDialog({
             <WordForm
               value={word}
               onChange={setWord}
-              label={kind === "adjective" ? "Adjective" : "Adverb"}
-              placeholder={kind === "adjective" ? "schön" : "schnell"}
+              label={kind.charAt(0).toUpperCase() + kind.slice(1)}
+              placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}
         </div>
