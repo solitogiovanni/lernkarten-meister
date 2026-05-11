@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImportVerbsRouteImport } from './routes/import.verbs'
 import { Route as ImportPronounsRouteImport } from './routes/import.pronouns'
 import { Route as ImportPrepositionsRouteImport } from './routes/import.prepositions'
+import { Route as ImportConjunctionsRouteImport } from './routes/import.conjunctions'
 import { Route as ImportAdverbsRouteImport } from './routes/import.adverbs'
 import { Route as ImportAdjectivesRouteImport } from './routes/import.adjectives'
 import { Route as CampaignRunRouteImport } from './routes/campaign_.run'
@@ -85,6 +86,11 @@ const ImportPrepositionsRoute = ImportPrepositionsRouteImport.update({
   path: '/import/prepositions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImportConjunctionsRoute = ImportConjunctionsRouteImport.update({
+  id: '/import/conjunctions',
+  path: '/import/conjunctions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImportAdverbsRoute = ImportAdverbsRouteImport.update({
   id: '/import/adverbs',
   path: '/import/adverbs',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/campaign/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
+  '/import/conjunctions': typeof ImportConjunctionsRoute
   '/import/prepositions': typeof ImportPrepositionsRoute
   '/import/pronouns': typeof ImportPronounsRoute
   '/import/verbs': typeof ImportVerbsRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/campaign/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
+  '/import/conjunctions': typeof ImportConjunctionsRoute
   '/import/prepositions': typeof ImportPrepositionsRoute
   '/import/pronouns': typeof ImportPronounsRoute
   '/import/verbs': typeof ImportVerbsRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/campaign_/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
+  '/import/conjunctions': typeof ImportConjunctionsRoute
   '/import/prepositions': typeof ImportPrepositionsRoute
   '/import/pronouns': typeof ImportPronounsRoute
   '/import/verbs': typeof ImportVerbsRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/campaign/run'
     | '/import/adjectives'
     | '/import/adverbs'
+    | '/import/conjunctions'
     | '/import/prepositions'
     | '/import/pronouns'
     | '/import/verbs'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/campaign/run'
     | '/import/adjectives'
     | '/import/adverbs'
+    | '/import/conjunctions'
     | '/import/prepositions'
     | '/import/pronouns'
     | '/import/verbs'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/campaign_/run'
     | '/import/adjectives'
     | '/import/adverbs'
+    | '/import/conjunctions'
     | '/import/prepositions'
     | '/import/pronouns'
     | '/import/verbs'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   CampaignRunRoute: typeof CampaignRunRoute
   ImportAdjectivesRoute: typeof ImportAdjectivesRoute
   ImportAdverbsRoute: typeof ImportAdverbsRoute
+  ImportConjunctionsRoute: typeof ImportConjunctionsRoute
   ImportPrepositionsRoute: typeof ImportPrepositionsRoute
   ImportPronounsRoute: typeof ImportPronounsRoute
   ImportVerbsRoute: typeof ImportVerbsRoute
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportPrepositionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/import/conjunctions': {
+      id: '/import/conjunctions'
+      path: '/import/conjunctions'
+      fullPath: '/import/conjunctions'
+      preLoaderRoute: typeof ImportConjunctionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/import/adverbs': {
       id: '/import/adverbs'
       path: '/import/adverbs'
@@ -348,6 +368,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignRunRoute: CampaignRunRoute,
   ImportAdjectivesRoute: ImportAdjectivesRoute,
   ImportAdverbsRoute: ImportAdverbsRoute,
+  ImportConjunctionsRoute: ImportConjunctionsRoute,
   ImportPrepositionsRoute: ImportPrepositionsRoute,
   ImportPronounsRoute: ImportPronounsRoute,
   ImportVerbsRoute: ImportVerbsRoute,
