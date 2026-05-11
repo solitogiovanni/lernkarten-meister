@@ -19,6 +19,7 @@ import { Route as AdverbsRouteImport } from './routes/adverbs'
 import { Route as AdjectivesRouteImport } from './routes/adjectives'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImportVerbsRouteImport } from './routes/import.verbs'
+import { Route as ImportPrepositionsRouteImport } from './routes/import.prepositions'
 import { Route as ImportAdverbsRouteImport } from './routes/import.adverbs'
 import { Route as ImportAdjectivesRouteImport } from './routes/import.adjectives'
 import { Route as CampaignRunRouteImport } from './routes/campaign_.run'
@@ -73,6 +74,11 @@ const ImportVerbsRoute = ImportVerbsRouteImport.update({
   path: '/import/verbs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImportPrepositionsRoute = ImportPrepositionsRouteImport.update({
+  id: '/import/prepositions',
+  path: '/import/prepositions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImportAdverbsRoute = ImportAdverbsRouteImport.update({
   id: '/import/adverbs',
   path: '/import/adverbs',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/campaign/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
+  '/import/prepositions': typeof ImportPrepositionsRoute
   '/import/verbs': typeof ImportVerbsRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/campaign/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
+  '/import/prepositions': typeof ImportPrepositionsRoute
   '/import/verbs': typeof ImportVerbsRoute
 }
 export interface FileRoutesById {
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/campaign_/run': typeof CampaignRunRoute
   '/import/adjectives': typeof ImportAdjectivesRoute
   '/import/adverbs': typeof ImportAdverbsRoute
+  '/import/prepositions': typeof ImportPrepositionsRoute
   '/import/verbs': typeof ImportVerbsRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/campaign/run'
     | '/import/adjectives'
     | '/import/adverbs'
+    | '/import/prepositions'
     | '/import/verbs'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/campaign/run'
     | '/import/adjectives'
     | '/import/adverbs'
+    | '/import/prepositions'
     | '/import/verbs'
   id:
     | '__root__'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/campaign_/run'
     | '/import/adjectives'
     | '/import/adverbs'
+    | '/import/prepositions'
     | '/import/verbs'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   CampaignRunRoute: typeof CampaignRunRoute
   ImportAdjectivesRoute: typeof ImportAdjectivesRoute
   ImportAdverbsRoute: typeof ImportAdverbsRoute
+  ImportPrepositionsRoute: typeof ImportPrepositionsRoute
   ImportVerbsRoute: typeof ImportVerbsRoute
 }
 
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportVerbsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/import/prepositions': {
+      id: '/import/prepositions'
+      path: '/import/prepositions'
+      fullPath: '/import/prepositions'
+      preLoaderRoute: typeof ImportPrepositionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/import/adverbs': {
       id: '/import/adverbs'
       path: '/import/adverbs'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignRunRoute: CampaignRunRoute,
   ImportAdjectivesRoute: ImportAdjectivesRoute,
   ImportAdverbsRoute: ImportAdverbsRoute,
+  ImportPrepositionsRoute: ImportPrepositionsRoute,
   ImportVerbsRoute: ImportVerbsRoute,
 }
 export const routeTree = rootRouteImport
