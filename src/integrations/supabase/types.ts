@@ -194,7 +194,12 @@ export type Database = {
     }
     Enums: {
       german_article: "der" | "die" | "das"
-      word_kind: "adjective" | "adverb"
+      word_kind:
+        | "adjective"
+        | "adverb"
+        | "preposition"
+        | "pronoun"
+        | "conjunction"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -323,7 +328,13 @@ export const Constants = {
   public: {
     Enums: {
       german_article: ["der", "die", "das"],
-      word_kind: ["adjective", "adverb"],
+      word_kind: [
+        "adjective",
+        "adverb",
+        "preposition",
+        "pronoun",
+        "conjunction",
+      ],
     },
   },
 } as const
