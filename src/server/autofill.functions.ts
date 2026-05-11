@@ -218,7 +218,7 @@ const MixedInput = z.object({
   lines: z.array(z.string().min(1)).min(1).max(50),
 });
 
-export type MixedKind = "noun" | "verb" | "adjective" | "adverb";
+export type MixedKind = "noun" | "verb" | "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
 
 export type MixedItem = {
   input: string;
