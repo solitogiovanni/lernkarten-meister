@@ -248,8 +248,9 @@ function ImportPage() {
         examples: d.examples,
         themes: d.themes,
       }));
+      const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
       const words = valid
-        .filter((d) => d.kind === "adjective" || d.kind === "adverb")
+        .filter((d) => WORD_KINDS.includes(d.kind))
         .map((d) => ({
           kind: d.kind,
           word: (d.word ?? "").trim(),
@@ -272,8 +273,9 @@ function ImportPage() {
         if (error) errors.push(`words: ${error.message}`);
       }
       if (errors.length) return toast.error(errors.join("; "));
+      const c = (k: string) => words.filter((w) => w.kind === k).length;
       toast.success(
-        `Saved ${nouns.length + verbs.length + words.length} (${nouns.length}N · ${verbs.length}V · ${words.filter((w) => w.kind === "adjective").length}Adj · ${words.filter((w) => w.kind === "adverb").length}Adv)`
+        `Saved ${nouns.length + verbs.length + words.length} (${nouns.length}N · ${verbs.length}V · ${c("adjective")}Adj · ${c("adverb")}Adv · ${c("preposition")}Prep · ${c("pronoun")}Pron · ${c("conjunction")}Conj)`
       );
       navigate({ to: "/" });
     } finally {
