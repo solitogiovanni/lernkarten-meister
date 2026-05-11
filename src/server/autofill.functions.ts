@@ -297,7 +297,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
                       type: "object",
                       properties: {
                         input: { type: "string" },
-                        kind: { type: "string", enum: ["noun", "verb", "adjective", "adverb"] },
+                        kind: { type: "string", enum: ["noun", "verb", "adjective", "adverb", "preposition", "pronoun", "conjunction"] },
                         noun: { type: "string" },
                         article: { type: "string", enum: ["der", "die", "das"] },
                         plural: { type: "string" },
