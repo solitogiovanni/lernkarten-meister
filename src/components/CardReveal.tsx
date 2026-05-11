@@ -32,6 +32,9 @@ const kindLabel: Record<RevealKind, string> = {
   adjective: "Adjective",
   adverb: "Adverb",
   verb: "Verb",
+  preposition: "Preposition",
+  pronoun: "Pronoun",
+  conjunction: "Conjunction",
 };
 
 export function CardRevealDialog({
