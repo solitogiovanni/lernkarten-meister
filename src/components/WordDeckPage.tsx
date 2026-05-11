@@ -40,7 +40,7 @@ export function WordDeckPage({
 }: {
   kind: Kind;
   title: string;
-  importTo: "/import/adjectives" | "/import/adverbs";
+  importTo: "/import/adjectives" | "/import/adverbs" | "/import/prepositions" | "/import/pronouns" | "/import/conjunctions";
   formLabel: string;
   formPlaceholder: string;
   addLabel: string;
