@@ -129,6 +129,9 @@ export function CrossDeckSearch({
 
   const adjectives = words.filter((w) => w.kind === "adjective");
   const adverbs = words.filter((w) => w.kind === "adverb");
+  const prepositions = words.filter((w) => w.kind === "preposition");
+  const pronouns = words.filter((w) => w.kind === "pronoun");
+  const conjunctions = words.filter((w) => w.kind === "conjunction");
 
   const openNoun = (r: NounHit) => setPreview({
     kind: "noun",
