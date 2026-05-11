@@ -246,13 +246,13 @@ export const autofillMixed = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) return { results: [], error: "LOVABLE_API_KEY not configured" };
 
-    const systemPrompt = `You are a meticulous German linguistics assistant. For EACH input line, decide whether it is a German noun, verb, adjective, or adverb, then return an item with the appropriate fields.
+    const systemPrompt = `You are a meticulous German linguistics assistant. For EACH input line, decide whether it is a German noun, verb, adjective, adverb, preposition, pronoun, or conjunction, then return an item with the appropriate fields.
 
 Each input may be just the German word, or "word = meaning1, meaning2", or "der Word = meaning". Strip any "= meaning" part — those meanings are user-provided and should be ignored here (they will be merged on the client). Identify the German word and classify it.
 
 For EVERY item return:
 - input: the original line, exactly as given
-- kind: "noun" | "verb" | "adjective" | "adverb"
+- kind: "noun" | "verb" | "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction"
 - meanings: 1 to 4 short Italian translations
 - themes: 1 to 3 short lowercase Italian thematic tags
 - examples: at least 2 short, natural German example sentences using the word
@@ -268,10 +268,10 @@ If kind = "verb", also return:
 - perfect: Perfekt 3rd person singular WITH the auxiliary verb (e.g. "ist gegangen")
 - prepositions: array of {preposition, case ("akk"|"dat"|"gen"), meaning}, only for prepositions the verb genuinely governs. Empty array if none. If non-empty, include at least one example per preposition (total examples = max(2, number_of_prepositions + 1)).
 
-If kind = "adjective" or "adverb", also return:
+If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction", also return:
 - word: base form, lowercase
 
-Be accurate. Lowercase verbs/adjectives/adverbs, capitalize nouns.`;
+Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctions, capitalize nouns.`;
 
     try {
       const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
