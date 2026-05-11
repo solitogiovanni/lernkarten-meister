@@ -85,6 +85,9 @@ function ImportPage() {
     verb: new Set(),
     adjective: new Set(),
     adverb: new Set(),
+    preposition: new Set(),
+    pronoun: new Set(),
+    conjunction: new Set(),
   });
   const autofillFn = useServerFn(autofillMixed);
   const navigate = useNavigate();
@@ -95,18 +98,21 @@ function ImportPage() {
       fetchAll<{ present: string }>("verbs", (q) => q.select("present")),
       fetchAll<{ word: string; kind: string }>("words", (q) => q.select("word, kind")),
     ]).then(([n, v, w]: any[]) => {
-      const adj = new Set<string>();
-      const adv = new Set<string>();
+      const buckets: Record<string, Set<string>> = {
+        adjective: new Set(), adverb: new Set(), preposition: new Set(), pronoun: new Set(), conjunction: new Set(),
+      };
       for (const row of (w.data ?? []) as Array<{ word: string; kind: string }>) {
         const k = row.word.trim().toLowerCase();
-        if (row.kind === "adjective") adj.add(k);
-        else if (row.kind === "adverb") adv.add(k);
+        if (buckets[row.kind]) buckets[row.kind].add(k);
       }
       setExisting({
         noun: new Set(((n.data ?? []) as Array<{ noun: string }>).map((r) => r.noun.trim().toLowerCase())),
         verb: new Set(((v.data ?? []) as Array<{ present: string }>).map((r) => r.present.trim().toLowerCase())),
-        adjective: adj,
-        adverb: adv,
+        adjective: buckets.adjective,
+        adverb: buckets.adverb,
+        preposition: buckets.preposition,
+        pronoun: buckets.pronoun,
+        conjunction: buckets.conjunction,
       });
     });
   }, []);
