@@ -138,7 +138,7 @@ export function WordImportPage({
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success(`Saved ${rows.length} entries`);
-    navigate({ to: kind === "adjective" ? "/adjectives" : "/adverbs" });
+    navigate({ to: DECK_PATH[kind] });
   };
 
   return (
