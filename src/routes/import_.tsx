@@ -172,10 +172,10 @@ function ImportPage() {
       setDrafts(merged);
       const counts = merged.reduce<Record<MixedKind, number>>(
         (acc, d) => ({ ...acc, [d.kind]: (acc[d.kind] ?? 0) + 1 }),
-        { noun: 0, verb: 0, adjective: 0, adverb: 0 }
+        { noun: 0, verb: 0, adjective: 0, adverb: 0, preposition: 0, pronoun: 0, conjunction: 0 }
       );
       toast.success(
-        `Classified ${merged.length}: ${counts.noun} nouns, ${counts.verb} verbs, ${counts.adjective} adj, ${counts.adverb} adv`
+        `Classified ${merged.length}: ${counts.noun}N · ${counts.verb}V · ${counts.adjective}Adj · ${counts.adverb}Adv · ${counts.preposition}Prep · ${counts.pronoun}Pron · ${counts.conjunction}Conj`
       );
     } finally {
       setBusy(false);
