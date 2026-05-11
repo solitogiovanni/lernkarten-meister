@@ -12,7 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { autofillNouns, autofillVerbs, autofillWords } from "@/server/autofill.functions";
 import { Loader2, Sparkles } from "lucide-react";
 
-export type Kind = "noun" | "adjective" | "adverb" | "verb";
+export type Kind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
 
 export type EditableCard = {
   id: string;
