@@ -259,6 +259,9 @@ export function CardEditDialog({
                 <SelectItem value="adjective">Adjective</SelectItem>
                 <SelectItem value="adverb">Adverb</SelectItem>
                 <SelectItem value="verb">Verb</SelectItem>
+                <SelectItem value="preposition">Preposition</SelectItem>
+                <SelectItem value="pronoun">Pronoun</SelectItem>
+                <SelectItem value="conjunction">Conjunction</SelectItem>
               </SelectContent>
             </Select>
           </div>
