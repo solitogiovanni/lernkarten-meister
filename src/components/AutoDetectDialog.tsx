@@ -16,6 +16,9 @@ const KIND_LABEL: Record<MixedKind, string> = {
   verb: "Verb",
   adjective: "Adjective",
   adverb: "Adverb",
+  preposition: "Preposition",
+  pronoun: "Pronoun",
+  conjunction: "Conjunction",
 };
 
 const KIND_COLOR: Record<MixedKind, string> = {
@@ -23,6 +26,9 @@ const KIND_COLOR: Record<MixedKind, string> = {
   verb: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
   adjective: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
   adverb: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  preposition: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+  pronoun: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300",
+  conjunction: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
 };
 
 const articleColor = {
