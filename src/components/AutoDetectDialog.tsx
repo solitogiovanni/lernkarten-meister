@@ -229,7 +229,7 @@ export function AutoDetectDialog({
                       </>
                     )}
 
-                    {(d.kind === "adjective" || d.kind === "adverb") && (
+                    {(d.kind === "adjective" || d.kind === "adverb" || d.kind === "preposition" || d.kind === "pronoun" || d.kind === "conjunction") && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <Input value={d.word ?? ""} onChange={(e) => updateDraft(i, { word: e.target.value })} placeholder="Word" />
                         <Input value={d.meanings.join(", ")} onChange={(e) => updateDraft(i, { meanings: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="meanings (comma)" />
