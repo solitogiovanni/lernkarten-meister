@@ -241,7 +241,7 @@ export function WordImportPage({
           </div>
 
           <div className="text-center pt-2">
-            <Link to={kind === "adjective" ? "/adjectives" : "/adverbs"} className="text-sm text-muted-foreground hover:text-foreground">
+            <Link to={DECK_PATH[kind]} className="text-sm text-muted-foreground hover:text-foreground">
               ← Back to deck
             </Link>
           </div>
