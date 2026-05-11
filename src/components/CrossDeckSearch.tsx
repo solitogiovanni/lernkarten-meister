@@ -35,18 +35,21 @@ type VerbHit = {
 type WordHit = {
   id: string;
   word: string;
-  kind: "adjective" | "adverb";
+  kind: "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
   meanings: string[];
   examples: string[];
   themes: string[];
   comments: string | null;
 };
 
-const targetFor: Record<DeckKind, "/" | "/verbs" | "/adjectives" | "/adverbs"> = {
+const targetFor: Record<DeckKind, "/" | "/verbs" | "/adjectives" | "/adverbs" | "/prepositions" | "/pronouns" | "/conjunctions"> = {
   noun: "/",
   verb: "/verbs",
   adjective: "/adjectives",
   adverb: "/adverbs",
+  preposition: "/prepositions",
+  pronoun: "/pronouns",
+  conjunction: "/conjunctions",
 };
 
 const labelFor: Record<DeckKind, string> = {
@@ -54,6 +57,9 @@ const labelFor: Record<DeckKind, string> = {
   verb: "Verbs",
   adjective: "Adjectives",
   adverb: "Adverbs",
+  preposition: "Prepositions",
+  pronoun: "Pronouns",
+  conjunction: "Conjunctions",
 };
 
 export const ADD_PREFILL_KEY = "wortschatz:addPrefill";
