@@ -68,7 +68,12 @@ export function CardRevealDialog({
           </div>
 
           <div className="mt-6 space-y-3 w-full">
-            {card.plural && <div className="text-muted-foreground">Plural: {card.plural}</div>}
+            {card.plural && (
+              <div className="text-muted-foreground flex items-center justify-center gap-1">
+                <span>Plural: {card.plural}</span>
+                <SpeakButton text={`die ${card.plural}`} size="icon" variant="ghost" />
+              </div>
+            )}
             {card.kind === "verb" && (card.praeteritum || card.perfect) && (
               <div className="text-muted-foreground space-y-0.5">
                 {card.praeteritum && (
@@ -96,7 +101,10 @@ export function CardRevealDialog({
             {card.examples.length > 0 && (
               <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md mx-auto space-y-1">
                 {card.examples.map((ex, i) => (
-                  <div key={i}>{ex}</div>
+                  <div key={i} className="flex items-start gap-1">
+                    <span className="flex-1">{ex}</span>
+                    <SpeakButton text={ex} size="icon" variant="ghost" />
+                  </div>
                 ))}
               </div>
             )}
