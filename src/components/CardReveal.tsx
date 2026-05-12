@@ -77,10 +77,16 @@ export function CardRevealDialog({
             {card.kind === "verb" && (card.praeteritum || card.perfect) && (
               <div className="text-muted-foreground space-y-0.5">
                 {card.praeteritum && (
-                  <div>Präteritum: <span className="font-medium text-foreground">{card.praeteritum}</span></div>
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Präteritum: <span className="font-medium text-foreground">{card.praeteritum}</span></span>
+                    <SpeakButton text={card.praeteritum} size="icon" variant="ghost" />
+                  </div>
                 )}
                 {card.perfect && (
-                  <div>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></div>
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></span>
+                    <SpeakButton text={card.perfect} size="icon" variant="ghost" />
+                  </div>
                 )}
               </div>
             )}
