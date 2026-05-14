@@ -94,10 +94,6 @@ export function CrossDeckSearch({
     const handle = setTimeout(async () => {
       setBusy(true);
       const like = `%${term}%`;
-      const arrLike = `{*${term}*}`;
-      // Run word/lemma and meaning queries separately, then merge by id.
-      // PostgREST's `or()` doesn't reliably parse `ilike(any).{...}` because of
-      // the braces/commas, so we issue parallel queries instead.
       const sb: any = supabase;
       const nounSel = "id,article,noun,plural,meanings,examples,themes,comments";
       const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments";
@@ -109,15 +105,15 @@ export function CrossDeckSearch({
           : sb.from("nouns").select(nounSel).or(`noun.ilike.${like},plural.ilike.${like}`).limit(20),
         currentKind === "noun"
           ? Promise.resolve({ data: [] as NounHit[] })
-          : sb.from("nouns").select(nounSel).filter("meanings", "ilike(any)", arrLike).limit(20),
+          : sb.rpc("search_nouns_by_meaning", { term }),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
           : sb.from("verbs").select(verbSel).ilike("present", like).limit(20),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
-          : sb.from("verbs").select(verbSel).filter("meanings", "ilike(any)", arrLike).limit(20),
+          : sb.rpc("search_verbs_by_meaning", { term }),
         sb.from("words").select(wordSel).ilike("word", like).limit(40),
-        sb.from("words").select(wordSel).filter("meanings", "ilike(any)", arrLike).limit(40),
+        sb.rpc("search_words_by_meaning", { term }),
       ]);
       if (cancelled) return;
       const dedupe = <T extends { id: string }>(...lists: T[][]) => {
