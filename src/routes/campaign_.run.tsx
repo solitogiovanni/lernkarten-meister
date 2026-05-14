@@ -422,7 +422,10 @@ function FlashcardView({
               {card.examples.length > 0 && (
                 <div className="text-sm italic text-muted-foreground border-l-2 pl-3 mt-3 text-left max-w-md space-y-1">
                   {card.examples.map((ex, i) => (
-                    <div key={i}>{ex}</div>
+                    <div key={i} className="flex items-start gap-1">
+                      <span className="flex-1">{ex}</span>
+                      <SpeakButton text={ex} size="icon" variant="ghost" />
+                    </div>
                   ))}
                 </div>
               )}
