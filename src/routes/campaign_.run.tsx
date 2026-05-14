@@ -384,11 +384,26 @@ function FlashcardView({
               />
             </div>
             <div className="mt-6 space-y-3">
-              {card.plural && <div className="text-muted-foreground">Plural: {card.plural}</div>}
+              {card.plural && (
+                <div className="text-muted-foreground flex items-center justify-center gap-1">
+                  <span>Plural: {card.plural}</span>
+                  <SpeakButton text={`die ${card.plural}`} size="icon" variant="ghost" />
+                </div>
+              )}
               {card.kind === "verb" && (card.praeteritum || card.perfect) && (
                 <div className="text-muted-foreground space-y-0.5">
-                  {card.praeteritum && <div>Präteritum: <span className="font-medium text-foreground">{card.praeteritum}</span></div>}
-                  {card.perfect && <div>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></div>}
+                  {card.praeteritum && (
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Präteritum: <span className="font-medium text-foreground">{card.praeteritum}</span></span>
+                      <SpeakButton text={card.praeteritum} size="icon" variant="ghost" />
+                    </div>
+                  )}
+                  {card.perfect && (
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></span>
+                      <SpeakButton text={card.perfect} size="icon" variant="ghost" />
+                    </div>
+                  )}
                 </div>
               )}
               {card.kind === "verb" && card.prepositions.length > 0 && (
