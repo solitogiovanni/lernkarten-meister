@@ -94,34 +94,41 @@ export function CrossDeckSearch({
     const handle = setTimeout(async () => {
       setBusy(true);
       const like = `%${term}%`;
-      // PostgREST: ilike(any).{*term*} performs case-insensitive substring match
-      // against each element of a text[] array.
       const arrLike = `{*${term}*}`;
-      const [n, v, w] = await Promise.all([
+      // Run word/lemma and meaning queries separately, then merge by id.
+      // PostgREST's `or()` doesn't reliably parse `ilike(any).{...}` because of
+      // the braces/commas, so we issue parallel queries instead.
+      const sb: any = supabase;
+      const nounSel = "id,article,noun,plural,meanings,examples,themes,comments";
+      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments";
+      const wordSel = "id,word,kind,meanings,examples,themes,comments";
+
+      const [nWord, nMean, vWord, vMean, wWord, wMean] = await Promise.all([
         currentKind === "noun"
           ? Promise.resolve({ data: [] as NounHit[] })
-          : (supabase as any)
-              .from("nouns")
-              .select("id,article,noun,plural,meanings,examples,themes,comments")
-              .or(`noun.ilike.${like},plural.ilike.${like},meanings.ilike(any).${arrLike}`)
-              .limit(20),
+          : sb.from("nouns").select(nounSel).or(`noun.ilike.${like},plural.ilike.${like}`).limit(20),
+        currentKind === "noun"
+          ? Promise.resolve({ data: [] as NounHit[] })
+          : sb.from("nouns").select(nounSel).filter("meanings", "ilike(any)", arrLike).limit(20),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
-          : (supabase as any)
-              .from("verbs")
-              .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments")
-              .or(`present.ilike.${like},meanings.ilike(any).${arrLike}`)
-              .limit(20),
-        (supabase as any)
-          .from("words")
-          .select("id,word,kind,meanings,examples,themes,comments")
-          .or(`word.ilike.${like},meanings.ilike(any).${arrLike}`)
-          .limit(40),
+          : sb.from("verbs").select(verbSel).ilike("present", like).limit(20),
+        currentKind === "verb"
+          ? Promise.resolve({ data: [] as VerbHit[] })
+          : sb.from("verbs").select(verbSel).filter("meanings", "ilike(any)", arrLike).limit(20),
+        sb.from("words").select(wordSel).ilike("word", like).limit(40),
+        sb.from("words").select(wordSel).filter("meanings", "ilike(any)", arrLike).limit(40),
       ]);
       if (cancelled) return;
-      setNouns((n.data ?? []) as NounHit[]);
-      setVerbs((v.data ?? []) as VerbHit[]);
-      const wordsAll = ((w.data ?? []) as WordHit[]).filter((x) => x.kind !== currentKind);
+      const dedupe = <T extends { id: string }>(...lists: T[][]) => {
+        const m = new Map<string, T>();
+        for (const list of lists) for (const r of list) m.set(r.id, r);
+        return Array.from(m.values());
+      };
+      setNouns(dedupe<NounHit>((nWord.data ?? []) as NounHit[], (nMean.data ?? []) as NounHit[]));
+      setVerbs(dedupe<VerbHit>((vWord.data ?? []) as VerbHit[], (vMean.data ?? []) as VerbHit[]));
+      const wordsAll = dedupe<WordHit>((wWord.data ?? []) as WordHit[], (wMean.data ?? []) as WordHit[])
+        .filter((x) => x.kind !== currentKind);
       setWords(wordsAll);
       setBusy(false);
     }, 250);
