@@ -190,7 +190,87 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      search_nouns_by_meaning: {
+        Args: { term: string }
+        Returns: {
+          article: Database["public"]["Enums"]["german_article"] | null
+          comments: string | null
+          created_at: string
+          due_at: string
+          ease: number
+          examples: string[]
+          id: string
+          interval_days: number
+          lapses: number
+          last_rated_at: string | null
+          meanings: string[]
+          noun: string
+          plural: string | null
+          reps: number
+          themes: string[]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "nouns"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      search_verbs_by_meaning: {
+        Args: { term: string }
+        Returns: {
+          comments: string | null
+          created_at: string
+          due_at: string
+          ease: number
+          examples: string[]
+          id: string
+          interval_days: number
+          lapses: number
+          last_rated_at: string | null
+          meanings: string[]
+          perfect: string | null
+          praeteritum: string | null
+          prepositions: Json
+          present: string
+          reps: number
+          themes: string[]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "verbs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      search_words_by_meaning: {
+        Args: { term: string }
+        Returns: {
+          comments: string | null
+          created_at: string
+          due_at: string
+          ease: number
+          examples: string[]
+          id: string
+          interval_days: number
+          kind: Database["public"]["Enums"]["word_kind"]
+          lapses: number
+          last_rated_at: string | null
+          meanings: string[]
+          reps: number
+          themes: string[]
+          updated_at: string
+          word: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "words"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       german_article: "der" | "die" | "das"
