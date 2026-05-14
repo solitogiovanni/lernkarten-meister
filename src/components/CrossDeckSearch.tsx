@@ -94,25 +94,28 @@ export function CrossDeckSearch({
     const handle = setTimeout(async () => {
       setBusy(true);
       const like = `%${term}%`;
+      // PostgREST: ilike(any).{*term*} performs case-insensitive substring match
+      // against each element of a text[] array.
+      const arrLike = `{*${term}*}`;
       const [n, v, w] = await Promise.all([
         currentKind === "noun"
           ? Promise.resolve({ data: [] as NounHit[] })
           : (supabase as any)
               .from("nouns")
               .select("id,article,noun,plural,meanings,examples,themes,comments")
-              .or(`noun.ilike.${like},meanings.cs.{${term}}`)
+              .or(`noun.ilike.${like},plural.ilike.${like},meanings.ilike(any).${arrLike}`)
               .limit(20),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
           : (supabase as any)
               .from("verbs")
               .select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments")
-              .or(`present.ilike.${like},meanings.cs.{${term}}`)
+              .or(`present.ilike.${like},meanings.ilike(any).${arrLike}`)
               .limit(20),
         (supabase as any)
           .from("words")
           .select("id,word,kind,meanings,examples,themes,comments")
-          .or(`word.ilike.${like},meanings.cs.{${term}}`)
+          .or(`word.ilike.${like},meanings.ilike(any).${arrLike}`)
           .limit(40),
       ]);
       if (cancelled) return;
