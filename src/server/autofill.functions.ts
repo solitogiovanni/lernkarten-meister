@@ -268,6 +268,7 @@ If kind = "verb", also return:
 - present: infinitive, lowercase
 - praeteritum: 3rd person singular Präteritum
 - perfect: Perfekt 3rd person singular WITH the auxiliary verb (e.g. "ist gegangen")
+- conjugation: the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " (e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen")
 - prepositions: array of {preposition, case ("akk"|"dat"|"gen"), meaning}, only for prepositions the verb genuinely governs. Empty array if none. If non-empty, include at least one example per preposition (total examples = max(2, number_of_prepositions + 1)).
 
 If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction", also return:
