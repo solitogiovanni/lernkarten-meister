@@ -74,6 +74,7 @@ export type Database = {
       verbs: {
         Row: {
           comments: string | null
+          conjugation: string | null
           created_at: string
           due_at: string
           ease: number
@@ -93,6 +94,7 @@ export type Database = {
         }
         Insert: {
           comments?: string | null
+          conjugation?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -112,6 +114,7 @@ export type Database = {
         }
         Update: {
           comments?: string | null
+          conjugation?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -221,6 +224,7 @@ export type Database = {
         Args: { term: string }
         Returns: {
           comments: string | null
+          conjugation: string | null
           created_at: string
           due_at: string
           ease: number
