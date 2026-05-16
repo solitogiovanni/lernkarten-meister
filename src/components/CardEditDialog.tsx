@@ -67,6 +67,7 @@ export function CardEditDialog({
     present: card.word,
     praeteritum: card.praeteritum ?? "",
     perfect: card.perfect ?? "",
+    conjugation: card.conjugation ?? "",
     prepositions: card.prepositions ?? [],
     meanings: card.meanings,
     examples: card.examples,
