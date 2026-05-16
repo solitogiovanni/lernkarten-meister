@@ -457,6 +457,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         present: it.present,
         praeteritum: it.praeteritum ?? null,
         perfect: it.perfect ?? null,
+        conjugation: it.conjugation ?? null,
         prepositions: (it.prepositions ?? []).map((p: any) => ({
           preposition: p.preposition ?? "",
           case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
