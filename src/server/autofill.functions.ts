@@ -355,6 +355,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
         present: it.present ?? undefined,
         praeteritum: it.praeteritum ?? null,
         perfect: it.perfect ?? null,
+        conjugation: it.conjugation ?? null,
         prepositions: (it.prepositions ?? []).map((p: any) => ({
           preposition: p.preposition ?? "",
           case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
