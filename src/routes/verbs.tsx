@@ -170,6 +170,7 @@ function VerbsPage() {
         present: editValue.present.trim(),
         praeteritum: editValue.praeteritum.trim() || null,
         perfect: editValue.perfect.trim() || null,
+        conjugation: editValue.conjugation.trim() || null,
         prepositions: editValue.prepositions.filter((p) => p.preposition.trim()),
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
