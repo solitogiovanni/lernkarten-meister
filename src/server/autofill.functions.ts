@@ -232,6 +232,7 @@ export type MixedItem = {
   present?: string;
   praeteritum?: string | null;
   perfect?: string | null;
+  conjugation?: string | null;
   prepositions?: VerbPreposition[];
   // adjective/adverb
   word?: string;
