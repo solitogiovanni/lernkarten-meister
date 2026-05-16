@@ -89,6 +89,12 @@ export function CardRevealDialog({
                     <SpeakButton text={card.perfect} size="icon" variant="ghost" />
                   </div>
                 )}
+                {card.conjugation && (
+                  <div className="text-sm">
+                    <span className="text-xs uppercase tracking-wider">Konjugation: </span>
+                    <span className="font-medium text-foreground">{card.conjugation}</span>
+                  </div>
+                )}
               </div>
             )}
             {card.kind === "verb" && card.prepositions && card.prepositions.length > 0 && (
