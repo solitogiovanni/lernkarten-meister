@@ -206,6 +206,7 @@ export type AutofilledVerb = {
   present: string;
   praeteritum: string | null;
   perfect: string | null;
+  conjugation: string | null;
   prepositions: VerbPreposition[];
   meanings: string[];
   themes: string[];
