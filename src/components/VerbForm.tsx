@@ -144,6 +144,16 @@ export function VerbForm({
       </div>
 
       <div>
+        <Label htmlFor="conjugation" className="mb-2 block">Konjugation (Präsens, no pronouns)</Label>
+        <Input
+          id="conjugation"
+          value={value.conjugation}
+          onChange={(e) => set("conjugation", e.target.value)}
+          placeholder="komme / kommst / kommt / kommen / kommt / kommen"
+        />
+      </div>
+
+      <div>
         <Label className="mb-2 block">Prepositions</Label>
         <div className="space-y-2">
           {value.prepositions.map((p, i) => (
