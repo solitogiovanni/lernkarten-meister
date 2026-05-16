@@ -414,6 +414,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
                         present: { type: "string" },
                         praeteritum: { type: "string" },
                         perfect: { type: "string" },
+                        conjugation: { type: "string" },
                         prepositions: {
                           type: "array",
                           items: {
