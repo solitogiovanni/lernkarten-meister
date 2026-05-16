@@ -84,6 +84,7 @@ function ImportVerbsPage() {
           present,
           praeteritum: r?.praeteritum ?? null,
           perfect: r?.perfect ?? null,
+          conjugation: r?.conjugation ?? null,
           prepositions: r?.prepositions ?? [],
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
