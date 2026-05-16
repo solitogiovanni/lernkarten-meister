@@ -88,7 +88,7 @@ function VerbsPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("verbs", (q) =>
-      q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
+      q.select("id,present,praeteritum,perfect,conjugation,prepositions,meanings,examples,themes,comments,due_at,reps")
         .order("present", { ascending: true }),
     );
     if (error) toast.error(error.message);
