@@ -70,6 +70,7 @@ function VerbsPage() {
         present: r.present || v.present,
         praeteritum: v.praeteritum || r.praeteritum || "",
         perfect: v.perfect || r.perfect || "",
+        conjugation: v.conjugation || r.conjugation || "",
         prepositions: v.prepositions.length ? v.prepositions : (r.prepositions ?? []),
         meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
         examples: v.examples.length ? v.examples : r.examples ?? [],
