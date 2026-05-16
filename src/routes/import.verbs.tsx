@@ -237,6 +237,11 @@ function ImportVerbsPage() {
                         />
                       </div>
                       <Input
+                        value={d.conjugation ?? ""}
+                        onChange={(e) => updateDraft(i, { conjugation: e.target.value })}
+                        placeholder="Konjugation (komme / kommst / kommt / kommen / kommt / kommen)"
+                      />
+                      <Input
                         value={d.meanings.join(", ")}
                         onChange={(e) =>
                           updateDraft(i, {
