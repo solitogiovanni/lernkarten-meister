@@ -379,6 +379,7 @@ export const autofillVerbs = createServerFn({ method: "POST" })
 - present: the verb in infinitive form, lowercase (e.g. "gehen", "warten")
 - praeteritum: 3rd person singular Präteritum (e.g. "ging", "wartete")
 - perfect: Perfekt 3rd person singular WITH the auxiliary verb sein/haben prefixed (e.g. "ist gegangen", "hat gewartet")
+- conjugation: the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " (e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"; for "sein" → "bin / bist / ist / sind / seid / sind")
 - prepositions: array of objects {preposition, case, meaning}. Include ONLY prepositions that the verb genuinely governs. case is one of "akk", "dat", "gen". meaning is a short Italian gloss for that construction. Empty array if the verb takes no preposition.
 - meanings: 1 to 4 Italian translations, each a short verb phrase (infinitive)
 - themes: 1 to 3 short Italian thematic tags, lowercase (e.g. "movimento", "comunicazione", "emozioni", "lavoro", "quotidiano")
