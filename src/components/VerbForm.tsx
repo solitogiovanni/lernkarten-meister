@@ -16,6 +16,7 @@ export type VerbFormValue = {
   present: string;
   praeteritum: string;
   perfect: string;
+  conjugation: string;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -27,6 +28,7 @@ export const emptyVerb: VerbFormValue = {
   present: "",
   praeteritum: "",
   perfect: "",
+  conjugation: "",
   prepositions: [],
   meanings: [],
   examples: [],
