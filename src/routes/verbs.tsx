@@ -152,6 +152,7 @@ function VerbsPage() {
       present: r.present,
       praeteritum: r.praeteritum ?? "",
       perfect: r.perfect ?? "",
+      conjugation: r.conjugation ?? "",
       prepositions: r.prepositions ?? [],
       meanings: r.meanings,
       examples: r.examples,
