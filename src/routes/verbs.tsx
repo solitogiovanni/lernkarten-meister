@@ -32,6 +32,7 @@ type Row = {
   present: string;
   praeteritum: string | null;
   perfect: string | null;
+  conjugation: string | null;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
