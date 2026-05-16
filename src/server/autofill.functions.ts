@@ -307,6 +307,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
                         present: { type: "string" },
                         praeteritum: { type: "string" },
                         perfect: { type: "string" },
+                        conjugation: { type: "string" },
                         prepositions: {
                           type: "array",
                           items: {
