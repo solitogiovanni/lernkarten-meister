@@ -108,6 +108,7 @@ export function CardEditDialog({
           present: r.present || verb.present,
           praeteritum: verb.praeteritum || r.praeteritum || "",
           perfect: verb.perfect || r.perfect || "",
+          conjugation: verb.conjugation || r.conjugation || "",
           prepositions: verb.prepositions.length ? verb.prepositions : (r.prepositions ?? []),
           meanings: verb.meanings.length ? verb.meanings : r.meanings ?? [],
           examples: verb.examples.length ? verb.examples : r.examples ?? [],
