@@ -84,6 +84,7 @@ function ImportVerbsPage() {
           present,
           praeteritum: r?.praeteritum ?? null,
           perfect: r?.perfect ?? null,
+          conjugation: r?.conjugation ?? null,
           prepositions: r?.prepositions ?? [],
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
@@ -107,6 +108,7 @@ function ImportVerbsPage() {
           present: p.present,
           praeteritum: null,
           perfect: null,
+          conjugation: null,
           prepositions: [],
           meanings: p.meanings,
           themes: [],
@@ -137,6 +139,7 @@ function ImportVerbsPage() {
       present: d.present.trim(),
       praeteritum: d.praeteritum?.trim() || null,
       perfect: d.perfect?.trim() || null,
+      conjugation: d.conjugation?.trim() || null,
       prepositions: d.prepositions.filter((p) => p.preposition.trim()),
       meanings: d.meanings,
       examples: [] as string[],
@@ -233,6 +236,11 @@ function ImportVerbsPage() {
                           placeholder="Perfekt (ist gegangen)"
                         />
                       </div>
+                      <Input
+                        value={d.conjugation ?? ""}
+                        onChange={(e) => updateDraft(i, { conjugation: e.target.value })}
+                        placeholder="Konjugation (komme / kommst / kommt / kommen / kommt / kommen)"
+                      />
                       <Input
                         value={d.meanings.join(", ")}
                         onChange={(e) =>

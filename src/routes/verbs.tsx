@@ -32,6 +32,7 @@ type Row = {
   present: string;
   praeteritum: string | null;
   perfect: string | null;
+  conjugation: string | null;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -69,6 +70,7 @@ function VerbsPage() {
         present: r.present || v.present,
         praeteritum: v.praeteritum || r.praeteritum || "",
         perfect: v.perfect || r.perfect || "",
+        conjugation: v.conjugation || r.conjugation || "",
         prepositions: v.prepositions.length ? v.prepositions : (r.prepositions ?? []),
         meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
         examples: v.examples.length ? v.examples : r.examples ?? [],
@@ -86,7 +88,7 @@ function VerbsPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("verbs", (q) =>
-      q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,due_at,reps")
+      q.select("id,present,praeteritum,perfect,conjugation,prepositions,meanings,examples,themes,comments,due_at,reps")
         .order("present", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -150,6 +152,7 @@ function VerbsPage() {
       present: r.present,
       praeteritum: r.praeteritum ?? "",
       perfect: r.perfect ?? "",
+      conjugation: r.conjugation ?? "",
       prepositions: r.prepositions ?? [],
       meanings: r.meanings,
       examples: r.examples,
@@ -167,6 +170,7 @@ function VerbsPage() {
         present: editValue.present.trim(),
         praeteritum: editValue.praeteritum.trim() || null,
         perfect: editValue.perfect.trim() || null,
+        conjugation: editValue.conjugation.trim() || null,
         prepositions: editValue.prepositions.filter((p) => p.preposition.trim()),
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
@@ -199,6 +203,7 @@ function VerbsPage() {
       present: newValue.present.trim(),
       praeteritum: newValue.praeteritum.trim() || null,
       perfect: newValue.perfect.trim() || null,
+      conjugation: newValue.conjugation.trim() || null,
       prepositions: newValue.prepositions.filter((p) => p.preposition.trim()),
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),

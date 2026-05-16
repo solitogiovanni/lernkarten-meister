@@ -14,6 +14,7 @@ export type RevealCard = {
   plural?: string | null;
   praeteritum?: string | null;
   perfect?: string | null;
+  conjugation?: string | null;
   prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -86,6 +87,12 @@ export function CardRevealDialog({
                   <div className="flex items-center justify-center gap-1">
                     <span>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></span>
                     <SpeakButton text={card.perfect} size="icon" variant="ghost" />
+                  </div>
+                )}
+                {card.conjugation && (
+                  <div className="text-sm">
+                    <span className="text-xs uppercase tracking-wider">Konjugation: </span>
+                    <span className="font-medium text-foreground">{card.conjugation}</span>
                   </div>
                 )}
               </div>

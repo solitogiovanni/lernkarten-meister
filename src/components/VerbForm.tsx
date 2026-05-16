@@ -16,6 +16,7 @@ export type VerbFormValue = {
   present: string;
   praeteritum: string;
   perfect: string;
+  conjugation: string;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -27,6 +28,7 @@ export const emptyVerb: VerbFormValue = {
   present: "",
   praeteritum: "",
   perfect: "",
+  conjugation: "",
   prepositions: [],
   meanings: [],
   examples: [],
@@ -139,6 +141,16 @@ export function VerbForm({
             placeholder="ist gegangen"
           />
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="conjugation" className="mb-2 block">Konjugation (Präsens, no pronouns)</Label>
+        <Input
+          id="conjugation"
+          value={value.conjugation}
+          onChange={(e) => set("conjugation", e.target.value)}
+          placeholder="komme / kommst / kommt / kommen / kommt / kommen"
+        />
       </div>
 
       <div>

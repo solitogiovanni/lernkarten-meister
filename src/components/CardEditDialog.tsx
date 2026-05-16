@@ -22,6 +22,7 @@ export type EditableCard = {
   plural: string | null;
   praeteritum?: string | null;
   perfect?: string | null;
+  conjugation?: string | null;
   prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -66,6 +67,7 @@ export function CardEditDialog({
     present: card.word,
     praeteritum: card.praeteritum ?? "",
     perfect: card.perfect ?? "",
+    conjugation: card.conjugation ?? "",
     prepositions: card.prepositions ?? [],
     meanings: card.meanings,
     examples: card.examples,
@@ -106,6 +108,7 @@ export function CardEditDialog({
           present: r.present || verb.present,
           praeteritum: verb.praeteritum || r.praeteritum || "",
           perfect: verb.perfect || r.perfect || "",
+          conjugation: verb.conjugation || r.conjugation || "",
           prepositions: verb.prepositions.length ? verb.prepositions : (r.prepositions ?? []),
           meanings: verb.meanings.length ? verb.meanings : r.meanings ?? [],
           examples: verb.examples.length ? verb.examples : r.examples ?? [],
