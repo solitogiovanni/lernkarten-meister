@@ -14,6 +14,7 @@ export type RevealCard = {
   plural?: string | null;
   praeteritum?: string | null;
   perfect?: string | null;
+  conjugation?: string | null;
   prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
