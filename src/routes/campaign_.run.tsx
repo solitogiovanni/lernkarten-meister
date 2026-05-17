@@ -41,6 +41,7 @@ type Card = {
   plural: string | null;
   praeteritum: string | null;
   perfect: string | null;
+  conjugation: string | null;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -96,7 +97,7 @@ function RunPage() {
           ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
@@ -108,6 +109,7 @@ function RunPage() {
         plural: r.plural,
         praeteritum: null,
         perfect: null,
+        conjugation: null,
         prepositions: [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
@@ -127,6 +129,7 @@ function RunPage() {
         plural: null,
         praeteritum: null,
         perfect: null,
+        conjugation: null,
         prepositions: [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
@@ -146,6 +149,7 @@ function RunPage() {
         plural: null,
         praeteritum: r.praeteritum,
         perfect: r.perfect,
+        conjugation: r.conjugation,
         prepositions: r.prepositions ?? [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
@@ -390,7 +394,7 @@ function FlashcardView({
                   <SpeakButton text={`die ${card.plural}`} size="icon" variant="ghost" />
                 </div>
               )}
-              {card.kind === "verb" && (card.praeteritum || card.perfect) && (
+              {card.kind === "verb" && (card.praeteritum || card.perfect || card.conjugation) && (
                 <div className="text-muted-foreground space-y-0.5">
                   {card.praeteritum && (
                     <div className="flex items-center justify-center gap-1">
@@ -402,6 +406,12 @@ function FlashcardView({
                     <div className="flex items-center justify-center gap-1">
                       <span>Perfekt: <span className="font-medium text-foreground">{card.perfect}</span></span>
                       <SpeakButton text={card.perfect} size="icon" variant="ghost" />
+                    </div>
+                  )}
+                  {card.conjugation && (
+                    <div className="text-sm">
+                      <span className="text-xs uppercase tracking-wider">Konjugation: </span>
+                      <span className="font-medium text-foreground">{card.conjugation}</span>
                     </div>
                   )}
                 </div>
