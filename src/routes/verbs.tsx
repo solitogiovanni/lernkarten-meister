@@ -355,6 +355,7 @@ function VerbsPage() {
           word: previewing.present,
           praeteritum: previewing.praeteritum,
           perfect: previewing.perfect,
+          conjugation: previewing.conjugation,
           prepositions: previewing.prepositions,
           meanings: previewing.meanings,
           examples: previewing.examples,
