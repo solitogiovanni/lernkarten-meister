@@ -41,6 +41,7 @@ type Card = {
   plural: string | null;
   praeteritum: string | null;
   perfect: string | null;
+  conjugation: string | null;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -96,7 +97,7 @@ function RunPage() {
           ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
