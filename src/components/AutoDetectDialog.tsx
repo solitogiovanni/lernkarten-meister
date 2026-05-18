@@ -105,6 +105,7 @@ export function AutoDetectDialog({
         present: (d.present ?? "").trim(),
         praeteritum: d.praeteritum?.trim() || null,
         perfect: d.perfect?.trim() || null,
+        conjugation: d.conjugation?.trim() || null,
         prepositions: (d.prepositions ?? []).filter((p) => p.preposition.trim()),
         meanings: d.meanings,
         examples: d.examples,
