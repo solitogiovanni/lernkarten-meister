@@ -502,7 +502,7 @@ For EACH item return:
 - examples: at least 2 short, natural German example sentences using the word AS that part of speech
 
 If kind = "noun": noun (capitalized singular), article (der/die/das), plural (or null).
-If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), prepositions (array, possibly empty).
+If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), conjugation (the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"), prepositions (array, possibly empty).
 If kind = "adjective" or "adverb": word (lowercase base form).
 
 Only include kinds the word genuinely could be. If the word is unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
