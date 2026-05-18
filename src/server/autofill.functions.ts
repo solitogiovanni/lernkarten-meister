@@ -538,6 +538,7 @@ Only include kinds the word genuinely could be. If the word is unambiguous, retu
                         present: { type: "string" },
                         praeteritum: { type: "string" },
                         perfect: { type: "string" },
+                        conjugation: { type: "string" },
                         prepositions: {
                           type: "array",
                           items: {
