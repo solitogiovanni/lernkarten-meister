@@ -94,6 +94,7 @@ function RootComponent() {
             <NavLink to="/prepositions" label="Prepositions" />
             <NavLink to="/pronouns" label="Pronouns" />
             <NavLink to="/conjunctions" label="Conjunctions" />
+            <NavLink to="/grammar" label="Grammar" />
             <NavLink to="/import" label="Import" />
             <NavLink to="/campaign" label="Campaign" />
           </nav>
@@ -116,6 +117,7 @@ function RootComponent() {
             <NavLink to="/prepositions" label="Prepositions" />
             <NavLink to="/pronouns" label="Pronouns" />
             <NavLink to="/conjunctions" label="Conjunctions" />
+            <NavLink to="/grammar" label="Grammar" />
             <NavLink to="/import" label="Import" />
             <NavLink to="/campaign" label="Campaign" />
           </nav>
