@@ -1,18 +1,12 @@
-Complete the remaining `conjugation` field integration so it flows end-to-end across all verb surfaces.
+## Fix: Save conjugation field in campaign verb edit
 
-## Changes
+**Bug**: In `src/components/CardEditDialog.tsx`, the verb `save()` builds a payload that omits `conjugation` (lines 184-193) and the resulting `next` EditableCard also omits it (lines 200-209). So even though AI fill populates the field in state, the UPDATE/INSERT never writes it.
 
-1. **`src/routes/import_.tsx`** (mixed importer)
-   - Extend the AI-fill mapping so verb-branch `MixedItem` results include `conjugation`.
-   - Add a Konjugation input field to the verb draft UI (matching the layout used in `import.verbs.tsx`).
-   - Persist `conjugation` when inserting verbs.
+## Change
 
-2. **`src/routes/campaign_.run.tsx`** (flashcard runner)
-   - Add `conjugation?: string` to the verb card type.
-   - Include `conjugation` in the verb fetch query.
-   - Render it on the back of verb flashcards, below Perfekt, styled like the other verb form rows (no SpeakButton — it's a list of forms).
+Edit **`src/components/CardEditDialog.tsx`** only:
+1. Add `conjugation: verb.conjugation.trim() || null` to the verb `payload` object.
+2. Add `conjugation: payload.conjugation` to the `next` object in the non-kindChanged branch.
+3. Add `conjugation: data.conjugation` to the `next` object in the kindChanged branch.
 
-3. **`src/routes/verbs.tsx`** (verb preview dialog)
-   - Pass `conjugation` into the `CardReveal` / preview dialog props so the existing display section actually receives data.
-
-No schema or autofill changes — those already landed in the previous step.
+No schema, server-fn, or other file changes required.
