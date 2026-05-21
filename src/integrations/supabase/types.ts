@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      grammar_notes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       nouns: {
         Row: {
           article: Database["public"]["Enums"]["german_article"] | null
