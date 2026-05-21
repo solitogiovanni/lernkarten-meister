@@ -1,12 +1,39 @@
-## Fix: Save conjugation field in campaign verb edit
+## Add possessive pronouns card
 
-**Bug**: In `src/components/CardEditDialog.tsx`, the verb `save()` builds a payload that omits `conjugation` (lines 184-193) and the resulting `next` EditableCard also omits it (lines 200-209). So even though AI fill populates the field in state, the UPDATE/INSERT never writes it.
+Insert one new row into the `words` table on the pronouns deck:
 
-## Change
+- **word**: `Possessivpronomen`
+- **kind**: `pronoun`
+- **meanings**: `["Pronomi possessivi"]`
+- **comments**: a plain-text block containing the stem list + ein-word endings table, formatted with monospace alignment so it renders cleanly inside the existing `whitespace-pre-wrap` comment box in `CardReveal.tsx`.
 
-Edit **`src/components/CardEditDialog.tsx`** only:
-1. Add `conjugation: verb.conjugation.trim() || null` to the verb `payload` object.
-2. Add `conjugation: payload.conjugation` to the `next` object in the non-kindChanged branch.
-3. Add `conjugation: data.conjugation` to the `next` object in the kindChanged branch.
+Comment body:
 
-No schema, server-fn, or other file changes required.
+```
+Stems (chi possiede):
+io        → mein
+tu        → dein
+lui/esso  → sein
+lei       → ihr
+noi       → unser
+voi       → euer
+loro      → ihr
+Lei (f.)  → Ihr
+
+Endings (ein-Wörter) — added to the stem:
+Case | Mask. | Fem. | Neut. | Plur.
+-----+-------+------+-------+------
+Nom  |  —    |  -e  |  —    |  -e
+Akk  | -en   |  -e  |  —    |  -e
+Dat  | -em   |  -er | -em   | -en
+Gen  | -es   |  -er | -es   | -er
+
+Es: "il mio cane" → mein Hund (Nom),
+    "vedo il mio cane" → meinen Hund (Akk),
+    "con la mia amica" → mit meiner Freundin (Dat).
+
+Note: "euer" perde la -e- davanti a desinenza
+(eure, euren, eurem, eurer).
+```
+
+No schema changes, no code changes — just a single data insert, identical pattern to the Personalpronomen and Reflexivpronomen cards already added.
