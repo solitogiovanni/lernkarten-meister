@@ -179,12 +179,10 @@ export function NounForm({
 
       <div>
         <Label htmlFor="noun-comments" className="mb-2 block">Comments</Label>
-        <Textarea
-          id="noun-comments"
+        <RichTextEditor
           value={value.comments}
-          onChange={(e) => set("comments", e.target.value)}
+          onChange={(html) => set("comments", html)}
           placeholder="Notes from your teacher…"
-          rows={2}
         />
       </div>
 
