@@ -151,12 +151,10 @@ export function WordForm({
 
       <div>
         <Label htmlFor="word-comments" className="mb-2 block">Comments</Label>
-        <Textarea
-          id="word-comments"
+        <RichTextEditor
           value={value.comments}
-          onChange={(e) => set("comments", e.target.value)}
+          onChange={(html) => set("comments", html)}
           placeholder="Notes from your teacher…"
-          rows={2}
         />
       </div>
 
