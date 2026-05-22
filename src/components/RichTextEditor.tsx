@@ -1,5 +1,16 @@
 import { useEffect, useRef } from "react";
-import { Bold, Italic, Underline, List, ListOrdered, Palette, Eraser } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Underline,
+  List,
+  ListOrdered,
+  Palette,
+  Highlighter,
+  Eraser,
+  IndentIncrease,
+  IndentDecrease,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -19,6 +30,39 @@ const COLORS = [
   { name: "Pink", value: "#ec4899" },
 ];
 
+const HIGHLIGHTS = [
+  { name: "None", value: "transparent" },
+  { name: "Yellow", value: "#fef08a" },
+  { name: "Lime", value: "#d9f99d" },
+  { name: "Cyan", value: "#a5f3fc" },
+  { name: "Pink", value: "#fbcfe8" },
+  { name: "Orange", value: "#fed7aa" },
+  { name: "Violet", value: "#ddd6fe" },
+  { name: "Gray", value: "#e5e7eb" },
+];
+
+// Bullet / dash variants for <ul>
+const UL_STYLES = [
+  { name: "Disc •", value: "disc" },
+  { name: "Circle ◦", value: "circle" },
+  { name: "Square ▪", value: "square" },
+  { name: "Dash –", value: "'–  '" },
+  { name: "Em-dash —", value: "'—  '" },
+  { name: "Arrow →", value: "'→  '" },
+  { name: "Check ✓", value: "'✓  '" },
+  { name: "Star ★", value: "'★  '" },
+];
+
+// Number variants for <ol>
+const OL_STYLES = [
+  { name: "1. 2. 3.", value: "decimal" },
+  { name: "01. 02.", value: "decimal-leading-zero" },
+  { name: "a. b. c.", value: "lower-alpha" },
+  { name: "A. B. C.", value: "upper-alpha" },
+  { name: "i. ii. iii.", value: "lower-roman" },
+  { name: "I. II. III.", value: "upper-roman" },
+];
+
 export function RichTextEditor({ value, onChange, placeholder }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -32,6 +76,38 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
   const exec = (command: string, arg?: string) => {
     ref.current?.focus();
     document.execCommand(command, false, arg);
+    if (ref.current) onChange(ref.current.innerHTML);
+  };
+
+  const setListStyle = (listTag: "UL" | "OL", style: string) => {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    let node: Node | null = sel.getRangeAt(0).startContainer;
+    let list: HTMLElement | null = null;
+    while (node && node !== ref.current) {
+      if ((node as HTMLElement).tagName === listTag) {
+        list = node as HTMLElement;
+        break;
+      }
+      node = node.parentNode;
+    }
+    // If no list at caret, create one first.
+    if (!list) {
+      document.execCommand(
+        listTag === "UL" ? "insertUnorderedList" : "insertOrderedList",
+      );
+      const sel2 = window.getSelection();
+      let n: Node | null = sel2?.getRangeAt(0).startContainer ?? null;
+      while (n && n !== ref.current) {
+        if ((n as HTMLElement).tagName === listTag) {
+          list = n as HTMLElement;
+          break;
+        }
+        n = n.parentNode;
+      }
+    }
+    if (list) list.style.listStyleType = style;
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
@@ -52,18 +128,10 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
           <Underline className="h-4 w-4" />
         </ToolBtn>
         <div className="w-px h-5 bg-border mx-1" />
-        <ToolBtn onClick={() => exec("insertUnorderedList")} title="Bulleted list">
-          <List className="h-4 w-4" />
-        </ToolBtn>
-        <ToolBtn onClick={() => exec("insertOrderedList")} title="Numbered list">
-          <ListOrdered className="h-4 w-4" />
-        </ToolBtn>
-        <div className="w-px h-5 bg-border mx-1" />
-        <div className="relative group">
-          <ToolBtn title="Text color">
-            <Palette className="h-4 w-4" />
-          </ToolBtn>
-          <div className="hidden group-hover:flex group-focus-within:flex absolute z-30 top-full left-0 mt-1 p-1.5 bg-popover border rounded-md shadow-md gap-1 flex-wrap w-40">
+
+        {/* Text color */}
+        <Popover title="Text color" icon={<Palette className="h-4 w-4" />}>
+          <div className="flex flex-wrap gap-1 w-40">
             {COLORS.map((c) => (
               <button
                 key={c.value}
@@ -83,7 +151,94 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
               />
             ))}
           </div>
-        </div>
+        </Popover>
+
+        {/* Highlight */}
+        <Popover title="Highlight" icon={<Highlighter className="h-4 w-4" />}>
+          <div className="flex flex-wrap gap-1 w-40">
+            {HIGHLIGHTS.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                title={c.name}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  // hiliteColor works in most browsers; fallback to backColor.
+                  if (!document.execCommand("hiliteColor", false, c.value)) {
+                    document.execCommand("backColor", false, c.value);
+                  }
+                  if (ref.current) onChange(ref.current.innerHTML);
+                }}
+                className="h-6 w-6 rounded border hover:scale-110 transition-transform"
+                style={{
+                  background:
+                    c.value === "transparent"
+                      ? "linear-gradient(135deg, transparent 45%, currentColor 45%, currentColor 55%, transparent 55%)"
+                      : c.value,
+                }}
+              />
+            ))}
+          </div>
+        </Popover>
+
+        <div className="w-px h-5 bg-border mx-1" />
+
+        {/* Bullets */}
+        <ToolBtn onClick={() => exec("insertUnorderedList")} title="Bulleted list">
+          <List className="h-4 w-4" />
+        </ToolBtn>
+        <Popover title="Bullet style" icon={<span className="text-xs font-semibold">•▾</span>}>
+          <div className="flex flex-col gap-0.5 w-36">
+            {UL_STYLES.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setListStyle("UL", s.value);
+                }}
+                className="text-left text-xs px-2 py-1 rounded hover:bg-muted"
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </Popover>
+
+        {/* Numbers */}
+        <ToolBtn onClick={() => exec("insertOrderedList")} title="Numbered list">
+          <ListOrdered className="h-4 w-4" />
+        </ToolBtn>
+        <Popover title="Number style" icon={<span className="text-xs font-semibold">1▾</span>}>
+          <div className="flex flex-col gap-0.5 w-36">
+            {OL_STYLES.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setListStyle("OL", s.value);
+                }}
+                className="text-left text-xs px-2 py-1 rounded hover:bg-muted"
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </Popover>
+
+        <div className="w-px h-5 bg-border mx-1" />
+
+        {/* Indent */}
+        <ToolBtn onClick={() => exec("outdent")} title="Decrease indent">
+          <IndentDecrease className="h-4 w-4" />
+        </ToolBtn>
+        <ToolBtn onClick={() => exec("indent")} title="Increase indent">
+          <IndentIncrease className="h-4 w-4" />
+        </ToolBtn>
+
+        <div className="w-px h-5 bg-border mx-1" />
+
         <ToolBtn onClick={() => exec("removeFormat")} title="Clear formatting">
           <Eraser className="h-4 w-4" />
         </ToolBtn>
@@ -123,5 +278,33 @@ function ToolBtn({
     >
       {children}
     </Button>
+  );
+}
+
+function Popover({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative group">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        title={title}
+        onMouseDown={(e) => e.preventDefault()}
+        className="h-7 w-7 p-0"
+      >
+        {icon}
+      </Button>
+      <div className="hidden group-hover:flex group-focus-within:flex absolute z-30 top-full left-0 mt-1 p-1.5 bg-popover border rounded-md shadow-md">
+        {children}
+      </div>
+    </div>
   );
 }

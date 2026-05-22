@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 export type VerbPrep = {
   preposition: string;
@@ -250,12 +251,10 @@ export function VerbForm({
 
       <div>
         <Label htmlFor="verb-comments" className="mb-2 block">Comments</Label>
-        <Textarea
-          id="verb-comments"
+        <RichTextEditor
           value={value.comments}
-          onChange={(e) => set("comments", e.target.value)}
+          onChange={(html) => set("comments", html)}
           placeholder="Notes from your teacher…"
-          rows={2}
         />
       </div>
 
