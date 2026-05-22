@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 export type VerbPrep = {
   preposition: string;
