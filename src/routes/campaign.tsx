@@ -33,6 +33,93 @@ function CampaignSetup() {
   const [size, setSize] = useState<number>(20);
   const navigate = useNavigate();
 
+  type Saved = {
+    id: string;
+    name: string;
+    mode: "flashcards" | "quiz";
+    direction: "de2it" | "it2de" | "mixed";
+    scope: "all" | "due";
+    kinds: string[];
+    themes: string[];
+    size: number;
+  };
+  const [saved, setSaved] = useState<Saved[]>([]);
+  const [loadedId, setLoadedId] = useState<string>("");
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [renameId, setRenameId] = useState<string>("");
+  const [renameValue, setRenameValue] = useState("");
+
+  const loadSaved = async () => {
+    const { data, error } = await (supabase as any)
+      .from("saved_campaigns")
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (!error && data) setSaved(data as Saved[]);
+  };
+  useEffect(() => { loadSaved(); }, []);
+
+  const applySaved = (id: string) => {
+    const s = saved.find((x) => x.id === id);
+    if (!s) return;
+    setMode(s.mode);
+    setDirection(s.direction);
+    setScope(s.scope);
+    setKinds(new Set(s.kinds as any));
+    setThemes(s.themes);
+    setSize(s.size);
+    setLoadedId(id);
+    toast.success(`Loaded "${s.name}"`);
+  };
+
+  const openSaveDialog = () => {
+    const current = saved.find((s) => s.id === loadedId);
+    setSaveName(current?.name ?? "");
+    setSaveOpen(true);
+  };
+
+  const saveCurrent = async () => {
+    const name = saveName.trim();
+    if (!name) { toast.error("Name required"); return; }
+    const payload = {
+      name, mode, direction, scope,
+      kinds: Array.from(kinds),
+      themes, size,
+    };
+    const existing = saved.find((s) => s.id === loadedId);
+    if (existing && existing.name === name) {
+      const { error } = await (supabase as any).from("saved_campaigns").update(payload).eq("id", loadedId);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Campaign updated");
+    } else {
+      const { data, error } = await (supabase as any).from("saved_campaigns").insert(payload).select().single();
+      if (error) { toast.error(error.message); return; }
+      if (data) setLoadedId(data.id);
+      toast.success("Campaign saved");
+    }
+    setSaveOpen(false);
+    setSaveName("");
+    loadSaved();
+  };
+
+  const deleteSaved = async (id: string) => {
+    const { error } = await (supabase as any).from("saved_campaigns").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    if (loadedId === id) setLoadedId("");
+    toast.success("Deleted");
+    loadSaved();
+  };
+
+  const renameSaved = async (id: string) => {
+    const name = renameValue.trim();
+    if (!name) return;
+    const { error } = await (supabase as any).from("saved_campaigns").update({ name }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setRenameId("");
+    setRenameValue("");
+    loadSaved();
+  };
+
   useEffect(() => {
     (async () => {
       const [nounsRes, wordsRes, verbsRes] = await Promise.all([
