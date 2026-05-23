@@ -95,6 +95,45 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_campaigns: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          kinds: string[]
+          mode: string
+          name: string
+          scope: string
+          size: number
+          themes: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          id?: string
+          kinds?: string[]
+          mode: string
+          name: string
+          scope: string
+          size: number
+          themes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          kinds?: string[]
+          mode?: string
+          name?: string
+          scope?: string
+          size?: number
+          themes?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       verbs: {
         Row: {
           comments: string | null

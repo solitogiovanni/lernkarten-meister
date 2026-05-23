@@ -7,7 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { isDue } from "@/lib/srs";
-import { Loader2, Play } from "lucide-react";
+import { Loader2, Play, Save, Bookmark, Trash2, Pencil, Check, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/campaign")({
   head: () => ({
@@ -29,6 +32,93 @@ function CampaignSetup() {
   const [themeFilter, setThemeFilter] = useState("");
   const [size, setSize] = useState<number>(20);
   const navigate = useNavigate();
+
+  type Saved = {
+    id: string;
+    name: string;
+    mode: "flashcards" | "quiz";
+    direction: "de2it" | "it2de" | "mixed";
+    scope: "all" | "due";
+    kinds: string[];
+    themes: string[];
+    size: number;
+  };
+  const [saved, setSaved] = useState<Saved[]>([]);
+  const [loadedId, setLoadedId] = useState<string>("");
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [renameId, setRenameId] = useState<string>("");
+  const [renameValue, setRenameValue] = useState("");
+
+  const loadSaved = async () => {
+    const { data, error } = await (supabase as any)
+      .from("saved_campaigns")
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (!error && data) setSaved(data as Saved[]);
+  };
+  useEffect(() => { loadSaved(); }, []);
+
+  const applySaved = (id: string) => {
+    const s = saved.find((x) => x.id === id);
+    if (!s) return;
+    setMode(s.mode);
+    setDirection(s.direction);
+    setScope(s.scope);
+    setKinds(new Set(s.kinds as any));
+    setThemes(s.themes);
+    setSize(s.size);
+    setLoadedId(id);
+    toast.success(`Loaded "${s.name}"`);
+  };
+
+  const openSaveDialog = () => {
+    const current = saved.find((s) => s.id === loadedId);
+    setSaveName(current?.name ?? "");
+    setSaveOpen(true);
+  };
+
+  const saveCurrent = async () => {
+    const name = saveName.trim();
+    if (!name) { toast.error("Name required"); return; }
+    const payload = {
+      name, mode, direction, scope,
+      kinds: Array.from(kinds),
+      themes, size,
+    };
+    const existing = saved.find((s) => s.id === loadedId);
+    if (existing && existing.name === name) {
+      const { error } = await (supabase as any).from("saved_campaigns").update(payload).eq("id", loadedId);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Campaign updated");
+    } else {
+      const { data, error } = await (supabase as any).from("saved_campaigns").insert(payload).select().single();
+      if (error) { toast.error(error.message); return; }
+      if (data) setLoadedId(data.id);
+      toast.success("Campaign saved");
+    }
+    setSaveOpen(false);
+    setSaveName("");
+    loadSaved();
+  };
+
+  const deleteSaved = async (id: string) => {
+    const { error } = await (supabase as any).from("saved_campaigns").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    if (loadedId === id) setLoadedId("");
+    toast.success("Deleted");
+    loadSaved();
+  };
+
+  const renameSaved = async (id: string) => {
+    const name = renameValue.trim();
+    if (!name) return;
+    const { error } = await (supabase as any).from("saved_campaigns").update({ name }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setRenameId("");
+    setRenameValue("");
+    loadSaved();
+  };
 
   useEffect(() => {
     (async () => {
@@ -106,6 +196,80 @@ function CampaignSetup() {
         <h1 className="text-2xl font-bold tracking-tight">Start a campaign</h1>
         <p className="text-sm text-muted-foreground">Pick how you want to study and what to study.</p>
       </div>
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-2 gap-2">
+          <Label className="flex items-center gap-1.5"><Bookmark className="h-4 w-4" /> Saved campaigns</Label>
+          <Button size="sm" variant="outline" onClick={openSaveDialog}>
+            <Save className="h-4 w-4 mr-1" /> {loadedId ? "Update / Save as…" : "Save current"}
+          </Button>
+        </div>
+        {saved.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No saved campaigns yet. Configure your settings and click Save.</p>
+        ) : (
+          <div className="space-y-1.5">
+            <Select value={loadedId} onValueChange={applySaved}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Load a saved campaign…" />
+              </SelectTrigger>
+              <SelectContent>
+                {saved.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {saved.map((s) => {
+                const editing = renameId === s.id;
+                return (
+                  <div key={s.id} className={`text-xs inline-flex items-center gap-1 rounded-full border pl-2 pr-1 py-0.5 ${loadedId === s.id ? "border-primary bg-primary/10" : "border-border"}`}>
+                    {editing ? (
+                      <>
+                        <Input
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") renameSaved(s.id); if (e.key === "Escape") setRenameId(""); }}
+                          className="h-6 px-1.5 text-xs w-32"
+                          autoFocus
+                        />
+                        <button className="p-0.5 hover:text-primary" onClick={() => renameSaved(s.id)} aria-label="Save name"><Check className="h-3 w-3" /></button>
+                        <button className="p-0.5 hover:text-destructive" onClick={() => setRenameId("")} aria-label="Cancel"><X className="h-3 w-3" /></button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="hover:text-primary" onClick={() => applySaved(s.id)}>{s.name}</button>
+                        <button className="p-0.5 text-muted-foreground hover:text-foreground" onClick={() => { setRenameId(s.id); setRenameValue(s.name); }} aria-label="Rename"><Pencil className="h-3 w-3" /></button>
+                        <button className="p-0.5 text-muted-foreground hover:text-destructive" onClick={() => deleteSaved(s.id)} aria-label="Delete"><Trash2 className="h-3 w-3" /></button>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save campaign</DialogTitle>
+            <DialogDescription>Give this configuration a name so you can recall it later.</DialogDescription>
+          </DialogHeader>
+          <Input
+            value={saveName}
+            onChange={(e) => setSaveName(e.target.value)}
+            placeholder="e.g. Daily verbs review"
+            onKeyDown={(e) => { if (e.key === "Enter") saveCurrent(); }}
+            autoFocus
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button onClick={saveCurrent}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       <Card className="p-4">
         <Label className="mb-2 block">Include</Label>
