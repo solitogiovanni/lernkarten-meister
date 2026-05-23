@@ -7,7 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { isDue } from "@/lib/srs";
-import { Loader2, Play } from "lucide-react";
+import { Loader2, Play, Save, Bookmark, Trash2, Pencil, Check, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/campaign")({
   head: () => ({
