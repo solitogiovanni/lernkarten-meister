@@ -198,6 +198,80 @@ function CampaignSetup() {
       </div>
 
       <Card className="p-4">
+        <div className="flex items-center justify-between mb-2 gap-2">
+          <Label className="flex items-center gap-1.5"><Bookmark className="h-4 w-4" /> Saved campaigns</Label>
+          <Button size="sm" variant="outline" onClick={openSaveDialog}>
+            <Save className="h-4 w-4 mr-1" /> {loadedId ? "Update / Save as…" : "Save current"}
+          </Button>
+        </div>
+        {saved.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No saved campaigns yet. Configure your settings and click Save.</p>
+        ) : (
+          <div className="space-y-1.5">
+            <Select value={loadedId} onValueChange={applySaved}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Load a saved campaign…" />
+              </SelectTrigger>
+              <SelectContent>
+                {saved.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {saved.map((s) => {
+                const editing = renameId === s.id;
+                return (
+                  <div key={s.id} className={`text-xs inline-flex items-center gap-1 rounded-full border pl-2 pr-1 py-0.5 ${loadedId === s.id ? "border-primary bg-primary/10" : "border-border"}`}>
+                    {editing ? (
+                      <>
+                        <Input
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") renameSaved(s.id); if (e.key === "Escape") setRenameId(""); }}
+                          className="h-6 px-1.5 text-xs w-32"
+                          autoFocus
+                        />
+                        <button className="p-0.5 hover:text-primary" onClick={() => renameSaved(s.id)} aria-label="Save name"><Check className="h-3 w-3" /></button>
+                        <button className="p-0.5 hover:text-destructive" onClick={() => setRenameId("")} aria-label="Cancel"><X className="h-3 w-3" /></button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="hover:text-primary" onClick={() => applySaved(s.id)}>{s.name}</button>
+                        <button className="p-0.5 text-muted-foreground hover:text-foreground" onClick={() => { setRenameId(s.id); setRenameValue(s.name); }} aria-label="Rename"><Pencil className="h-3 w-3" /></button>
+                        <button className="p-0.5 text-muted-foreground hover:text-destructive" onClick={() => deleteSaved(s.id)} aria-label="Delete"><Trash2 className="h-3 w-3" /></button>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save campaign</DialogTitle>
+            <DialogDescription>Give this configuration a name so you can recall it later.</DialogDescription>
+          </DialogHeader>
+          <Input
+            value={saveName}
+            onChange={(e) => setSaveName(e.target.value)}
+            placeholder="e.g. Daily verbs review"
+            onKeyDown={(e) => { if (e.key === "Enter") saveCurrent(); }}
+            autoFocus
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button onClick={saveCurrent}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+      <Card className="p-4">
         <Label className="mb-2 block">Include</Label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {(["noun", "adjective", "adverb", "verb"] as const).map((k) => (
