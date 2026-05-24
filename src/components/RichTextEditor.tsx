@@ -277,6 +277,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
+        onPaste={handlePaste}
         data-placeholder={placeholder || "Write your notes…"}
         className="min-h-[180px] max-h-[420px] overflow-y-auto px-3 py-2 text-sm focus:outline-none rich-text-editor"
       />
