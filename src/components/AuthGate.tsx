@@ -29,6 +29,25 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!session) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        supabase.auth.signOut();
+        toast.info("Signed out after 15 minutes of inactivity");
+      }, 15 * 60 * 1000);
+    };
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [session]);
+
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
