@@ -115,6 +115,35 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
+  const insertImage = (dataUrl: string) => {
+    ref.current?.focus();
+    document.execCommand(
+      "insertHTML",
+      false,
+      `<img src="${dataUrl}" style="max-width:100%;height:auto;border-radius:6px;margin:4px 0;" />`,
+    );
+    if (ref.current) onChange(ref.current.innerHTML);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (it.kind === "file" && it.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = it.getAsFile();
+        if (!file) continue;
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") insertImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+  };
+
   return (
     <div className="border rounded-md overflow-hidden bg-background">
       <div className="flex flex-wrap items-center gap-0.5 border-b bg-muted/40 px-1.5 py-1">
