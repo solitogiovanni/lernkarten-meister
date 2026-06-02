@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition } from "@/server/autofill.functions";
+import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition } from "@/lib/autofill.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 type Draft = MixedItem & { include: boolean };

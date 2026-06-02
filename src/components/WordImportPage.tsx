@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, X, Check } from "lucide-react";
 import { toast } from "sonner";
-import { autofillWords, type AutofilledWord } from "@/server/autofill.functions";
+import { autofillWords, type AutofilledWord } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";

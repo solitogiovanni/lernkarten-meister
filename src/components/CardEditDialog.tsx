@@ -9,7 +9,7 @@ import { VerbForm, type VerbFormValue, type VerbPrep } from "@/components/VerbFo
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { autofillNouns, autofillVerbs, autofillWords } from "@/server/autofill.functions";
+import { autofillNouns, autofillVerbs, autofillWords } from "@/lib/autofill.functions";
 import { Loader2, Sparkles } from "lucide-react";
 
 export type Kind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
