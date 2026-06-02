@@ -11,7 +11,7 @@ import { VerbForm, type VerbFormValue, type VerbPrep, emptyVerb } from "@/compon
 import { Loader2, Plus, Trash2, Upload, Play, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
-import { autofillVerbs } from "@/server/autofill.functions";
+import { autofillVerbs } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";

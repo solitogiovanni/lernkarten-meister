@@ -11,7 +11,7 @@ import { WordForm, type WordFormValue, emptyWord } from "@/components/WordForm";
 import { Loader2, Plus, Sparkles, Trash2, Upload, Play, Search } from "lucide-react";
 import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
-import { autofillWords } from "@/server/autofill.functions";
+import { autofillWords } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
