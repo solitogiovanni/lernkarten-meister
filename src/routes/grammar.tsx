@@ -155,20 +155,24 @@ function GrammarPage() {
 
       {/* Preview */}
       <Dialog open={!!previewing} onOpenChange={(o) => !o && setPreviewing(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
           {previewing && (
             <>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Grammar rule</p>
-              <h2 className="text-2xl font-bold tracking-tight">{previewing.title}</h2>
-              {previewing.content ? (
-                <div
-                  className="rich-text-view text-sm leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: previewing.content }}
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No notes yet.</p>
-              )}
-              <DialogFooter className="sm:justify-between gap-2">
+              <div className="shrink-0">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Grammar rule</p>
+                <h2 className="text-2xl font-bold tracking-tight">{previewing.title}</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto min-h-0 my-4">
+                {previewing.content ? (
+                  <div
+                    className="rich-text-view text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: previewing.content }}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">No notes yet.</p>
+                )}
+              </div>
+              <DialogFooter className="sm:justify-between gap-2 shrink-0">
                 <Button variant="outline" onClick={() => setPreviewing(null)}>
                   Close
                 </Button>
