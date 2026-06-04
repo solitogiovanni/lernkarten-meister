@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Sparkles } from "lucide-react";
 import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
 import { AutoDetectDialog } from "@/components/AutoDetectDialog";
+import { SpeakButton } from "@/components/SpeakButton";
 import type { VerbPrep } from "@/components/VerbForm";
 
 export type DeckKind = "noun" | "verb" | "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
@@ -190,9 +191,12 @@ export function CrossDeckSearch({
       count: nouns.length,
       render: () => nouns.map((r) => (
         <button key={r.id} type="button" onClick={() => openNoun(r)} className={cardCls}>
-          <div className="text-sm font-medium">
-            {r.article && <span className="text-muted-foreground mr-1">{r.article}</span>}
-            {r.noun}
+          <div className="flex items-center gap-1">
+            <div className="text-sm font-medium">
+              {r.article && <span className="text-muted-foreground mr-1">{r.article}</span>}
+              {r.noun}
+            </div>
+            <SpeakButton text={r.article ? `${r.article} ${r.noun}` : r.noun} size="icon" variant="ghost" className="h-5 w-5" />
           </div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
@@ -206,7 +210,10 @@ export function CrossDeckSearch({
       count: verbs.length,
       render: () => verbs.map((r) => (
         <button key={r.id} type="button" onClick={() => openVerb(r)} className={cardCls}>
-          <div className="text-sm font-medium">{r.present}</div>
+          <div className="flex items-center gap-1">
+            <div className="text-sm font-medium">{r.present}</div>
+            <SpeakButton text={r.present} size="icon" variant="ghost" className="h-5 w-5" />
+          </div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
@@ -219,7 +226,10 @@ export function CrossDeckSearch({
       count: adjectives.length,
       render: () => adjectives.map((r) => (
         <button key={r.id} type="button" onClick={() => openWord(r)} className={cardCls}>
-          <div className="text-sm font-medium">{r.word}</div>
+          <div className="flex items-center gap-1">
+            <div className="text-sm font-medium">{r.word}</div>
+            <SpeakButton text={r.word} size="icon" variant="ghost" className="h-5 w-5" />
+          </div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
@@ -232,7 +242,10 @@ export function CrossDeckSearch({
       count: adverbs.length,
       render: () => adverbs.map((r) => (
         <button key={r.id} type="button" onClick={() => openWord(r)} className={cardCls}>
-          <div className="text-sm font-medium">{r.word}</div>
+          <div className="flex items-center gap-1">
+            <div className="text-sm font-medium">{r.word}</div>
+            <SpeakButton text={r.word} size="icon" variant="ghost" className="h-5 w-5" />
+          </div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
@@ -245,7 +258,10 @@ export function CrossDeckSearch({
       count: words.filter((w) => w.kind === kk).length,
       render: () => words.filter((w) => w.kind === kk).map((r) => (
         <button key={r.id} type="button" onClick={() => openWord(r)} className={cardCls}>
-          <div className="text-sm font-medium">{r.word}</div>
+          <div className="flex items-center gap-1">
+            <div className="text-sm font-medium">{r.word}</div>
+            <SpeakButton text={r.word} size="icon" variant="ghost" className="h-5 w-5" />
+          </div>
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
