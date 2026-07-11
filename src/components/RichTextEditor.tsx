@@ -12,8 +12,22 @@ import {
   IndentDecrease,
   AArrowUp,
   AArrowDown,
+  Type,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const FONT_FAMILIES = [
+  { name: "Default", value: "" },
+  { name: "Sans", value: "ui-sans-serif, system-ui, sans-serif" },
+  { name: "Serif", value: "ui-serif, Georgia, serif" },
+  { name: "Mono", value: "ui-monospace, SFMono-Regular, Menlo, monospace" },
+  { name: "Inter", value: "Inter, sans-serif" },
+  { name: "Georgia", value: "Georgia, serif" },
+  { name: "Times", value: "'Times New Roman', Times, serif" },
+  { name: "Arial", value: "Arial, Helvetica, sans-serif" },
+  { name: "Courier", value: "'Courier New', Courier, monospace" },
+  { name: "Verdana", value: "Verdana, Geneva, sans-serif" },
+];
 
 // Font size steps in px, mapped to execCommand fontSize 1-7
 const FONT_SIZES = [10, 12, 14, 16, 18, 24, 32];
@@ -127,6 +141,29 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
+  const setFontFamily = (family: string) => {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    const span = document.createElement("span");
+    span.style.fontFamily = family;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+    } catch {
+      // ignore
+    }
+    if (ref.current) onChange(ref.current.innerHTML);
+  };
+
+
+
   const setListStyle = (listTag: "UL" | "OL", style: string) => {
     ref.current?.focus();
     const sel = window.getSelection();
@@ -212,7 +249,26 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         <ToolBtn onClick={() => changeFontSize(1)} title="Increase font size">
           <AArrowUp className="h-4 w-4" />
         </ToolBtn>
+        <Popover title="Font family" icon={<Type className="h-4 w-4" />}>
+          <div className="flex flex-col gap-0.5 w-40 max-h-64 overflow-y-auto">
+            {FONT_FAMILIES.map((f) => (
+              <button
+                key={f.name}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setFontFamily(f.value);
+                }}
+                style={{ fontFamily: f.value || undefined }}
+                className="text-left text-xs px-2 py-1 rounded hover:bg-muted"
+              >
+                {f.name}
+              </button>
+            ))}
+          </div>
+        </Popover>
         <div className="w-px h-5 bg-border mx-1" />
+
 
 
         {/* Text color */}
