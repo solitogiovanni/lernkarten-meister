@@ -84,6 +84,49 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
+  const changeFontSize = (delta: 1 | -1) => {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    // Determine current size from the start container's parent
+    let node: Node | null = range.startContainer;
+    let currentPx = 16;
+    while (node && node !== ref.current) {
+      if (node.nodeType === 1) {
+        const cs = window.getComputedStyle(node as Element);
+        const p = parseFloat(cs.fontSize);
+        if (!isNaN(p)) {
+          currentPx = p;
+          break;
+        }
+      }
+      node = node.parentNode;
+    }
+    // Find closest step and move
+    let idx = FONT_SIZES.findIndex((s) => s >= currentPx);
+    if (idx === -1) idx = FONT_SIZES.length - 1;
+    const nextIdx = Math.max(0, Math.min(FONT_SIZES.length - 1, idx + delta));
+    const nextPx = FONT_SIZES[nextIdx];
+
+    const span = document.createElement("span");
+    span.style.fontSize = `${nextPx}px`;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      // Restore selection over the inserted span
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+    } catch {
+      // ignore
+    }
+    if (ref.current) onChange(ref.current.innerHTML);
+  };
+
   const setListStyle = (listTag: "UL" | "OL", style: string) => {
     ref.current?.focus();
     const sel = window.getSelection();
