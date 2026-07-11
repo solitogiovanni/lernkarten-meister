@@ -249,7 +249,26 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         <ToolBtn onClick={() => changeFontSize(1)} title="Increase font size">
           <AArrowUp className="h-4 w-4" />
         </ToolBtn>
+        <Popover title="Font family" icon={<Type className="h-4 w-4" />}>
+          <div className="flex flex-col gap-0.5 w-40 max-h-64 overflow-y-auto">
+            {FONT_FAMILIES.map((f) => (
+              <button
+                key={f.name}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setFontFamily(f.value);
+                }}
+                style={{ fontFamily: f.value || undefined }}
+                className="text-left text-xs px-2 py-1 rounded hover:bg-muted"
+              >
+                {f.name}
+              </button>
+            ))}
+          </div>
+        </Popover>
         <div className="w-px h-5 bg-border mx-1" />
+
 
 
         {/* Text color */}
