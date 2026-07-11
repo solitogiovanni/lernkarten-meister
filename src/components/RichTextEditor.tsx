@@ -10,8 +10,13 @@ import {
   Eraser,
   IndentIncrease,
   IndentDecrease,
+  AArrowUp,
+  AArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Font size steps in px, mapped to execCommand fontSize 1-7
+const FONT_SIZES = [10, 12, 14, 16, 18, 24, 32];
 
 type Props = {
   value: string;
@@ -76,6 +81,49 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
   const exec = (command: string, arg?: string) => {
     ref.current?.focus();
     document.execCommand(command, false, arg);
+    if (ref.current) onChange(ref.current.innerHTML);
+  };
+
+  const changeFontSize = (delta: 1 | -1) => {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    // Determine current size from the start container's parent
+    let node: Node | null = range.startContainer;
+    let currentPx = 16;
+    while (node && node !== ref.current) {
+      if (node.nodeType === 1) {
+        const cs = window.getComputedStyle(node as Element);
+        const p = parseFloat(cs.fontSize);
+        if (!isNaN(p)) {
+          currentPx = p;
+          break;
+        }
+      }
+      node = node.parentNode;
+    }
+    // Find closest step and move
+    let idx = FONT_SIZES.findIndex((s) => s >= currentPx);
+    if (idx === -1) idx = FONT_SIZES.length - 1;
+    const nextIdx = Math.max(0, Math.min(FONT_SIZES.length - 1, idx + delta));
+    const nextPx = FONT_SIZES[nextIdx];
+
+    const span = document.createElement("span");
+    span.style.fontSize = `${nextPx}px`;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      // Restore selection over the inserted span
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+    } catch {
+      // ignore
+    }
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
@@ -157,6 +205,15 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
           <Underline className="h-4 w-4" />
         </ToolBtn>
         <div className="w-px h-5 bg-border mx-1" />
+
+        <ToolBtn onClick={() => changeFontSize(-1)} title="Decrease font size">
+          <AArrowDown className="h-4 w-4" />
+        </ToolBtn>
+        <ToolBtn onClick={() => changeFontSize(1)} title="Increase font size">
+          <AArrowUp className="h-4 w-4" />
+        </ToolBtn>
+        <div className="w-px h-5 bg-border mx-1" />
+
 
         {/* Text color */}
         <Popover title="Text color" icon={<Palette className="h-4 w-4" />}>
