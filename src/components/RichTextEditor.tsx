@@ -10,8 +10,13 @@ import {
   Eraser,
   IndentIncrease,
   IndentDecrease,
+  AArrowUp,
+  AArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Font size steps in px, mapped to execCommand fontSize 1-7
+const FONT_SIZES = [10, 12, 14, 16, 18, 24, 32];
 
 type Props = {
   value: string;
