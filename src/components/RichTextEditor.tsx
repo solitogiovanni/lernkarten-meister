@@ -12,8 +12,22 @@ import {
   IndentDecrease,
   AArrowUp,
   AArrowDown,
+  Type,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const FONT_FAMILIES = [
+  { name: "Default", value: "" },
+  { name: "Sans", value: "ui-sans-serif, system-ui, sans-serif" },
+  { name: "Serif", value: "ui-serif, Georgia, serif" },
+  { name: "Mono", value: "ui-monospace, SFMono-Regular, Menlo, monospace" },
+  { name: "Inter", value: "Inter, sans-serif" },
+  { name: "Georgia", value: "Georgia, serif" },
+  { name: "Times", value: "'Times New Roman', Times, serif" },
+  { name: "Arial", value: "Arial, Helvetica, sans-serif" },
+  { name: "Courier", value: "'Courier New', Courier, monospace" },
+  { name: "Verdana", value: "Verdana, Geneva, sans-serif" },
+];
 
 // Font size steps in px, mapped to execCommand fontSize 1-7
 const FONT_SIZES = [10, 12, 14, 16, 18, 24, 32];
