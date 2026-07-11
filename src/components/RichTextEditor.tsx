@@ -141,6 +141,29 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
+  const setFontFamily = (family: string) => {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    const span = document.createElement("span");
+    span.style.fontFamily = family;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+    } catch {
+      // ignore
+    }
+    if (ref.current) onChange(ref.current.innerHTML);
+  };
+
+
+
   const setListStyle = (listTag: "UL" | "OL", style: string) => {
     ref.current?.focus();
     const sel = window.getSelection();
