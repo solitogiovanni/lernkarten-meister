@@ -206,6 +206,15 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         </ToolBtn>
         <div className="w-px h-5 bg-border mx-1" />
 
+        <ToolBtn onClick={() => changeFontSize(-1)} title="Decrease font size">
+          <AArrowDown className="h-4 w-4" />
+        </ToolBtn>
+        <ToolBtn onClick={() => changeFontSize(1)} title="Increase font size">
+          <AArrowUp className="h-4 w-4" />
+        </ToolBtn>
+        <div className="w-px h-5 bg-border mx-1" />
+
+
         {/* Text color */}
         <Popover title="Text color" icon={<Palette className="h-4 w-4" />}>
           <div className="flex flex-wrap gap-1 w-40">
