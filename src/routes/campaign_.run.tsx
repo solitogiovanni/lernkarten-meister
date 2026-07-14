@@ -42,6 +42,7 @@ type Card = {
   praeteritum: string | null;
   perfect: string | null;
   conjugation: string | null;
+  praeteritum_conjugation: string | null;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -97,7 +98,7 @@ function RunPage() {
           ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
@@ -110,6 +111,7 @@ function RunPage() {
         praeteritum: null,
         perfect: null,
         conjugation: null,
+        praeteritum_conjugation: null,
         prepositions: [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
@@ -130,6 +132,7 @@ function RunPage() {
         praeteritum: null,
         perfect: null,
         conjugation: null,
+        praeteritum_conjugation: null,
         prepositions: [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
@@ -150,6 +153,7 @@ function RunPage() {
         praeteritum: r.praeteritum,
         perfect: r.perfect,
         conjugation: r.conjugation,
+        praeteritum_conjugation: r.praeteritum_conjugation ?? null,
         prepositions: r.prepositions ?? [],
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
