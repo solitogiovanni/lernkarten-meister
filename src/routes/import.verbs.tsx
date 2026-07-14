@@ -85,6 +85,7 @@ function ImportVerbsPage() {
           praeteritum: r?.praeteritum ?? null,
           perfect: r?.perfect ?? null,
           conjugation: r?.conjugation ?? null,
+          praeteritum_conjugation: r?.praeteritum_conjugation ?? null,
           prepositions: r?.prepositions ?? [],
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
@@ -109,6 +110,7 @@ function ImportVerbsPage() {
           praeteritum: null,
           perfect: null,
           conjugation: null,
+          praeteritum_conjugation: null,
           prepositions: [],
           meanings: p.meanings,
           themes: [],
@@ -140,6 +142,7 @@ function ImportVerbsPage() {
       praeteritum: d.praeteritum?.trim() || null,
       perfect: d.perfect?.trim() || null,
       conjugation: d.conjugation?.trim() || null,
+      praeteritum_conjugation: d.praeteritum_conjugation?.trim() || null,
       prepositions: d.prepositions.filter((p) => p.preposition.trim()),
       meanings: d.meanings,
       examples: [] as string[],
@@ -239,7 +242,12 @@ function ImportVerbsPage() {
                       <Input
                         value={d.conjugation ?? ""}
                         onChange={(e) => updateDraft(i, { conjugation: e.target.value })}
-                        placeholder="Konjugation (komme / kommst / kommt / kommen / kommt / kommen)"
+                        placeholder="Konjugation Präsens (komme / kommst / kommt / kommen / kommt / kommen)"
+                      />
+                      <Input
+                        value={d.praeteritum_conjugation ?? ""}
+                        onChange={(e) => updateDraft(i, { praeteritum_conjugation: e.target.value })}
+                        placeholder="Konjugation Präteritum (kam / kamst / kam / kamen / kamt / kamen)"
                       />
                       <Input
                         value={d.meanings.join(", ")}

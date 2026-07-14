@@ -33,6 +33,7 @@ type Row = {
   praeteritum: string | null;
   perfect: string | null;
   conjugation: string | null;
+  praeteritum_conjugation: string | null;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -71,6 +72,7 @@ function VerbsPage() {
         praeteritum: v.praeteritum || r.praeteritum || "",
         perfect: v.perfect || r.perfect || "",
         conjugation: v.conjugation || r.conjugation || "",
+        praeteritumConjugation: v.praeteritumConjugation || r.praeteritum_conjugation || "",
         prepositions: v.prepositions.length ? v.prepositions : (r.prepositions ?? []),
         meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
         examples: v.examples.length ? v.examples : r.examples ?? [],
@@ -88,7 +90,7 @@ function VerbsPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("verbs", (q) =>
-      q.select("id,present,praeteritum,perfect,conjugation,prepositions,meanings,examples,themes,comments,due_at,reps")
+      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,comments,due_at,reps")
         .order("present", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -159,6 +161,7 @@ function VerbsPage() {
       praeteritum: r.praeteritum ?? "",
       perfect: r.perfect ?? "",
       conjugation: r.conjugation ?? "",
+      praeteritumConjugation: r.praeteritum_conjugation ?? "",
       prepositions: r.prepositions ?? [],
       meanings: r.meanings,
       examples: r.examples,
@@ -177,6 +180,7 @@ function VerbsPage() {
         praeteritum: editValue.praeteritum.trim() || null,
         perfect: editValue.perfect.trim() || null,
         conjugation: editValue.conjugation.trim() || null,
+        praeteritum_conjugation: editValue.praeteritumConjugation.trim() || null,
         prepositions: editValue.prepositions.filter((p) => p.preposition.trim()),
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
@@ -210,6 +214,7 @@ function VerbsPage() {
       praeteritum: newValue.praeteritum.trim() || null,
       perfect: newValue.perfect.trim() || null,
       conjugation: newValue.conjugation.trim() || null,
+      praeteritum_conjugation: newValue.praeteritumConjugation.trim() || null,
       prepositions: newValue.prepositions.filter((p) => p.preposition.trim()),
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
@@ -362,6 +367,7 @@ function VerbsPage() {
           praeteritum: previewing.praeteritum,
           perfect: previewing.perfect,
           conjugation: previewing.conjugation,
+          praeteritum_conjugation: previewing.praeteritum_conjugation,
           prepositions: previewing.prepositions,
           meanings: previewing.meanings,
           examples: previewing.examples,

@@ -23,6 +23,7 @@ export type EditableCard = {
   praeteritum?: string | null;
   perfect?: string | null;
   conjugation?: string | null;
+  praeteritum_conjugation?: string | null;
   prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -68,6 +69,7 @@ export function CardEditDialog({
     praeteritum: card.praeteritum ?? "",
     perfect: card.perfect ?? "",
     conjugation: card.conjugation ?? "",
+    praeteritumConjugation: card.praeteritum_conjugation ?? "",
     prepositions: card.prepositions ?? [],
     meanings: card.meanings,
     examples: card.examples,
@@ -109,6 +111,7 @@ export function CardEditDialog({
           praeteritum: verb.praeteritum || r.praeteritum || "",
           perfect: verb.perfect || r.perfect || "",
           conjugation: verb.conjugation || r.conjugation || "",
+          praeteritumConjugation: verb.praeteritumConjugation || r.praeteritum_conjugation || "",
           prepositions: verb.prepositions.length ? verb.prepositions : (r.prepositions ?? []),
           meanings: verb.meanings.length ? verb.meanings : r.meanings ?? [],
           examples: verb.examples.length ? verb.examples : r.examples ?? [],
@@ -186,6 +189,7 @@ export function CardEditDialog({
           praeteritum: verb.praeteritum.trim() || null,
           perfect: verb.perfect.trim() || null,
           conjugation: verb.conjugation.trim() || null,
+          praeteritum_conjugation: verb.praeteritumConjugation.trim() || null,
           prepositions: verb.prepositions.filter((p) => p.preposition.trim()),
           meanings: verb.meanings,
           examples: verb.examples.filter((e) => e.trim()),
@@ -199,14 +203,14 @@ export function CardEditDialog({
           await deleteOldRow(card.kind, card.id);
           next = {
             ...card, id: data.id, kind: "verb", article: null, word: data.present, plural: null,
-            praeteritum: data.praeteritum, perfect: data.perfect, conjugation: data.conjugation, prepositions: data.prepositions ?? [],
+            praeteritum: data.praeteritum, perfect: data.perfect, conjugation: data.conjugation, praeteritum_conjugation: data.praeteritum_conjugation ?? null, prepositions: data.prepositions ?? [],
             meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
           };
         } else {
           const { error } = await (supabase as any).from("verbs").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind: "verb", article: null, plural: null, word: payload.present,
-            praeteritum: payload.praeteritum, perfect: payload.perfect, conjugation: payload.conjugation, prepositions: payload.prepositions,
+            praeteritum: payload.praeteritum, perfect: payload.perfect, conjugation: payload.conjugation, praeteritum_conjugation: payload.praeteritum_conjugation, prepositions: payload.prepositions,
             meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
         }
       } else {

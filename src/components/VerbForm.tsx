@@ -18,6 +18,7 @@ export type VerbFormValue = {
   praeteritum: string;
   perfect: string;
   conjugation: string;
+  praeteritumConjugation: string;
   prepositions: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -30,6 +31,7 @@ export const emptyVerb: VerbFormValue = {
   praeteritum: "",
   perfect: "",
   conjugation: "",
+  praeteritumConjugation: "",
   prepositions: [],
   meanings: [],
   examples: [],
@@ -151,6 +153,16 @@ export function VerbForm({
           value={value.conjugation}
           onChange={(e) => set("conjugation", e.target.value)}
           placeholder="komme / kommst / kommt / kommen / kommt / kommen"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="praeteritumConjugation" className="mb-2 block">Konjugation Präteritum (no pronouns)</Label>
+        <Input
+          id="praeteritumConjugation"
+          value={value.praeteritumConjugation}
+          onChange={(e) => set("praeteritumConjugation", e.target.value)}
+          placeholder="kam / kamst / kam / kamen / kamt / kamen"
         />
       </div>
 
