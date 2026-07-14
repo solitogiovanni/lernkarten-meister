@@ -1,0 +1,1 @@
+ALTER TABLE public.verbs ADD COLUMN IF NOT EXISTS praeteritum_conjugation text;

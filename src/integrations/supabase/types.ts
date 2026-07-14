@@ -149,6 +149,7 @@ export type Database = {
           meanings: string[]
           perfect: string | null
           praeteritum: string | null
+          praeteritum_conjugation: string | null
           prepositions: Json
           present: string
           reps: number
@@ -169,6 +170,7 @@ export type Database = {
           meanings?: string[]
           perfect?: string | null
           praeteritum?: string | null
+          praeteritum_conjugation?: string | null
           prepositions?: Json
           present: string
           reps?: number
@@ -189,6 +191,7 @@ export type Database = {
           meanings?: string[]
           perfect?: string | null
           praeteritum?: string | null
+          praeteritum_conjugation?: string | null
           prepositions?: Json
           present?: string
           reps?: number
@@ -299,6 +302,7 @@ export type Database = {
           meanings: string[]
           perfect: string | null
           praeteritum: string | null
+          praeteritum_conjugation: string | null
           prepositions: Json
           present: string
           reps: number
