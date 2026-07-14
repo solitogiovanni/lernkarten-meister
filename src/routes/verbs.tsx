@@ -367,6 +367,7 @@ function VerbsPage() {
           praeteritum: previewing.praeteritum,
           perfect: previewing.perfect,
           conjugation: previewing.conjugation,
+          praeteritum_conjugation: previewing.praeteritum_conjugation,
           prepositions: previewing.prepositions,
           meanings: previewing.meanings,
           examples: previewing.examples,
