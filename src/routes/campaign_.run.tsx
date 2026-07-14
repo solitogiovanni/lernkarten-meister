@@ -398,7 +398,7 @@ function FlashcardView({
                   <SpeakButton text={`die ${card.plural}`} size="icon" variant="ghost" />
                 </div>
               )}
-              {card.kind === "verb" && (card.praeteritum || card.perfect || card.conjugation) && (
+              {card.kind === "verb" && (card.praeteritum || card.perfect || card.conjugation || card.praeteritum_conjugation) && (
                 <div className="text-muted-foreground space-y-0.5">
                   {card.praeteritum && (
                     <div className="flex items-center justify-center gap-1">
@@ -414,8 +414,14 @@ function FlashcardView({
                   )}
                   {card.conjugation && (
                     <div className="text-sm">
-                      <span className="text-xs uppercase tracking-wider">Konjugation: </span>
+                      <span className="text-xs uppercase tracking-wider">Konjugation Präsens: </span>
                       <span className="font-medium text-foreground">{card.conjugation}</span>
+                    </div>
+                  )}
+                  {card.praeteritum_conjugation && (
+                    <div className="text-sm">
+                      <span className="text-xs uppercase tracking-wider">Konjugation Präteritum: </span>
+                      <span className="font-medium text-foreground">{card.praeteritum_conjugation}</span>
                     </div>
                   )}
                 </div>
