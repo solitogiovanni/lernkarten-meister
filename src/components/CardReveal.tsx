@@ -15,6 +15,7 @@ export type RevealCard = {
   praeteritum?: string | null;
   perfect?: string | null;
   conjugation?: string | null;
+  praeteritum_conjugation?: string | null;
   prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -91,8 +92,14 @@ export function CardRevealDialog({
                 )}
                 {card.conjugation && (
                   <div className="text-sm">
-                    <span className="text-xs uppercase tracking-wider">Konjugation: </span>
+                    <span className="text-xs uppercase tracking-wider">Konjugation Präsens: </span>
                     <span className="font-medium text-foreground">{card.conjugation}</span>
+                  </div>
+                )}
+                {card.praeteritum_conjugation && (
+                  <div className="text-sm">
+                    <span className="text-xs uppercase tracking-wider">Konjugation Präteritum: </span>
+                    <span className="font-medium text-foreground">{card.praeteritum_conjugation}</span>
                   </div>
                 )}
               </div>

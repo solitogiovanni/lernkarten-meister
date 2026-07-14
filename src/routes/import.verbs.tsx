@@ -242,7 +242,12 @@ function ImportVerbsPage() {
                       <Input
                         value={d.conjugation ?? ""}
                         onChange={(e) => updateDraft(i, { conjugation: e.target.value })}
-                        placeholder="Konjugation (komme / kommst / kommt / kommen / kommt / kommen)"
+                        placeholder="Konjugation Präsens (komme / kommst / kommt / kommen / kommt / kommen)"
+                      />
+                      <Input
+                        value={d.praeteritum_conjugation ?? ""}
+                        onChange={(e) => updateDraft(i, { praeteritum_conjugation: e.target.value })}
+                        placeholder="Konjugation Präteritum (kam / kamst / kam / kamen / kamt / kamen)"
                       />
                       <Input
                         value={d.meanings.join(", ")}
