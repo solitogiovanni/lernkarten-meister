@@ -207,6 +207,7 @@ export type AutofilledVerb = {
   praeteritum: string | null;
   perfect: string | null;
   conjugation: string | null;
+  praeteritum_conjugation: string | null;
   prepositions: VerbPreposition[];
   meanings: string[];
   themes: string[];
@@ -384,6 +385,7 @@ export const autofillVerbs = createServerFn({ method: "POST" })
 - praeteritum: 3rd person singular Präteritum (e.g. "ging", "wartete")
 - perfect: Perfekt 3rd person singular WITH the auxiliary verb sein/haben prefixed (e.g. "ist gegangen", "hat gewartet")
 - conjugation: the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " (e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"; for "sein" → "bin / bist / ist / sind / seid / sind")
+- praeteritum_conjugation: the six Präteritum forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " (e.g. for "kommen" → "kam / kamst / kam / kamen / kamt / kamen"; for "sein" → "war / warst / war / waren / wart / waren")
 - prepositions: array of objects {preposition, case, meaning}. Include ONLY prepositions that the verb genuinely governs. case is one of "akk", "dat", "gen". meaning is a short Italian gloss for that construction. Empty array if the verb takes no preposition.
 - meanings: 1 to 4 Italian translations, each a short verb phrase (infinitive)
 - themes: 1 to 3 short Italian thematic tags, lowercase (e.g. "movimento", "comunicazione", "emozioni", "lavoro", "quotidiano")
@@ -419,6 +421,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
                         praeteritum: { type: "string" },
                         perfect: { type: "string" },
                         conjugation: { type: "string" },
+                        praeteritum_conjugation: { type: "string" },
                         prepositions: {
                           type: "array",
                           items: {
@@ -462,6 +465,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         praeteritum: it.praeteritum ?? null,
         perfect: it.perfect ?? null,
         conjugation: it.conjugation ?? null,
+        praeteritum_conjugation: (it as any).praeteritum_conjugation ?? null,
         prepositions: (it.prepositions ?? []).map((p: any) => ({
           preposition: p.preposition ?? "",
           case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
