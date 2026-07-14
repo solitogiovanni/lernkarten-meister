@@ -23,6 +23,7 @@ export type EditableCard = {
   praeteritum?: string | null;
   perfect?: string | null;
   conjugation?: string | null;
+  praeteritum_conjugation?: string | null;
   prepositions?: VerbPrep[];
   meanings: string[];
   examples: string[];
@@ -68,6 +69,7 @@ export function CardEditDialog({
     praeteritum: card.praeteritum ?? "",
     perfect: card.perfect ?? "",
     conjugation: card.conjugation ?? "",
+    praeteritumConjugation: card.praeteritum_conjugation ?? "",
     prepositions: card.prepositions ?? [],
     meanings: card.meanings,
     examples: card.examples,
