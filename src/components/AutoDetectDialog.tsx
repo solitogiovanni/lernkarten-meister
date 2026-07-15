@@ -106,6 +106,7 @@ export function AutoDetectDialog({
         praeteritum: d.praeteritum?.trim() || null,
         perfect: d.perfect?.trim() || null,
         conjugation: d.conjugation?.trim() || null,
+        praeteritum_conjugation: d.praeteritum_conjugation?.trim() || null,
         prepositions: (d.prepositions ?? []).filter((p) => p.preposition.trim()),
         meanings: d.meanings,
         examples: d.examples,
@@ -209,7 +210,8 @@ export function AutoDetectDialog({
                           <Input value={d.praeteritum ?? ""} onChange={(e) => updateDraft(i, { praeteritum: e.target.value })} placeholder="Präteritum" />
                           <Input value={d.perfect ?? ""} onChange={(e) => updateDraft(i, { perfect: e.target.value })} placeholder="Perfekt" />
                         </div>
-                        <Input value={d.conjugation ?? ""} onChange={(e) => updateDraft(i, { conjugation: e.target.value })} placeholder="komme / kommst / kommt / kommen / kommt / kommen" />
+                        <Input value={d.conjugation ?? ""} onChange={(e) => updateDraft(i, { conjugation: e.target.value })} placeholder="Präsens: komme / kommst / kommt / kommen / kommt / kommen" />
+                        <Input value={d.praeteritum_conjugation ?? ""} onChange={(e) => updateDraft(i, { praeteritum_conjugation: e.target.value })} placeholder="Präteritum: kam / kamst / kam / kamen / kamt / kamen" />
                         <Input value={d.meanings.join(", ")} onChange={(e) => updateDraft(i, { meanings: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="meanings (comma)" />
                         {(d.prepositions ?? []).length > 0 && (
                           <div className="space-y-1.5">
