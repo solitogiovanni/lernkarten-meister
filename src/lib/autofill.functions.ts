@@ -234,6 +234,7 @@ export type MixedItem = {
   praeteritum?: string | null;
   perfect?: string | null;
   conjugation?: string | null;
+  praeteritum_conjugation?: string | null;
   prepositions?: VerbPreposition[];
   // adjective/adverb
   word?: string;
@@ -270,6 +271,7 @@ If kind = "verb", also return:
 - praeteritum: 3rd person singular Präteritum
 - perfect: Perfekt 3rd person singular WITH the auxiliary verb (e.g. "ist gegangen")
 - conjugation: the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " (e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen")
+- praeteritum_conjugation: the six Präteritum forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " (e.g. for "kommen" → "kam / kamst / kam / kamen / kamt / kamen")
 - prepositions: array of {preposition, case ("akk"|"dat"|"gen"), meaning}, only for prepositions the verb genuinely governs. Empty array if none. If non-empty, include at least one example per preposition (total examples = max(2, number_of_prepositions + 1)).
 
 If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction", also return:
@@ -309,6 +311,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
                         praeteritum: { type: "string" },
                         perfect: { type: "string" },
                         conjugation: { type: "string" },
+                        praeteritum_conjugation: { type: "string" },
                         prepositions: {
                           type: "array",
                           items: {
@@ -357,6 +360,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
         praeteritum: it.praeteritum ?? null,
         perfect: it.perfect ?? null,
         conjugation: it.conjugation ?? null,
+        praeteritum_conjugation: it.praeteritum_conjugation ?? null,
         prepositions: (it.prepositions ?? []).map((p: any) => ({
           preposition: p.preposition ?? "",
           case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
@@ -506,7 +510,7 @@ For EACH item return:
 - examples: at least 2 short, natural German example sentences using the word AS that part of speech
 
 If kind = "noun": noun (capitalized singular), article (der/die/das), plural (or null).
-If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), conjugation (the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"), prepositions (array, possibly empty).
+If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), conjugation (the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"), praeteritum_conjugation (the six Präteritum forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "kam / kamst / kam / kamen / kamt / kamen"), prepositions (array, possibly empty).
 If kind = "adjective" or "adverb": word (lowercase base form).
 
 Only include kinds the word genuinely could be. If the word is unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
@@ -543,6 +547,7 @@ Only include kinds the word genuinely could be. If the word is unambiguous, retu
                         praeteritum: { type: "string" },
                         perfect: { type: "string" },
                         conjugation: { type: "string" },
+                        praeteritum_conjugation: { type: "string" },
                         prepositions: {
                           type: "array",
                           items: {
@@ -591,6 +596,7 @@ Only include kinds the word genuinely could be. If the word is unambiguous, retu
         praeteritum: it.praeteritum ?? null,
         perfect: it.perfect ?? null,
         conjugation: it.conjugation ?? null,
+        praeteritum_conjugation: it.praeteritum_conjugation ?? null,
         prepositions: (it.prepositions ?? []).map((p: any) => ({
           preposition: p.preposition ?? "",
           case: (p.case as "akk" | "dat" | "gen" | undefined) ?? null,
