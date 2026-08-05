@@ -1,30 +1,28 @@
-## Add Präteritum Konjugation to verbs
+# Synonyms and Opposites on cards
 
-Add a new field storing the Präteritum conjugation (no pronouns), shown/edited alongside the existing Präsens Konjugation and filled by AI.
+Add two new list fields — **Synonyms** and **Opposites (Contrary)** — to Noun, Verb, Adjective and Adverb cards, and have the AI Fill / Auto-detect features populate them when they exist.
 
-### 1. Database
-Migration on `verbs` table:
-- Add column `praeteritum_conjugation text` (nullable).
+## What changes for you
 
-### 2. Form — `src/components/VerbForm.tsx`
-- Extend `VerbFormValue` with `praeteritumConjugation: string`.
-- Add an input directly below the existing "Konjugation (Präsens, no pronouns)" field, labeled **"Konjugation Präteritum (no pronouns)"**, placeholder e.g. `kam / kamst / kam / kamen / kamt / kamen`.
-- Update `emptyVerb`.
+- Each Noun, Verb, Adjective and Adverb card gains two tag-style fields: Synonyms and Opposites, edited exactly like the existing Meanings/Themes chips (type, Enter, chip appears).
+- The fields show on the card preview and on the flashcard back during a campaign, each with a pronunciation speaker icon like other German text.
+- Pressing **AI Fill** (deck pages, campaign card editor, Auto-detect dialog, and the importers) fills German synonyms and opposites when they exist for that word; when none apply, the fields stay empty rather than being invented.
+- Prepositions, pronouns and conjunctions keep their current fields — no synonym/opposite inputs there.
 
-### 3. Edit dialog — `src/components/CardEditDialog.tsx`
-- Include `praeteritum_conjugation` in verb insert/update payloads and in the resulting `EditableCard` mapping.
-- Wire initial state from `card.praeteritum_conjugation`.
-- Extend `EditableCard` type with `praeteritum_conjugation?: string | null`.
+## Technical outline
 
-### 4. AI autofill — `src/lib/autofill.functions.ts`
-- In `autofillVerbs`, extend the Zod schema and the prompt so the model returns `praeteritum_conjugation` (six forms, slash-separated, no pronouns, matching the existing `conjugation` format).
-- Return it in `results`.
-- Update the AI-fill merge in `CardEditDialog` to populate the new field (only if empty), same pattern as `conjugation`.
+Database migration
+- Add `synonyms text[] not null default '{}'` and `antonyms text[] not null default '{}'` to `public.nouns`, `public.verbs`, `public.words`.
 
-### 5. Card display — `src/components/CardReveal.tsx`
-- Render the Präteritum conjugation line below the Präsens conjugation when present.
+Forms
+- `NounForm.tsx`, `VerbForm.tsx`, `WordForm.tsx`: add `synonyms` / `antonyms` to the value type and empty defaults, plus two `ChipInput` blocks. In `WordForm`, render them only for `adjective` and `adverb` kinds.
 
-### 6. Other verb entry points
-- `src/routes/verbs.tsx` and `src/routes/import.verbs.tsx`: include the new field in select/insert/import so it round-trips and gets populated by bulk AI fill.
+Display
+- `CardReveal.tsx`: render both lists as badges with `SpeakButton` per entry.
+- `campaign_.run.tsx`: add the fields to the `Card` type, the select lists, the row mappers, and the flashcard back.
 
-No changes to SRS logic, other decks, or existing verb rows (field is nullable; older cards simply won't show a Präteritum line until edited or re-filled).
+AI
+- `src/lib/autofill.functions.ts`: extend the noun/verb/word autofill schemas and prompts (and the mixed-import + `detectWordKinds` schemas) with `synonyms` and `antonyms`, instructing the model to return German lemmas only and empty arrays when nothing fits.
+
+Persistence
+- Include the two fields in insert/update payloads and load selects in: `routes/index.tsx` (nouns), `routes/verbs.tsx`, `components/WordDeckPage.tsx`, `components/CardEditDialog.tsx`, `components/AutoDetectDialog.tsx`, `routes/import_.tsx`, `routes/import.verbs.tsx`, `components/WordImportPage.tsx`.
