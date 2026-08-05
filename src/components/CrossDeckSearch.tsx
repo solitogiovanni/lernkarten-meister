@@ -20,6 +20,8 @@ type NounHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[] | null;
+  antonyms: string[] | null;
   comments: string | null;
 };
 type VerbHit = {
@@ -31,6 +33,8 @@ type VerbHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[] | null;
+  antonyms: string[] | null;
   comments: string | null;
 };
 type WordHit = {
@@ -40,6 +44,8 @@ type WordHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[] | null;
+  antonyms: string[] | null;
   comments: string | null;
 };
 
@@ -96,9 +102,9 @@ export function CrossDeckSearch({
       setBusy(true);
       const like = `%${term}%`;
       const sb: any = supabase;
-      const nounSel = "id,article,noun,plural,meanings,examples,themes,comments";
-      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,comments";
-      const wordSel = "id,word,kind,meanings,examples,themes,comments";
+      const nounSel = "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments";
+      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments";
+      const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments";
 
       const [nWord, nMean, vWord, vMean, wWord, wMean] = await Promise.all([
         currentKind === "noun"
@@ -151,6 +157,8 @@ export function CrossDeckSearch({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      synonyms: r.synonyms ?? [],
+      antonyms: r.antonyms ?? [],
       comments: r.comments,
     },
   });
@@ -166,6 +174,8 @@ export function CrossDeckSearch({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      synonyms: r.synonyms ?? [],
+      antonyms: r.antonyms ?? [],
       comments: r.comments,
     },
   });
@@ -178,6 +188,8 @@ export function CrossDeckSearch({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      synonyms: r.synonyms ?? [],
+      antonyms: r.antonyms ?? [],
       comments: r.comments,
     },
   });
