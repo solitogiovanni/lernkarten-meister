@@ -375,7 +375,7 @@ export function WordDeckPage({
             <SheetTitle>Edit {formLabel.toLowerCase()}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} label={formLabel} placeholder={formPlaceholder} />
+            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
             <div className="flex justify-between mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
@@ -397,7 +397,7 @@ export function WordDeckPage({
             <SheetTitle>{addLabel}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} label={formLabel} placeholder={formPlaceholder} />
+            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
             {newDuplicate && (
               <div className="mt-3 text-sm text-amber-700 dark:text-amber-400 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2">
                 ⚠ "{newValue.word.trim()}" is already in your deck
