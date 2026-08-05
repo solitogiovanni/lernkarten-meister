@@ -14,6 +14,8 @@ export type NounFormValue = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[];
+  antonyms: string[];
   comments: string;
 };
 
@@ -24,6 +26,8 @@ export const emptyNoun: NounFormValue = {
   meanings: [],
   examples: [],
   themes: [],
+  synonyms: [],
+  antonyms: [],
   comments: "",
 };
 
@@ -175,6 +179,25 @@ export function NounForm({
             <Plus className="h-4 w-4 mr-1" /> Add example
           </Button>
         </div>
+      </div>
+
+
+      <div>
+        <Label className="mb-2 block">Synonyms (German)</Label>
+        <ChipInput
+          values={value.synonyms}
+          onChange={(v) => set("synonyms", v)}
+          placeholder="add a synonym…"
+        />
+      </div>
+
+      <div>
+        <Label className="mb-2 block">Opposites (German)</Label>
+        <ChipInput
+          values={value.antonyms}
+          onChange={(v) => set("antonyms", v)}
+          placeholder="add an opposite…"
+        />
       </div>
 
       <div>
