@@ -27,6 +27,8 @@ type NounRow = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[];
+  antonyms: string[];
   comments: string | null;
   due_at: string;
   reps: number;
@@ -69,7 +71,7 @@ function DeckPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<NounRow>("nouns", (q) =>
-      q.select("id,article,noun,plural,meanings,examples,themes,comments,due_at,reps")
+      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps")
         .order("noun", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -138,6 +140,8 @@ function DeckPage() {
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      synonyms: r.synonyms ?? [],
+      antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
     });
   };
@@ -154,6 +158,8 @@ function DeckPage() {
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        synonyms: editValue.synonyms,
+        antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
       })
       .eq("id", editing.id);
@@ -185,6 +191,8 @@ function DeckPage() {
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      synonyms: newValue.synonyms,
+      antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
     });
     if (error) return toast.error(error.message);
@@ -214,6 +222,8 @@ function DeckPage() {
         meanings: v.meanings.length ? v.meanings : r.meanings,
         examples: v.examples.length ? v.examples : r.examples ?? [],
         themes: v.themes.length ? v.themes : r.themes,
+        synonyms: v.synonyms.length ? v.synonyms : r.synonyms ?? [],
+        antonyms: v.antonyms.length ? v.antonyms : r.antonyms ?? [],
         comments: v.comments,
       };
       if (target === "edit") setEditValue(merged);
@@ -389,6 +399,8 @@ function DeckPage() {
           meanings: previewing.meanings,
           examples: previewing.examples,
           themes: previewing.themes,
+          synonyms: previewing.synonyms,
+          antonyms: previewing.antonyms,
           comments: previewing.comments,
         } : null}
         onEdit={() => {

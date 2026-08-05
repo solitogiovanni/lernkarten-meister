@@ -38,6 +38,8 @@ type Row = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[];
+  antonyms: string[];
   comments: string | null;
   due_at: string;
   reps: number;
@@ -77,6 +79,8 @@ function VerbsPage() {
         meanings: v.meanings.length ? v.meanings : r.meanings ?? [],
         examples: v.examples.length ? v.examples : r.examples ?? [],
         themes: v.themes.length ? v.themes : r.themes ?? [],
+        synonyms: v.synonyms.length ? v.synonyms : r.synonyms ?? [],
+        antonyms: v.antonyms.length ? v.antonyms : r.antonyms ?? [],
         comments: v.comments,
       };
       if (target === "edit") setEditValue(merged);
@@ -90,7 +94,7 @@ function VerbsPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("verbs", (q) =>
-      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,comments,due_at,reps")
+      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps")
         .order("present", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -166,6 +170,8 @@ function VerbsPage() {
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      synonyms: r.synonyms ?? [],
+      antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
     });
   };
@@ -185,6 +191,8 @@ function VerbsPage() {
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        synonyms: editValue.synonyms,
+        antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
       })
       .eq("id", editing.id);
@@ -219,6 +227,8 @@ function VerbsPage() {
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      synonyms: newValue.synonyms,
+      antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
     });
     if (error) return toast.error(error.message);
@@ -372,6 +382,8 @@ function VerbsPage() {
           meanings: previewing.meanings,
           examples: previewing.examples,
           themes: previewing.themes,
+          synonyms: previewing.synonyms,
+          antonyms: previewing.antonyms,
           comments: previewing.comments,
         } : null}
         onEdit={() => {
