@@ -47,6 +47,8 @@ type Card = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[];
+  antonyms: string[];
   comments: string | null;
   ease: number;
   interval_days: number;
@@ -92,13 +94,13 @@ function RunPage() {
       const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
       const [nRes, wRes, vRes] = await Promise.all([
         wantNoun
-          ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
         wantWords
-          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
+          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
@@ -116,6 +118,8 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        synonyms: r.synonyms ?? [],
+        antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
@@ -137,6 +141,8 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        synonyms: r.synonyms ?? [],
+        antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
@@ -158,6 +164,8 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        synonyms: r.synonyms ?? [],
+        antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
