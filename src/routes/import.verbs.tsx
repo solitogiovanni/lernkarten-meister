@@ -89,6 +89,8 @@ function ImportVerbsPage() {
           prepositions: r?.prepositions ?? [],
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
+          synonyms: r?.synonyms ?? [],
+          antonyms: r?.antonyms ?? [],
           examples: r?.examples ?? [],
           include: !dupExisting,
         };
@@ -115,6 +117,8 @@ function ImportVerbsPage() {
           meanings: p.meanings,
           themes: [],
           examples: [],
+          synonyms: [],
+          antonyms: [],
           include: !dupExisting,
         };
       })
@@ -147,6 +151,8 @@ function ImportVerbsPage() {
       meanings: d.meanings,
       examples: [] as string[],
       themes: d.themes,
+      synonyms: d.synonyms,
+      antonyms: d.antonyms,
     }));
     const { error } = await (supabase as any).from("verbs").insert(rows);
     setSaving(false);

@@ -92,6 +92,8 @@ export function WordImportPage({
           word,
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
+          synonyms: r?.synonyms ?? [],
+          antonyms: r?.antonyms ?? [],
           examples: r?.examples ?? [],
           include: !dupExisting,
         };
@@ -113,6 +115,8 @@ export function WordImportPage({
           meanings: p.meanings,
           themes: [],
           examples: [],
+          synonyms: [],
+          antonyms: [],
           include: !dupExisting,
         };
       })
@@ -133,6 +137,8 @@ export function WordImportPage({
       meanings: d.meanings,
       examples: [] as string[],
       themes: d.themes,
+      synonyms: d.synonyms,
+      antonyms: d.antonyms,
     }));
     const { error } = await (supabase as any).from("words").insert(rows);
     setSaving(false);
