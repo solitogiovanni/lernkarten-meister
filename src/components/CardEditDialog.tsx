@@ -28,6 +28,8 @@ export type EditableCard = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms?: string[] | null;
+  antonyms?: string[] | null;
   comments?: string | null;
   ease: number;
   interval_days: number;
@@ -55,6 +57,8 @@ export function CardEditDialog({
     meanings: card.meanings,
     examples: card.examples,
     themes: card.themes,
+    synonyms: card.synonyms ?? [],
+    antonyms: card.antonyms ?? [],
     comments: card.comments ?? "",
   });
   const [word, setWord] = useState<WordFormValue>({
@@ -62,6 +66,8 @@ export function CardEditDialog({
     meanings: card.meanings,
     examples: card.examples,
     themes: card.themes,
+    synonyms: card.synonyms ?? [],
+    antonyms: card.antonyms ?? [],
     comments: card.comments ?? "",
   });
   const [verb, setVerb] = useState<VerbFormValue>({
@@ -74,6 +80,8 @@ export function CardEditDialog({
     meanings: card.meanings,
     examples: card.examples,
     themes: card.themes,
+    synonyms: card.synonyms ?? [],
+    antonyms: card.antonyms ?? [],
     comments: card.comments ?? "",
   });
   const [saving, setSaving] = useState(false);
@@ -98,6 +106,8 @@ export function CardEditDialog({
           meanings: noun.meanings.length ? noun.meanings : r.meanings,
           examples: noun.examples.length ? noun.examples : r.examples ?? [],
           themes: noun.themes.length ? noun.themes : r.themes,
+          synonyms: noun.synonyms.length ? noun.synonyms : r.synonyms ?? [],
+          antonyms: noun.antonyms.length ? noun.antonyms : r.antonyms ?? [],
           comments: noun.comments,
         });
       } else if (kind === "verb") {
@@ -116,6 +126,8 @@ export function CardEditDialog({
           meanings: verb.meanings.length ? verb.meanings : r.meanings ?? [],
           examples: verb.examples.length ? verb.examples : r.examples ?? [],
           themes: verb.themes.length ? verb.themes : r.themes ?? [],
+          synonyms: verb.synonyms.length ? verb.synonyms : r.synonyms ?? [],
+          antonyms: verb.antonyms.length ? verb.antonyms : r.antonyms ?? [],
           comments: verb.comments,
         });
       } else {
@@ -129,6 +141,8 @@ export function CardEditDialog({
           meanings: word.meanings.length ? word.meanings : r.meanings,
           examples: word.examples.length ? word.examples : r.examples ?? [],
           themes: word.themes.length ? word.themes : r.themes,
+          synonyms: word.synonyms.length ? word.synonyms : r.synonyms ?? [],
+          antonyms: word.antonyms.length ? word.antonyms : r.antonyms ?? [],
           comments: word.comments,
         });
       }
@@ -165,6 +179,8 @@ export function CardEditDialog({
           meanings: noun.meanings,
           examples: noun.examples.filter((e) => e.trim()),
           themes: noun.themes,
+          synonyms: noun.synonyms,
+          antonyms: noun.antonyms,
           comments: noun.comments.trim() || null,
         };
         if (!payload.noun) throw new Error("Noun is required");
@@ -175,13 +191,13 @@ export function CardEditDialog({
           next = {
             ...card, id: data.id, kind: "noun", article: data.article, word: data.noun, plural: data.plural,
             praeteritum: null, perfect: null, prepositions: [],
-            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], synonyms: data.synonyms ?? [], antonyms: data.antonyms ?? [], comments: data.comments ?? null,
           };
         } else {
           const { error } = await (supabase as any).from("nouns").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, article: payload.article, word: payload.noun, plural: payload.plural,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
         }
       } else if (kind === "verb") {
         const payload = {
@@ -194,6 +210,8 @@ export function CardEditDialog({
           meanings: verb.meanings,
           examples: verb.examples.filter((e) => e.trim()),
           themes: verb.themes,
+          synonyms: verb.synonyms,
+          antonyms: verb.antonyms,
           comments: verb.comments.trim() || null,
         };
         if (!payload.present) throw new Error("Present is required");
@@ -204,14 +222,14 @@ export function CardEditDialog({
           next = {
             ...card, id: data.id, kind: "verb", article: null, word: data.present, plural: null,
             praeteritum: data.praeteritum, perfect: data.perfect, conjugation: data.conjugation, praeteritum_conjugation: data.praeteritum_conjugation ?? null, prepositions: data.prepositions ?? [],
-            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], synonyms: data.synonyms ?? [], antonyms: data.antonyms ?? [], comments: data.comments ?? null,
           };
         } else {
           const { error } = await (supabase as any).from("verbs").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind: "verb", article: null, plural: null, word: payload.present,
             praeteritum: payload.praeteritum, perfect: payload.perfect, conjugation: payload.conjugation, praeteritum_conjugation: payload.praeteritum_conjugation, prepositions: payload.prepositions,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
         }
       } else {
         const payload = {
@@ -220,6 +238,8 @@ export function CardEditDialog({
           meanings: word.meanings,
           examples: word.examples.filter((e) => e.trim()),
           themes: word.themes,
+          synonyms: word.synonyms,
+          antonyms: word.antonyms,
           comments: word.comments.trim() || null,
         };
         if (!payload.word) throw new Error("Word is required");
@@ -230,13 +250,13 @@ export function CardEditDialog({
           next = {
             ...card, id: data.id, kind, article: null, word: data.word, plural: null,
             praeteritum: null, perfect: null, prepositions: [],
-            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], comments: data.comments ?? null,
+            meanings: data.meanings ?? [], examples: data.examples ?? [], themes: data.themes ?? [], synonyms: data.synonyms ?? [], antonyms: data.antonyms ?? [], comments: data.comments ?? null,
           };
         } else {
           const { error } = await (supabase as any).from("words").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind, article: null, plural: null, word: payload.word,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, comments: payload.comments };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
         }
       }
 
@@ -283,6 +303,7 @@ export function CardEditDialog({
               value={word}
               onChange={setWord}
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
+              showSynonyms={kind === "adjective" || kind === "adverb"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}

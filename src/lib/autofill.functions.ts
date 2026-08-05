@@ -1,6 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+const SYN_RULE = `
+
+Additionally, for items that are nouns, verbs, adjectives or adverbs, return:
+- synonyms: 0 to 4 German words (same part of speech, base/lemma form) with a similar meaning. Return an empty array if there is no good German synonym. Never invent words.
+- antonyms: 0 to 4 German words (same part of speech, base/lemma form) with the opposite meaning. Return an empty array if the word has no meaningful opposite. Never invent words.
+For prepositions, pronouns and conjunctions always return empty arrays for synonyms and antonyms.`;
+
+
 const NounsInput = z.object({
   nouns: z.array(z.string().min(1)).min(1).max(50),
 });
@@ -13,6 +21,8 @@ export type AutofilledNoun = {
   meanings: string[];
   themes: string[];
   examples: string[];
+  synonyms: string[];
+  antonyms: string[];
 };
 
 export const autofillNouns = createServerFn({ method: "POST" })
@@ -38,7 +48,7 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these inputs:\n${data.nouns.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
           ],
           tools: [{
@@ -61,6 +71,8 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
                         examples: { type: "array", items: { type: "string" } },
+                        synonyms: { type: "array", items: { type: "string" } },
+                        antonyms: { type: "array", items: { type: "string" } },
                       },
                       required: ["input", "noun", "meanings", "themes", "examples"],
                     },
@@ -91,6 +103,8 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],
+        synonyms: it.synonyms ?? [],
+        antonyms: it.antonyms ?? [],
       }));
       return { results, error: null };
     } catch (e) {
@@ -110,6 +124,8 @@ export type AutofilledWord = {
   meanings: string[];
   themes: string[];
   examples: string[];
+  synonyms: string[];
+  antonyms: string[];
 };
 
 export const autofillWords = createServerFn({ method: "POST" })
@@ -134,7 +150,7 @@ Be accurate.`;
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these ${kindLabel}s:\n${data.words.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
           ],
           tools: [{
@@ -155,6 +171,8 @@ Be accurate.`;
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
                         examples: { type: "array", items: { type: "string" } },
+                        synonyms: { type: "array", items: { type: "string" } },
+                        antonyms: { type: "array", items: { type: "string" } },
                       },
                       required: ["input", "word", "meanings", "themes", "examples"],
                     },
@@ -183,6 +201,8 @@ Be accurate.`;
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],
+        synonyms: it.synonyms ?? [],
+        antonyms: it.antonyms ?? [],
       }));
       return { results, error: null };
     } catch (e) {
@@ -212,6 +232,8 @@ export type AutofilledVerb = {
   meanings: string[];
   themes: string[];
   examples: string[];
+  synonyms: string[];
+  antonyms: string[];
 };
 
 // ============ Mixed import (auto-classify) ============
@@ -242,6 +264,8 @@ export type MixedItem = {
   meanings: string[];
   themes: string[];
   examples: string[];
+  synonyms: string[];
+  antonyms: string[];
 };
 
 export const autofillMixed = createServerFn({ method: "POST" })
@@ -286,7 +310,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these inputs:\n${data.lines.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
           ],
           tools: [{
@@ -328,6 +352,8 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
                         examples: { type: "array", items: { type: "string" } },
+                        synonyms: { type: "array", items: { type: "string" } },
+                        antonyms: { type: "array", items: { type: "string" } },
                       },
                       required: ["input", "kind", "meanings", "themes", "examples"],
                     },
@@ -370,6 +396,8 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],
+        synonyms: it.synonyms ?? [],
+        antonyms: it.antonyms ?? [],
       }));
       return { results, error: null };
     } catch (e) {
@@ -404,7 +432,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these verbs:\n${data.verbs.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
           ],
           tools: [{
@@ -441,6 +469,8 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
                         examples: { type: "array", items: { type: "string" } },
+                        synonyms: { type: "array", items: { type: "string" } },
+                        antonyms: { type: "array", items: { type: "string" } },
                       },
                       required: ["input", "present", "meanings", "themes", "examples"],
                     },
@@ -478,6 +508,8 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],
+        synonyms: it.synonyms ?? [],
+        antonyms: it.antonyms ?? [],
       }));
       return { results, error: null };
     } catch (e) {
@@ -522,7 +554,7 @@ Only include kinds the word genuinely could be. If the word is unambiguous, retu
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Classify: ${data.word}` },
           ],
           tools: [{
@@ -564,6 +596,8 @@ Only include kinds the word genuinely could be. If the word is unambiguous, retu
                         meanings: { type: "array", items: { type: "string" } },
                         themes: { type: "array", items: { type: "string" } },
                         examples: { type: "array", items: { type: "string" } },
+                        synonyms: { type: "array", items: { type: "string" } },
+                        antonyms: { type: "array", items: { type: "string" } },
                       },
                       required: ["input", "kind", "meanings", "themes", "examples"],
                     },
@@ -606,6 +640,8 @@ Only include kinds the word genuinely could be. If the word is unambiguous, retu
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],
+        synonyms: it.synonyms ?? [],
+        antonyms: it.antonyms ?? [],
       }));
       return { results, error: null };
     } catch (e) {

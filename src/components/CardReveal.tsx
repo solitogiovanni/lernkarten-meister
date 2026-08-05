@@ -20,6 +20,8 @@ export type RevealCard = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms?: string[] | null;
+  antonyms?: string[] | null;
   comments?: string | null;
 };
 
@@ -128,6 +130,32 @@ export function CardRevealDialog({
                 ))}
               </div>
             )}
+            {(card.synonyms?.length || card.antonyms?.length) ? (
+              <div className="space-y-1.5 text-sm">
+                {card.synonyms && card.synonyms.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">Synonyms:</span>
+                    {card.synonyms.map((w) => (
+                      <span key={w} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full border bg-muted">
+                        {w}
+                        <SpeakButton text={w} size="icon" variant="ghost" />
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {card.antonyms && card.antonyms.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">Opposites:</span>
+                    {card.antonyms.map((w) => (
+                      <span key={w} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full border bg-muted">
+                        {w}
+                        <SpeakButton text={w} size="icon" variant="ghost" />
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
             {card.comments && (
               <div className="text-sm text-amber-700 dark:text-amber-300 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2 mt-3 text-left max-w-md mx-auto max-h-40 overflow-y-auto">
                 {/<[a-z][\s\S]*>/i.test(card.comments) ? (

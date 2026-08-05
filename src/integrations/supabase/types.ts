@@ -40,6 +40,7 @@ export type Database = {
       }
       nouns: {
         Row: {
+          antonyms: string[]
           article: Database["public"]["Enums"]["german_article"] | null
           comments: string | null
           created_at: string
@@ -54,10 +55,12 @@ export type Database = {
           noun: string
           plural: string | null
           reps: number
+          synonyms: string[]
           themes: string[]
           updated_at: string
         }
         Insert: {
+          antonyms?: string[]
           article?: Database["public"]["Enums"]["german_article"] | null
           comments?: string | null
           created_at?: string
@@ -72,10 +75,12 @@ export type Database = {
           noun: string
           plural?: string | null
           reps?: number
+          synonyms?: string[]
           themes?: string[]
           updated_at?: string
         }
         Update: {
+          antonyms?: string[]
           article?: Database["public"]["Enums"]["german_article"] | null
           comments?: string | null
           created_at?: string
@@ -90,6 +95,7 @@ export type Database = {
           noun?: string
           plural?: string | null
           reps?: number
+          synonyms?: string[]
           themes?: string[]
           updated_at?: string
         }
@@ -136,6 +142,7 @@ export type Database = {
       }
       verbs: {
         Row: {
+          antonyms: string[]
           comments: string | null
           conjugation: string | null
           created_at: string
@@ -153,10 +160,12 @@ export type Database = {
           prepositions: Json
           present: string
           reps: number
+          synonyms: string[]
           themes: string[]
           updated_at: string
         }
         Insert: {
+          antonyms?: string[]
           comments?: string | null
           conjugation?: string | null
           created_at?: string
@@ -174,10 +183,12 @@ export type Database = {
           prepositions?: Json
           present: string
           reps?: number
+          synonyms?: string[]
           themes?: string[]
           updated_at?: string
         }
         Update: {
+          antonyms?: string[]
           comments?: string | null
           conjugation?: string | null
           created_at?: string
@@ -195,6 +206,7 @@ export type Database = {
           prepositions?: Json
           present?: string
           reps?: number
+          synonyms?: string[]
           themes?: string[]
           updated_at?: string
         }
@@ -202,6 +214,7 @@ export type Database = {
       }
       words: {
         Row: {
+          antonyms: string[]
           comments: string | null
           created_at: string
           due_at: string
@@ -214,11 +227,13 @@ export type Database = {
           last_rated_at: string | null
           meanings: string[]
           reps: number
+          synonyms: string[]
           themes: string[]
           updated_at: string
           word: string
         }
         Insert: {
+          antonyms?: string[]
           comments?: string | null
           created_at?: string
           due_at?: string
@@ -231,11 +246,13 @@ export type Database = {
           last_rated_at?: string | null
           meanings?: string[]
           reps?: number
+          synonyms?: string[]
           themes?: string[]
           updated_at?: string
           word: string
         }
         Update: {
+          antonyms?: string[]
           comments?: string | null
           created_at?: string
           due_at?: string
@@ -248,6 +265,7 @@ export type Database = {
           last_rated_at?: string | null
           meanings?: string[]
           reps?: number
+          synonyms?: string[]
           themes?: string[]
           updated_at?: string
           word?: string
@@ -262,6 +280,7 @@ export type Database = {
       search_nouns_by_meaning: {
         Args: { term: string }
         Returns: {
+          antonyms: string[]
           article: Database["public"]["Enums"]["german_article"] | null
           comments: string | null
           created_at: string
@@ -276,6 +295,7 @@ export type Database = {
           noun: string
           plural: string | null
           reps: number
+          synonyms: string[]
           themes: string[]
           updated_at: string
         }[]
@@ -289,6 +309,7 @@ export type Database = {
       search_verbs_by_meaning: {
         Args: { term: string }
         Returns: {
+          antonyms: string[]
           comments: string | null
           conjugation: string | null
           created_at: string
@@ -306,6 +327,7 @@ export type Database = {
           prepositions: Json
           present: string
           reps: number
+          synonyms: string[]
           themes: string[]
           updated_at: string
         }[]
@@ -319,6 +341,7 @@ export type Database = {
       search_words_by_meaning: {
         Args: { term: string }
         Returns: {
+          antonyms: string[]
           comments: string | null
           created_at: string
           due_at: string
@@ -331,6 +354,7 @@ export type Database = {
           last_rated_at: string | null
           meanings: string[]
           reps: number
+          synonyms: string[]
           themes: string[]
           updated_at: string
           word: string

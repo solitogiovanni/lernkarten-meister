@@ -12,6 +12,8 @@ export type WordFormValue = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  synonyms: string[];
+  antonyms: string[];
   comments: string;
 };
 
@@ -20,6 +22,8 @@ export const emptyWord: WordFormValue = {
   meanings: [],
   examples: [],
   themes: [],
+  synonyms: [],
+  antonyms: [],
   comments: "",
 };
 
@@ -83,12 +87,14 @@ export function WordForm({
   themeSuggestions,
   label,
   placeholder,
+  showSynonyms = true,
 }: {
   value: WordFormValue;
   onChange: (v: WordFormValue) => void;
   themeSuggestions?: string[];
   label: string;
   placeholder: string;
+  showSynonyms?: boolean;
 }) {
   const set = <K extends keyof WordFormValue>(k: K, v: WordFormValue[K]) =>
     onChange({ ...value, [k]: v });
@@ -148,6 +154,29 @@ export function WordForm({
           </Button>
         </div>
       </div>
+
+
+      {showSynonyms && (
+        <>
+      <div>
+        <Label className="mb-2 block">Synonyms (German)</Label>
+        <ChipInput
+          values={value.synonyms}
+          onChange={(v) => set("synonyms", v)}
+          placeholder="add a synonym…"
+        />
+      </div>
+
+      <div>
+        <Label className="mb-2 block">Opposites (German)</Label>
+        <ChipInput
+          values={value.antonyms}
+          onChange={(v) => set("antonyms", v)}
+          placeholder="add an opposite…"
+        />
+      </div>
+        </>
+      )}
 
       <div>
         <Label htmlFor="word-comments" className="mb-2 block">Comments</Label>

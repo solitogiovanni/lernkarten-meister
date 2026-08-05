@@ -147,6 +147,8 @@ function ImportPage() {
           kind,
           meanings: p.meanings.length ? p.meanings : r?.meanings ?? [],
           themes: r?.themes ?? [],
+          synonyms: r?.synonyms ?? [],
+          antonyms: r?.antonyms ?? [],
           examples: r?.examples ?? [],
           include: true,
         };
@@ -239,6 +241,8 @@ function ImportPage() {
         meanings: d.meanings,
         examples: d.examples,
         themes: d.themes,
+        synonyms: d.synonyms,
+        antonyms: d.antonyms,
       }));
       const verbs = valid.filter((d) => d.kind === "verb").map((d) => ({
         present: (d.present ?? "").trim(),
@@ -249,6 +253,8 @@ function ImportPage() {
         meanings: d.meanings,
         examples: d.examples,
         themes: d.themes,
+        synonyms: d.synonyms,
+        antonyms: d.antonyms,
       }));
       const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
       const words = valid
@@ -259,6 +265,8 @@ function ImportPage() {
           meanings: d.meanings,
           examples: d.examples,
           themes: d.themes,
+          synonyms: d.synonyms,
+          antonyms: d.antonyms,
         }));
 
       const errors: string[] = [];
