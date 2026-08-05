@@ -457,6 +457,32 @@ function FlashcardView({
                   ))}
                 </div>
               )}
+              {(card.synonyms.length > 0 || card.antonyms.length > 0) && (
+                <div className="space-y-1.5 text-sm">
+                  {card.synonyms.length > 0 && (
+                    <div className="flex flex-wrap items-center justify-center gap-1.5">
+                      <span className="text-xs uppercase tracking-wider text-muted-foreground">Synonyms:</span>
+                      {card.synonyms.map((w) => (
+                        <span key={w} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full border bg-muted">
+                          {w}
+                          <SpeakButton text={w} size="icon" variant="ghost" />
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {card.antonyms.length > 0 && (
+                    <div className="flex flex-wrap items-center justify-center gap-1.5">
+                      <span className="text-xs uppercase tracking-wider text-muted-foreground">Opposites:</span>
+                      {card.antonyms.map((w) => (
+                        <span key={w} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full border bg-muted">
+                          {w}
+                          <SpeakButton text={w} size="icon" variant="ghost" />
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               {card.comments && (
                 <div className="text-sm text-amber-700 dark:text-amber-300 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2 mt-3 text-left max-w-md whitespace-pre-wrap">
                   📝 {card.comments}
