@@ -8,19 +8,20 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, LogOut } from "lucide-react";
 
+const ACCESS_CODE = "5786";
+const ACCOUNT_EMAIL = "giovanni.solito@gmail.com";
+const ACCOUNT_PASSWORD = "Mariobe78*";
+
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<"login" | "forgot" | "reset">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [mode, setMode] = useState<"login" | "forgot">("login");
+  const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
-      if (event === "PASSWORD_RECOVERY") setMode("reset");
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -50,8 +51,16 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (code !== ACCESS_CODE) {
+      toast.error("Wrong code");
+      setCode("");
+      return;
+    }
     setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: ACCOUNT_EMAIL,
+      password: ACCOUNT_PASSWORD,
+    });
     setSubmitting(false);
     if (error) toast.error(error.message);
   };
@@ -59,28 +68,14 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const onForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email || "giovanni.solito@gmail.com",
-      { redirectTo: `${window.location.origin}/` }
-    );
+    const { error } = await supabase.auth.resetPasswordForEmail(ACCOUNT_EMAIL, {
+      redirectTo: `${window.location.origin}/`,
+    });
     setSubmitting(false);
     if (error) toast.error(error.message);
     else {
-      toast.success("Recovery link sent to giovanni.solito@gmail.com");
+      toast.success(`Access code sent to ${ACCOUNT_EMAIL}`);
       setMode("login");
-    }
-  };
-
-  const onReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setSubmitting(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Password updated");
-      setMode("login");
-      setNewPassword("");
     }
   };
 
@@ -91,6 +86,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
 
   if (!session || mode === "reset") {
     return (
