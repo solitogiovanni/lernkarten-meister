@@ -74,7 +74,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     setSubmitting(false);
     if (error) toast.error(error.message);
     else {
-      toast.success(`Access code sent to ${ACCOUNT_EMAIL}`);
+      toast.success(`Recovery email sent to ${ACCOUNT_EMAIL}`);
       setMode("login");
     }
   };
