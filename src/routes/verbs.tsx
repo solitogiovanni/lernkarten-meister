@@ -11,6 +11,7 @@ import { VerbForm, type VerbFormValue, type VerbPrep, emptyVerb } from "@/compon
 import { Loader2, Plus, Trash2, Upload, Play, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
+import { fold } from "@/lib/normalize";
 import { autofillVerbs } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
@@ -140,14 +141,14 @@ function VerbsPage() {
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (q) {
-        const needle = q.toLowerCase();
-        const hay = [
+        const needle = fold(q);
+        const hay = fold([
           r.present,
           r.praeteritum ?? "",
           r.perfect ?? "",
           ...r.meanings,
           ...(r.prepositions ?? []).map((p) => p.meaning ?? ""),
-        ].join(" ").toLowerCase();
+        ].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (theme && !r.themes.includes(theme)) return false;
@@ -287,7 +288,7 @@ function VerbsPage() {
               className="mt-2 h-8 text-xs"
             />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {allThemes.filter((t) => t.toLowerCase().includes(themeFilter.toLowerCase())).map((t) => (
+              {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTheme(theme === t ? "" : t)}
