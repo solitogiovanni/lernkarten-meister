@@ -531,22 +531,28 @@ export const detectWordKinds = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) return { results: [], error: "LOVABLE_API_KEY not configured" };
 
-    const systemPrompt = `You are a meticulous German linguistics assistant. The user gives ONE German word that could be ambiguous between multiple parts of speech (e.g. "schnell" is an adjective AND adverb; "Essen" is a noun and also relates to verb "essen"; "laut" can be adjective, adverb, or preposition).
+    const systemPrompt = `You are a meticulous German linguistics assistant. The user gives ONE word, which may be GERMAN or ITALIAN.
 
-Return ALL plausible classifications as separate items (1 to 3 items). Each item must be filled as if it were a standalone entry in that category.
+STEP 1 — decide the language of the input.
+- If it is a plausible German word, treat it as German and return ALL plausible classifications (e.g. "schnell" is adjective AND adverb; "laut" can be adjective, adverb, or preposition). Set source = "german" on those items.
+- If it is an Italian word, TRANSLATE it into German first, and return one item per distinct German equivalent (max 3, e.g. Italian "tempo" → "die Zeit" and "das Wetter"). Each item is a complete German entry of the appropriate kind. Set source = "italian-translation" on those items, and ALWAYS include the original Italian input in meanings (first position).
+- If the word exists in both languages, return the German classifications FIRST, then up to 2 Italian-translation items after them.
+
+Each item must be filled as if it were a standalone entry in that category.
 
 For EACH item return:
-- input: the original word
-- kind: "noun" | "verb" | "adjective" | "adverb"
+- input: the original word typed by the user
+- kind: "noun" | "verb" | "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction"
+- source: "german" | "italian-translation"
 - meanings: 1 to 4 short Italian translations specific to that part of speech
 - themes: 1 to 3 short lowercase Italian thematic tags
-- examples: at least 2 short, natural German example sentences using the word AS that part of speech
+- examples: at least 2 short, natural German example sentences using the GERMAN word AS that part of speech
 
 If kind = "noun": noun (capitalized singular), article (der/die/das), plural (or null).
 If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), conjugation (the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"), praeteritum_conjugation (the six Präteritum forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "kam / kamst / kam / kamen / kamt / kamen"), prepositions (array, possibly empty).
-If kind = "adjective" or "adverb": word (lowercase base form).
+If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction": word (lowercase German base form).
 
-Only include kinds the word genuinely could be. If the word is unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
+Only include kinds the word genuinely could be. If unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
 
     try {
       const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
