@@ -113,8 +113,8 @@ export function WordDeckPage({
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (q) {
-        const needle = q.toLowerCase();
-        const hay = [r.word, ...r.meanings].join(" ").toLowerCase();
+        const needle = fold(q);
+        const hay = fold([r.word, ...r.meanings].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (theme && !r.themes.includes(theme)) return false;

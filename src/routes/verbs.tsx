@@ -140,14 +140,14 @@ function VerbsPage() {
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (q) {
-        const needle = q.toLowerCase();
-        const hay = [
+        const needle = fold(q);
+        const hay = fold([
           r.present,
           r.praeteritum ?? "",
           r.perfect ?? "",
           ...r.meanings,
           ...(r.prepositions ?? []).map((p) => p.meaning ?? ""),
-        ].join(" ").toLowerCase();
+        ].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (theme && !r.themes.includes(theme)) return false;
