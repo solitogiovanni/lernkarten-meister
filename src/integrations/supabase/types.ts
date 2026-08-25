@@ -277,6 +277,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fold_de: { Args: { t: string }; Returns: string }
       search_nouns_by_meaning: {
         Args: { term: string }
         Returns: {
