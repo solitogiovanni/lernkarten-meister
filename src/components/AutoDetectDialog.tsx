@@ -182,10 +182,15 @@ export function AutoDetectDialog({
                     {d.include && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
                   </button>
                   <div className="flex-1 space-y-2 min-w-0">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 items-center">
                       <span className={`text-xs px-2 py-0.5 rounded font-medium ${KIND_COLOR[d.kind]}`}>
                         {KIND_LABEL[d.kind]}
                       </span>
+                      {d.source === "italian-translation" && (
+                        <span className="text-xs px-2 py-0.5 rounded font-medium bg-muted text-muted-foreground">
+                          translated from Italian
+                        </span>
+                      )}
                     </div>
 
                     {d.kind === "noun" && (
