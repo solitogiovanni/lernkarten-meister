@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { isDue } from "@/lib/srs";
+import { fold } from "@/lib/normalize";
 import { Loader2, Play, Save, Bookmark, Trash2, Pencil, Check, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -324,7 +325,7 @@ function CampaignSetup() {
               className="mt-2 h-8 text-sm"
             />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {allThemes.filter((t) => t.toLowerCase().includes(themeFilter.toLowerCase())).map((t) => {
+              {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => {
                 const on = themes.includes(t);
                 return (
                   <button

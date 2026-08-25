@@ -13,6 +13,7 @@ import { NounForm, type NounFormValue, emptyNoun } from "@/components/NounForm";
 import { Loader2, Plus, Sparkles, Trash2, Upload, Play, Search } from "lucide-react";
 import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
+import { fold } from "@/lib/normalize";
 import { autofillNouns } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
@@ -302,7 +303,7 @@ function DeckPage() {
               className="mt-2 h-8 text-xs"
             />
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {allThemes.filter((t) => t.toLowerCase().includes(themeFilter.toLowerCase())).map((t) => (
+              {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => (
                 <button
                   key={t}
                   onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: p.theme === t ? "" : t }) })}
