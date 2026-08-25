@@ -578,7 +578,8 @@ Only include kinds the word genuinely could be. If unambiguous, return exactly 1
                       type: "object",
                       properties: {
                         input: { type: "string" },
-                        kind: { type: "string", enum: ["noun", "verb", "adjective", "adverb"] },
+                        kind: { type: "string", enum: ["noun", "verb", "adjective", "adverb", "preposition", "pronoun", "conjunction"] },
+                        source: { type: "string", enum: ["german", "italian-translation"] },
                         noun: { type: "string" },
                         article: { type: "string", enum: ["der", "die", "das"] },
                         plural: { type: "string" },
