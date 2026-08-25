@@ -266,6 +266,7 @@ export type MixedItem = {
   examples: string[];
   synonyms: string[];
   antonyms: string[];
+  source?: "german" | "italian-translation";
 };
 
 export const autofillMixed = createServerFn({ method: "POST" })
