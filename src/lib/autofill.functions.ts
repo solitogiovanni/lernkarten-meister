@@ -650,6 +650,7 @@ Only include kinds the word genuinely could be. If unambiguous, return exactly 1
         examples: it.examples ?? [],
         synonyms: it.synonyms ?? [],
         antonyms: it.antonyms ?? [],
+        source: it.source === "italian-translation" ? "italian-translation" : "german",
       }));
       return { results, error: null };
     } catch (e) {
