@@ -198,6 +198,16 @@ export function AutoDetectDialog({
                           translated from Italian
                         </span>
                       )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="ml-auto h-7"
+                        onClick={() => setEditingIndex(i)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                      </Button>
+
                     </div>
 
                     {d.kind === "noun" && (
