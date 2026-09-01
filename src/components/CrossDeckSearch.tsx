@@ -77,11 +77,13 @@ export function CrossDeckSearch({
   currentKind,
   hasLocalMatches,
   onProposeAdd,
+  onRefresh,
 }: {
   q: string;
   currentKind: DeckKind;
   hasLocalMatches: boolean;
   onProposeAdd?: (kind: DeckKind, word: string) => void;
+  onRefresh?: () => void;
 }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -90,6 +92,9 @@ export function CrossDeckSearch({
   const [words, setWords] = useState<WordHit[]>([]);
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
   const [autoDetect, setAutoDetect] = useState(false);
+  const [tick, setTick] = useState(0);
+
+
 
   useEffect(() => {
     const term = q.trim();
@@ -136,7 +141,7 @@ export function CrossDeckSearch({
       setBusy(false);
     }, 250);
     return () => { cancelled = true; clearTimeout(handle); };
-  }, [q, currentKind]);
+  }, [q, currentKind, tick]);
 
   if (q.trim().length < 2) return null;
 
@@ -292,13 +297,13 @@ export function CrossDeckSearch({
       onProposeAdd(kind, term);
       return;
     }
-    sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term }));
+    sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term, q: term }));
     navigate({ to: targetFor[kind] });
   };
 
   const onEditPreview = () => {
     if (!preview) return;
-    sessionStorage.setItem(EDIT_PREFILL_KEY, JSON.stringify({ kind: preview.kind, id: preview.id }));
+    sessionStorage.setItem(EDIT_PREFILL_KEY, JSON.stringify({ kind: preview.kind, id: preview.id, q: term }));
     setPreview(null);
     navigate({ to: targetFor[preview.kind] });
   };
@@ -330,7 +335,10 @@ export function CrossDeckSearch({
         open={autoDetect}
         onOpenChange={setAutoDetect}
         word={term}
-        onSaved={() => { if (typeof window !== "undefined") window.location.reload(); }}
+        onSaved={() => {
+          if (onRefresh) { onRefresh(); setTick((t) => t + 1); }
+          else if (typeof window !== "undefined") window.location.reload();
+        }}
       />
     </Card>
   );

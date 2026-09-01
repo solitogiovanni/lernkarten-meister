@@ -82,8 +82,9 @@ export function WordDeckPage({
     const raw = sessionStorage.getItem(ADD_PREFILL_KEY);
     if (!raw) return;
     try {
-      const p = JSON.parse(raw) as { kind: string; word: string };
+      const p = JSON.parse(raw) as { kind: string; word: string; q?: string };
       if (p.kind === kind && p.word) {
+        if (p.q) setQ(p.q);
         setNewValue({ ...emptyWord, word: p.word });
         setCreating(true);
       }
@@ -96,14 +97,16 @@ export function WordDeckPage({
     const raw = sessionStorage.getItem(EDIT_PREFILL_KEY);
     if (!raw) return;
     try {
-      const p = JSON.parse(raw) as { kind: string; id: string };
+      const p = JSON.parse(raw) as { kind: string; id: string; q?: string };
       if (p.kind === kind && p.id) {
+        if (p.q) setQ(p.q);
         const r = rows.find((x) => x.id === p.id);
         if (r) openEdit(r);
       }
     } catch {}
     sessionStorage.removeItem(EDIT_PREFILL_KEY);
   }, [loading, rows, kind]);
+
 
   const allThemes = useMemo(() => {
     const set = new Set<string>();
@@ -346,7 +349,7 @@ export function WordDeckPage({
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onProposeAdd={(_, word) => { setNewValue({ ...emptyWord, word }); setCreating(true); }} />
+      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} onProposeAdd={(_, word) => { setNewValue({ ...emptyWord, word }); setCreating(true); }} />
 
       <CardRevealDialog
         open={!!previewing}
