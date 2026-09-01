@@ -301,7 +301,7 @@ export function CrossDeckSearch({
 
   const onEditPreview = () => {
     if (!preview) return;
-    sessionStorage.setItem(EDIT_PREFILL_KEY, JSON.stringify({ kind: preview.kind, id: preview.id }));
+    sessionStorage.setItem(EDIT_PREFILL_KEY, JSON.stringify({ kind: preview.kind, id: preview.id, q: term }));
     setPreview(null);
     navigate({ to: targetFor[preview.kind] });
   };
