@@ -31,6 +31,7 @@ type Row = {
   comments: string | null;
   due_at: string;
   reps: number;
+  created_at: string;
 };
 
 export function WordDeckPage({
@@ -65,7 +66,7 @@ export function WordDeckPage({
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("words", (q) =>
-      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps")
+      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
         .eq("kind", kind)
         .order("word", { ascending: true }),
     );
@@ -113,6 +114,19 @@ export function WordDeckPage({
     for (const r of rows) for (const t of r.themes) set.add(t);
     return Array.from(set).sort();
   }, [rows]);
+
+  const recentThemes = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const r of [...rows].sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))) {
+      for (const t of r.themes) {
+        if (!seen.has(t)) { seen.add(t); out.push(t); }
+      }
+      if (out.length >= 6) break;
+    }
+    return out.slice(0, 6);
+  }, [rows]);
+
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -379,7 +393,7 @@ export function WordDeckPage({
             <SheetTitle>Edit {formLabel.toLowerCase()}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
+            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
             <div className="flex justify-between mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
@@ -401,7 +415,7 @@ export function WordDeckPage({
             <SheetTitle>{addLabel}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
+            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
             {newDuplicate && (
               <div className="mt-3 text-sm text-amber-700 dark:text-amber-400 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2">
                 ⚠ "{newValue.word.trim()}" is already in your deck

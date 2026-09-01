@@ -33,6 +33,7 @@ type NounRow = {
   comments: string | null;
   due_at: string;
   reps: number;
+  created_at: string;
 };
 
 const searchSchema = z.object({
@@ -72,7 +73,7 @@ function DeckPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<NounRow>("nouns", (q) =>
-      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps")
+      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
         .order("noun", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -119,6 +120,19 @@ function DeckPage() {
     for (const r of rows) for (const t of r.themes) set.add(t);
     return Array.from(set).sort();
   }, [rows]);
+
+  const recentThemes = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const r of [...rows].sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))) {
+      for (const t of r.themes) {
+        if (!seen.has(t)) { seen.add(t); out.push(t); }
+      }
+      if (out.length >= 6) break;
+    }
+    return out.slice(0, 6);
+  }, [rows]);
+
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -423,7 +437,7 @@ function DeckPage() {
             <SheetTitle>Edit noun</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <NounForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} />
+            <NounForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
             <div className="flex justify-between mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" />
@@ -448,7 +462,7 @@ function DeckPage() {
             <SheetTitle>Add noun</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <NounForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} />
+            <NounForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
             {newDuplicate && (
               <div className="mt-3 text-sm text-amber-700 dark:text-amber-400 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2">
                 ⚠ "{newValue.noun.trim()}" is already in your deck
