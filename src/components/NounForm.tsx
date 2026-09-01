@@ -89,11 +89,15 @@ export function NounForm({
   value,
   onChange,
   themeSuggestions,
+  recentThemes,
 }: {
   value: NounFormValue;
   onChange: (v: NounFormValue) => void;
   themeSuggestions?: string[];
+  recentThemes?: string[];
 }) {
+  const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
+
   const set = <K extends keyof NounFormValue>(k: K, v: NounFormValue[K]) =>
     onChange({ ...value, [k]: v });
 
