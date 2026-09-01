@@ -141,7 +141,7 @@ export function CrossDeckSearch({
       setBusy(false);
     }, 250);
     return () => { cancelled = true; clearTimeout(handle); };
-  }, [q, currentKind]);
+  }, [q, currentKind, tick]);
 
   if (q.trim().length < 2) return null;
 
