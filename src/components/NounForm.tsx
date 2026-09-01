@@ -89,11 +89,15 @@ export function NounForm({
   value,
   onChange,
   themeSuggestions,
+  recentThemes,
 }: {
   value: NounFormValue;
   onChange: (v: NounFormValue) => void;
   themeSuggestions?: string[];
+  recentThemes?: string[];
 }) {
+  const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
+
   const set = <K extends keyof NounFormValue>(k: K, v: NounFormValue[K]) =>
     onChange({ ...value, [k]: v });
 
@@ -216,11 +220,12 @@ export function NounForm({
           onChange={(v) => set("themes", v)}
           placeholder="casa, lavoro…"
         />
-        {themeSuggestions && themeSuggestions.length > 0 && (
+        {suggestions.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {themeSuggestions
+            {suggestions
               .filter((t) => !value.themes.includes(t))
               .slice(0, 12)
+
               .map((t) => (
                 <button
                   key={t}

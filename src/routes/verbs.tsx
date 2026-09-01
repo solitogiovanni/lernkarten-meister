@@ -44,6 +44,7 @@ type Row = {
   comments: string | null;
   due_at: string;
   reps: number;
+  created_at: string;
 };
 
 function VerbsPage() {
@@ -95,7 +96,7 @@ function VerbsPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("verbs", (q) =>
-      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps")
+      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
         .order("present", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -140,6 +141,19 @@ function VerbsPage() {
     for (const r of rows) for (const t of r.themes) set.add(t);
     return Array.from(set).sort();
   }, [rows]);
+
+  const recentThemes = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const r of [...rows].sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))) {
+      for (const t of r.themes) {
+        if (!seen.has(t)) { seen.add(t); out.push(t); }
+      }
+      if (out.length >= 6) break;
+    }
+    return out.slice(0, 6);
+  }, [rows]);
+
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -403,7 +417,7 @@ function VerbsPage() {
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader><SheetTitle>Edit verb</SheetTitle></SheetHeader>
           <div className="mt-4">
-            <VerbForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} />
+            <VerbForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
             <div className="flex justify-between mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
@@ -424,7 +438,7 @@ function VerbsPage() {
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader><SheetTitle>Add verb</SheetTitle></SheetHeader>
           <div className="mt-4">
-            <VerbForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} />
+            <VerbForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={() => aiFillCurrent("new")} disabled={aiBusy || !newValue.present.trim()}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
