@@ -333,7 +333,10 @@ export function CrossDeckSearch({
         open={autoDetect}
         onOpenChange={setAutoDetect}
         word={term}
-        onSaved={() => { if (typeof window !== "undefined") window.location.reload(); }}
+        onSaved={() => {
+          if (onRefresh) { onRefresh(); setTick((t) => t + 1); }
+          else if (typeof window !== "undefined") window.location.reload();
+        }}
       />
     </Card>
   );
