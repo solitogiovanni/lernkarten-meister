@@ -295,7 +295,7 @@ export function CrossDeckSearch({
       onProposeAdd(kind, term);
       return;
     }
-    sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term }));
+    sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term, q: term }));
     navigate({ to: targetFor[kind] });
   };
 
