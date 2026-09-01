@@ -109,8 +109,9 @@ function VerbsPage() {
     const raw = sessionStorage.getItem(ADD_PREFILL_KEY);
     if (!raw) return;
     try {
-      const p = JSON.parse(raw) as { kind: string; word: string };
+      const p = JSON.parse(raw) as { kind: string; word: string; q?: string };
       if (p.kind === "verb" && p.word) {
+        if (p.q) setQ(p.q);
         setNewValue({ ...emptyVerb, present: p.word });
         setCreating(true);
       }
@@ -123,14 +124,16 @@ function VerbsPage() {
     const raw = sessionStorage.getItem(EDIT_PREFILL_KEY);
     if (!raw) return;
     try {
-      const p = JSON.parse(raw) as { kind: string; id: string };
+      const p = JSON.parse(raw) as { kind: string; id: string; q?: string };
       if (p.kind === "verb" && p.id) {
+        if (p.q) setQ(p.q);
         const r = rows.find((x) => x.id === p.id);
         if (r) openEdit(r);
       }
     } catch {}
     sessionStorage.removeItem(EDIT_PREFILL_KEY);
   }, [loading, rows]);
+
 
   const allThemes = useMemo(() => {
     const set = new Set<string>();
