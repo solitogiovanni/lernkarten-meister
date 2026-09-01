@@ -106,6 +106,7 @@ export function AutoDetectDialog({
         themes: d.themes,
         synonyms: d.synonyms,
         antonyms: d.antonyms,
+        comments: d.comments?.trim() || null,
       }));
       const verbs = valid.filter((d) => d.kind === "verb").map((d) => ({
         present: (d.present ?? "").trim(),
@@ -119,6 +120,7 @@ export function AutoDetectDialog({
         themes: d.themes,
         synonyms: d.synonyms,
         antonyms: d.antonyms,
+        comments: d.comments?.trim() || null,
       }));
       const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
       const words = valid.filter((d) => WORD_KINDS.includes(d.kind)).map((d) => ({
@@ -129,6 +131,7 @@ export function AutoDetectDialog({
         themes: d.themes,
         synonyms: d.synonyms,
         antonyms: d.antonyms,
+        comments: d.comments?.trim() || null,
       }));
       if (nouns.length) {
         const { error } = await supabase.from("nouns").insert(nouns);
