@@ -77,11 +77,13 @@ export function CrossDeckSearch({
   currentKind,
   hasLocalMatches,
   onProposeAdd,
+  onRefresh,
 }: {
   q: string;
   currentKind: DeckKind;
   hasLocalMatches: boolean;
   onProposeAdd?: (kind: DeckKind, word: string) => void;
+  onRefresh?: () => void;
 }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -90,6 +92,7 @@ export function CrossDeckSearch({
   const [words, setWords] = useState<WordHit[]>([]);
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
   const [autoDetect, setAutoDetect] = useState(false);
+
 
   useEffect(() => {
     const term = q.trim();
