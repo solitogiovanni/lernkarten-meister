@@ -389,7 +389,7 @@ function DeckPage() {
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onProposeAdd={(_, word) => { setNewValue({ ...emptyNoun, noun: word }); setCreating(true); }} />
+      <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} onProposeAdd={(_, word) => { setNewValue({ ...emptyNoun, noun: word }); setCreating(true); }} />
 
       {/* Reveal preview */}
       <CardRevealDialog
