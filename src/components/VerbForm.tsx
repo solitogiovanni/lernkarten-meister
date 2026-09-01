@@ -107,11 +107,15 @@ export function VerbForm({
   value,
   onChange,
   themeSuggestions,
+  recentThemes,
 }: {
   value: VerbFormValue;
   onChange: (v: VerbFormValue) => void;
   themeSuggestions?: string[];
+  recentThemes?: string[];
 }) {
+  const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
+
   const set = <K extends keyof VerbFormValue>(k: K, v: VerbFormValue[K]) =>
     onChange({ ...value, [k]: v });
 
