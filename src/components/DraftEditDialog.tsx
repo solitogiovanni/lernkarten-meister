@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { autofillNouns, autofillVerbs, autofillWords, type MixedItem, type MixedKind } from "@/lib/autofill.functions";
 import { Loader2, Sparkles } from "lucide-react";
+import { useThemeSuggestions } from "@/hooks/useThemeSuggestions";
 
 export type DraftItem = MixedItem & { comments?: string };
 
@@ -25,6 +26,7 @@ export function DraftEditDialog({
   onSave: (next: DraftItem) => void;
 }) {
   const [kind, setKind] = useState<MixedKind>(draft.kind);
+  const { recentThemes, allThemes } = useThemeSuggestions(kind as any, open);
   const [noun, setNoun] = useState<NounFormValue>({
     article: draft.article ?? null,
     noun: draft.noun ?? draft.word ?? draft.present ?? draft.input,
@@ -189,13 +191,15 @@ export function DraftEditDialog({
           </div>
 
           {kind === "noun" ? (
-            <NounForm value={noun} onChange={setNoun} />
+            <NounForm value={noun} onChange={setNoun} themeSuggestions={allThemes} recentThemes={recentThemes} />
           ) : kind === "verb" ? (
-            <VerbForm value={verb} onChange={setVerb} />
+            <VerbForm value={verb} onChange={setVerb} themeSuggestions={allThemes} recentThemes={recentThemes} />
           ) : (
             <WordForm
               value={word}
               onChange={setWord}
+              themeSuggestions={allThemes}
+              recentThemes={recentThemes}
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
               showSynonyms={kind === "adjective" || kind === "adverb"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}

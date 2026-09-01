@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { autofillNouns, autofillVerbs, autofillWords } from "@/lib/autofill.functions";
 import { Loader2, Sparkles } from "lucide-react";
+import { useThemeSuggestions } from "@/hooks/useThemeSuggestions";
 
 export type Kind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
 
@@ -50,6 +51,7 @@ export function CardEditDialog({
   onSaved: (next: EditableCard) => void;
 }) {
   const [kind, setKind] = useState<Kind>(card.kind);
+  const { recentThemes, allThemes } = useThemeSuggestions(kind as any, open);
   const [noun, setNoun] = useState<NounFormValue>({
     article: card.article,
     noun: card.word,
@@ -295,13 +297,15 @@ export function CardEditDialog({
           </div>
 
           {kind === "noun" ? (
-            <NounForm value={noun} onChange={setNoun} />
+            <NounForm value={noun} onChange={setNoun} themeSuggestions={allThemes} recentThemes={recentThemes} />
           ) : kind === "verb" ? (
-            <VerbForm value={verb} onChange={setVerb} />
+            <VerbForm value={verb} onChange={setVerb} themeSuggestions={allThemes} recentThemes={recentThemes} />
           ) : (
             <WordForm
               value={word}
               onChange={setWord}
+              themeSuggestions={allThemes}
+              recentThemes={recentThemes}
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
               showSynonyms={kind === "adjective" || kind === "adverb"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
