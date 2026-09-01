@@ -85,6 +85,7 @@ export function WordForm({
   value,
   onChange,
   themeSuggestions,
+  recentThemes,
   label,
   placeholder,
   showSynonyms = true,
@@ -92,12 +93,15 @@ export function WordForm({
   value: WordFormValue;
   onChange: (v: WordFormValue) => void;
   themeSuggestions?: string[];
+  recentThemes?: string[];
   label: string;
   placeholder: string;
   showSynonyms?: boolean;
 }) {
+  const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
   const set = <K extends keyof WordFormValue>(k: K, v: WordFormValue[K]) =>
     onChange({ ...value, [k]: v });
+
 
   return (
     <div className="space-y-4">
