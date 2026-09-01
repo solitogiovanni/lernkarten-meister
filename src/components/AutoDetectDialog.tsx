@@ -60,6 +60,8 @@ export function AutoDetectDialog({
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
 
   useEffect(() => {
     if (!open || !word.trim()) return;
