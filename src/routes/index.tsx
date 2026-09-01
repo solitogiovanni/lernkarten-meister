@@ -88,8 +88,9 @@ function DeckPage() {
     const raw = sessionStorage.getItem(ADD_PREFILL_KEY);
     if (!raw) return;
     try {
-      const p = JSON.parse(raw) as { kind: string; word: string };
+      const p = JSON.parse(raw) as { kind: string; word: string; q?: string };
       if (p.kind === "noun" && p.word) {
+        if (p.q) navigate({ search: (prev: { q: string; theme: string; due: boolean }) => ({ ...prev, q: p.q as string }) });
         setNewValue({ ...emptyNoun, noun: p.word });
         setCreating(true);
       }
@@ -102,14 +103,16 @@ function DeckPage() {
     const raw = sessionStorage.getItem(EDIT_PREFILL_KEY);
     if (!raw) return;
     try {
-      const p = JSON.parse(raw) as { kind: string; id: string };
+      const p = JSON.parse(raw) as { kind: string; id: string; q?: string };
       if (p.kind === "noun" && p.id) {
+        if (p.q) navigate({ search: (prev: { q: string; theme: string; due: boolean }) => ({ ...prev, q: p.q as string }) });
         const r = rows.find((x) => x.id === p.id);
         if (r) openEdit(r);
       }
     } catch {}
     sessionStorage.removeItem(EDIT_PREFILL_KEY);
   }, [loading, rows]);
+
 
   const allThemes = useMemo(() => {
     const set = new Set<string>();
