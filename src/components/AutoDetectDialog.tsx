@@ -3,13 +3,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, Sparkles } from "lucide-react";
+import { Loader2, Check, Sparkles, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition } from "@/lib/autofill.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { DraftEditDialog } from "@/components/DraftEditDialog";
 
-type Draft = MixedItem & { include: boolean };
+type Draft = MixedItem & { include: boolean; comments?: string };
+
 
 const KIND_LABEL: Record<MixedKind, string> = {
   noun: "Noun",
@@ -58,6 +60,8 @@ export function AutoDetectDialog({
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
 
   useEffect(() => {
     if (!open || !word.trim()) return;
@@ -102,6 +106,7 @@ export function AutoDetectDialog({
         themes: d.themes,
         synonyms: d.synonyms,
         antonyms: d.antonyms,
+        comments: d.comments?.trim() || null,
       }));
       const verbs = valid.filter((d) => d.kind === "verb").map((d) => ({
         present: (d.present ?? "").trim(),
@@ -115,6 +120,7 @@ export function AutoDetectDialog({
         themes: d.themes,
         synonyms: d.synonyms,
         antonyms: d.antonyms,
+        comments: d.comments?.trim() || null,
       }));
       const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
       const words = valid.filter((d) => WORD_KINDS.includes(d.kind)).map((d) => ({
@@ -125,6 +131,7 @@ export function AutoDetectDialog({
         themes: d.themes,
         synonyms: d.synonyms,
         antonyms: d.antonyms,
+        comments: d.comments?.trim() || null,
       }));
       if (nouns.length) {
         const { error } = await supabase.from("nouns").insert(nouns);
@@ -191,6 +198,16 @@ export function AutoDetectDialog({
                           translated from Italian
                         </span>
                       )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="ml-auto h-7"
+                        onClick={() => setEditingIndex(i)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                      </Button>
+
                     </div>
 
                     {d.kind === "noun" && (
@@ -270,7 +287,21 @@ export function AutoDetectDialog({
             </div>
           </div>
         )}
+
+        {editingIndex !== null && drafts[editingIndex] && (
+          <DraftEditDialog
+            open
+            onOpenChange={(o) => { if (!o) setEditingIndex(null); }}
+            draft={drafts[editingIndex]}
+            onSave={(next) => {
+              const idx = editingIndex;
+              setDrafts((ds) => ds.map((d, k) => (k === idx ? { ...d, ...next, include: true } : d)));
+              setEditingIndex(null);
+            }}
+          />
+        )}
       </DialogContent>
+
     </Dialog>
   );
 }
