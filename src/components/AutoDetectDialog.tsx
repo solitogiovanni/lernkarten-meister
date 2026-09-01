@@ -287,7 +287,21 @@ export function AutoDetectDialog({
             </div>
           </div>
         )}
+
+        {editingIndex !== null && drafts[editingIndex] && (
+          <DraftEditDialog
+            open
+            onOpenChange={(o) => { if (!o) setEditingIndex(null); }}
+            draft={drafts[editingIndex]}
+            onSave={(next) => {
+              const idx = editingIndex;
+              setDrafts((ds) => ds.map((d, k) => (k === idx ? { ...d, ...next, include: true } : d)));
+              setEditingIndex(null);
+            }}
+          />
+        )}
       </DialogContent>
+
     </Dialog>
   );
 }
