@@ -3,13 +3,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, Sparkles } from "lucide-react";
+import { Loader2, Check, Sparkles, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition } from "@/lib/autofill.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { DraftEditDialog } from "@/components/DraftEditDialog";
 
-type Draft = MixedItem & { include: boolean };
+type Draft = MixedItem & { include: boolean; comments?: string };
+
 
 const KIND_LABEL: Record<MixedKind, string> = {
   noun: "Noun",
