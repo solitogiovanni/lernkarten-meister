@@ -92,6 +92,8 @@ export function CrossDeckSearch({
   const [words, setWords] = useState<WordHit[]>([]);
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
   const [autoDetect, setAutoDetect] = useState(false);
+  const [tick, setTick] = useState(0);
+
 
 
   useEffect(() => {
