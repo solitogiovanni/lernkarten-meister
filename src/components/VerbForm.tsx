@@ -304,11 +304,12 @@ export function VerbForm({
           onChange={(v) => set("themes", v)}
           placeholder="movimento, lavoro…"
         />
-        {themeSuggestions && themeSuggestions.length > 0 && (
+        {suggestions.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {themeSuggestions
+            {suggestions
               .filter((t) => !value.themes.includes(t))
               .slice(0, 12)
+
               .map((t) => (
                 <button
                   key={t}
