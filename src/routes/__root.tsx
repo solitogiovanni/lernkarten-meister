@@ -131,7 +131,7 @@ function RootComponent() {
         <main className="max-w-6xl mx-auto px-4 py-6">
           <Outlet />
         </main>
-        <Toaster richColors />
+        <Toaster richColors position="top-center" />
       </div>
     </AuthGate>
   );
