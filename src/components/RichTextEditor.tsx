@@ -13,6 +13,7 @@ import {
   AArrowUp,
   AArrowDown,
   Type,
+  BrushCleaning,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -194,6 +195,80 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     }
     if (list) list.style.listStyleType = style;
     if (ref.current) onChange(ref.current.innerHTML);
+  };
+
+  const cleanHtml = () => {
+    if (!ref.current) return;
+    const doc = new DOMParser().parseFromString(ref.current.innerHTML, "text/html");
+
+    // Remove comments
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
+    const comments: Node[] = [];
+    let n: Node | null;
+    while ((n = walker.nextNode())) comments.push(n);
+    comments.forEach((c) => c.parentNode?.removeChild(c));
+
+    // Remove junk tags entirely
+    doc.body
+      .querySelectorAll("style, script, link, meta, title, xml, noscript, iframe, object, embed")
+      .forEach((el) => el.remove());
+
+    // Remove hidden elements
+    const isHidden = (el: Element) => {
+      const s = ((el.getAttribute("style") || "") + "").toLowerCase().replace(/\s+/g, "");
+      return (
+        el.hasAttribute("hidden") ||
+        el.getAttribute("aria-hidden") === "true" ||
+        s.includes("display:none") ||
+        s.includes("visibility:hidden") ||
+        s.includes("font-size:0") ||
+        s.includes("mso-hide:all")
+      );
+    };
+    doc.body.querySelectorAll("*").forEach((el) => {
+      if (isHidden(el)) el.remove();
+    });
+
+    // Strip class attributes and Office junk attributes/styles
+    doc.body.querySelectorAll("*").forEach((el) => {
+      el.removeAttribute("class");
+      el.removeAttribute("id");
+      for (const attr of Array.from(el.attributes)) {
+        const name = attr.name.toLowerCase();
+        if (name.startsWith("mso-") || name.startsWith("data-") || name.startsWith("on")) {
+          el.removeAttribute(attr.name);
+        }
+      }
+      const style = el.getAttribute("style");
+      if (style) {
+        const cleaned = style
+          .split(";")
+          .filter((decl) => {
+            const prop = decl.split(":")[0]?.trim().toLowerCase() ?? "";
+            return (
+              prop &&
+              !prop.startsWith("mso-") &&
+              !prop.startsWith("--") &&
+              !["font-family", "tab-stops", "line-height"].includes(prop)
+            );
+          })
+          .join(";");
+        if (cleaned.trim()) el.setAttribute("style", cleaned);
+        else el.removeAttribute("style");
+      }
+    });
+
+    // Unwrap empty spans
+    doc.body.querySelectorAll("span").forEach((el) => {
+      if (!el.getAttribute("style") && el.attributes.length === 0) {
+        while (el.firstChild) el.parentNode?.insertBefore(el.firstChild, el);
+        el.remove();
+      }
+    });
+
+    const cleaned = doc.body.innerHTML;
+    ref.current.innerHTML = cleaned;
+    onChange(cleaned);
   };
 
   const handleInput = () => {
@@ -383,6 +458,9 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
 
         <ToolBtn onClick={() => exec("removeFormat")} title="Clear formatting">
           <Eraser className="h-4 w-4" />
+        </ToolBtn>
+        <ToolBtn onClick={cleanHtml} title="Remove hidden HTML code from pasted text">
+          <BrushCleaning className="h-4 w-4" />
         </ToolBtn>
       </div>
       <div
