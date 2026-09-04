@@ -459,6 +459,9 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         <ToolBtn onClick={() => exec("removeFormat")} title="Clear formatting">
           <Eraser className="h-4 w-4" />
         </ToolBtn>
+        <ToolBtn onClick={cleanHtml} title="Remove hidden HTML code from pasted text">
+          <BrushCleaning className="h-4 w-4" />
+        </ToolBtn>
       </div>
       <div
         ref={ref}
