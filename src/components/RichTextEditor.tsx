@@ -13,6 +13,7 @@ import {
   AArrowUp,
   AArrowDown,
   Type,
+  BrushCleaning,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
