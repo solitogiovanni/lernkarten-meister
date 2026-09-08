@@ -63,17 +63,46 @@ export function AutoDetectDialog({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
 
+  const findExistingId = async (d: Draft): Promise<string | null> => {
+    try {
+      if (d.kind === "noun") {
+        const term = (d.noun ?? "").trim();
+        if (!term) return null;
+        const { data } = await (supabase as any).from("nouns").select("id").ilike("noun", term).limit(1);
+        return data?.[0]?.id ?? null;
+      }
+      if (d.kind === "verb") {
+        const term = (d.present ?? "").trim();
+        if (!term) return null;
+        const { data } = await (supabase as any).from("verbs").select("id").ilike("present", term).limit(1);
+        return data?.[0]?.id ?? null;
+      }
+      const term = (d.word ?? "").trim();
+      if (!term) return null;
+      const { data } = await (supabase as any)
+        .from("words").select("id").eq("kind", d.kind).ilike("word", term).limit(1);
+      return data?.[0]?.id ?? null;
+    } catch {
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (!open || !word.trim()) return;
     let cancelled = false;
     setDrafts([]);
     setBusy(true);
     detectFn({ data: { word: word.trim() } })
-      .then(({ results, error }) => {
+      .then(async ({ results, error }) => {
         if (cancelled) return;
         if (error) { toast.error(error); return; }
         if (!results.length) { toast.error("Could not detect a type"); return; }
-        setDrafts(results.map((r) => ({ ...r, include: true })));
+        const base: Draft[] = results.map((r) => ({ ...r, include: true }));
+        const withIds = await Promise.all(
+          base.map(async (d) => ({ ...d, existingId: await findExistingId(d) })),
+        );
+        if (cancelled) return;
+        setDrafts(withIds);
       })
       .finally(() => { if (!cancelled) setBusy(false); });
     return () => { cancelled = true; };
@@ -97,62 +126,87 @@ export function AutoDetectDialog({
     setSaving(true);
     try {
       const errors: string[] = [];
-      const nouns = valid.filter((d) => d.kind === "noun").map((d) => ({
-        article: d.article ?? null,
-        noun: (d.noun ?? "").trim(),
-        plural: d.plural?.trim() || null,
-        meanings: d.meanings,
-        examples: d.examples,
-        themes: d.themes,
-        synonyms: d.synonyms,
-        antonyms: d.antonyms,
-        comments: d.comments?.trim() || null,
-      }));
-      const verbs = valid.filter((d) => d.kind === "verb").map((d) => ({
-        present: (d.present ?? "").trim(),
-        praeteritum: d.praeteritum?.trim() || null,
-        perfect: d.perfect?.trim() || null,
-        conjugation: d.conjugation?.trim() || null,
-        praeteritum_conjugation: d.praeteritum_conjugation?.trim() || null,
-        prepositions: (d.prepositions ?? []).filter((p) => p.preposition.trim()),
-        meanings: d.meanings,
-        examples: d.examples,
-        themes: d.themes,
-        synonyms: d.synonyms,
-        antonyms: d.antonyms,
-        comments: d.comments?.trim() || null,
-      }));
-      const WORD_KINDS: MixedKind[] = ["adjective", "adverb", "preposition", "pronoun", "conjunction"];
-      const words = valid.filter((d) => WORD_KINDS.includes(d.kind)).map((d) => ({
-        kind: d.kind,
-        word: (d.word ?? "").trim(),
-        meanings: d.meanings,
-        examples: d.examples,
-        themes: d.themes,
-        synonyms: d.synonyms,
-        antonyms: d.antonyms,
-        comments: d.comments?.trim() || null,
-      }));
-      if (nouns.length) {
-        const { error } = await supabase.from("nouns").insert(nouns);
-        if (error) errors.push(`nouns: ${error.message}`);
+      let updated = 0;
+      let inserted = 0;
+
+      const payloadFor = (d: Draft) => {
+        if (d.kind === "noun") {
+          return {
+            table: "nouns",
+            row: {
+              article: d.article ?? null,
+              noun: (d.noun ?? "").trim(),
+              plural: d.plural?.trim() || null,
+              meanings: d.meanings,
+              examples: d.examples,
+              themes: d.themes,
+              synonyms: d.synonyms,
+              antonyms: d.antonyms,
+            },
+          };
+        }
+        if (d.kind === "verb") {
+          return {
+            table: "verbs",
+            row: {
+              present: (d.present ?? "").trim(),
+              praeteritum: d.praeteritum?.trim() || null,
+              perfect: d.perfect?.trim() || null,
+              conjugation: d.conjugation?.trim() || null,
+              praeteritum_conjugation: d.praeteritum_conjugation?.trim() || null,
+              prepositions: (d.prepositions ?? []).filter((p) => p.preposition.trim()),
+              meanings: d.meanings,
+              examples: d.examples,
+              themes: d.themes,
+              synonyms: d.synonyms,
+              antonyms: d.antonyms,
+            },
+          };
+        }
+        return {
+          table: "words",
+          row: {
+            kind: d.kind,
+            word: (d.word ?? "").trim(),
+            meanings: d.meanings,
+            examples: d.examples,
+            themes: d.themes,
+            synonyms: d.synonyms,
+            antonyms: d.antonyms,
+          },
+        };
+      };
+
+      for (const d of valid) {
+        const { table, row } = payloadFor(d);
+        const existingId = d.existingId ?? (await findExistingId(d));
+        if (existingId) {
+          // Update everything except comments so no duplicate card is created.
+          const { error } = await (supabase as any).from(table).update(row).eq("id", existingId);
+          if (error) errors.push(`${table}: ${error.message}`);
+          else updated += 1;
+        } else {
+          const { error } = await (supabase as any)
+            .from(table)
+            .insert([{ ...row, comments: d.comments?.trim() || null }]);
+          if (error) errors.push(`${table}: ${error.message}`);
+          else inserted += 1;
+        }
       }
-      if (verbs.length) {
-        const { error } = await (supabase as any).from("verbs").insert(verbs);
-        if (error) errors.push(`verbs: ${error.message}`);
-      }
-      if (words.length) {
-        const { error } = await (supabase as any).from("words").insert(words);
-        if (error) errors.push(`words: ${error.message}`);
-      }
+
       if (errors.length) return toast.error(errors.join("; "));
-      toast.success(`Saved ${valid.length}`);
+      toast.success(
+        [inserted ? `Added ${inserted}` : null, updated ? `Updated ${updated}` : null]
+          .filter(Boolean)
+          .join(" · "),
+      );
       onSaved?.();
       onOpenChange(false);
     } finally {
       setSaving(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
