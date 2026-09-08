@@ -10,7 +10,7 @@ import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition }
 import { supabase } from "@/integrations/supabase/client";
 import { DraftEditDialog } from "@/components/DraftEditDialog";
 
-type Draft = MixedItem & { include: boolean; comments?: string };
+type Draft = MixedItem & { include: boolean; comments?: string; existingId?: string | null };
 
 
 const KIND_LABEL: Record<MixedKind, string> = {
