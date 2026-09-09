@@ -64,7 +64,7 @@ function GrammarPage() {
     setEditValue({ title: r.title, content: r.content ?? "" });
   };
 
-  const saveEdit = async () => {
+  const saveEdit = async (close = true) => {
     if (!editing) return;
     if (!editValue.title.trim()) return toast.error("Title is required");
     const { error } = await (supabase as any)
@@ -73,7 +73,7 @@ function GrammarPage() {
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
     toast.success("Saved");
-    setEditing(null);
+    if (close) setEditing(null);
     load();
   };
 
@@ -217,7 +217,14 @@ function GrammarPage() {
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
               </Button>
-              <Button onClick={saveEdit}>Save</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => saveEdit(false)}>
+                  Save
+                </Button>
+                <Button onClick={() => saveEdit(true)}>
+                  Save & close
+                </Button>
+              </div>
             </div>
           </div>
         </SheetContent>
