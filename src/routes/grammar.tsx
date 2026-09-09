@@ -217,7 +217,14 @@ function GrammarPage() {
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
               </Button>
-              <Button onClick={saveEdit}>Save</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => saveEdit(false)}>
+                  Save
+                </Button>
+                <Button onClick={() => saveEdit(true)}>
+                  Save & close
+                </Button>
+              </div>
             </div>
           </div>
         </SheetContent>
