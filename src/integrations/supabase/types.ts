@@ -48,6 +48,7 @@ export type Database = {
           ease: number
           examples: string[]
           id: string
+          image_url: string | null
           interval_days: number
           lapses: number
           last_rated_at: string | null
@@ -68,6 +69,7 @@ export type Database = {
           ease?: number
           examples?: string[]
           id?: string
+          image_url?: string | null
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           ease?: number
           examples?: string[]
           id?: string
+          image_url?: string | null
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
@@ -150,6 +153,7 @@ export type Database = {
           ease: number
           examples: string[]
           id: string
+          image_url: string | null
           interval_days: number
           lapses: number
           last_rated_at: string | null
@@ -173,6 +177,7 @@ export type Database = {
           ease?: number
           examples?: string[]
           id?: string
+          image_url?: string | null
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
@@ -196,6 +201,7 @@ export type Database = {
           ease?: number
           examples?: string[]
           id?: string
+          image_url?: string | null
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
@@ -289,6 +295,7 @@ export type Database = {
           ease: number
           examples: string[]
           id: string
+          image_url: string | null
           interval_days: number
           lapses: number
           last_rated_at: string | null
@@ -318,6 +325,7 @@ export type Database = {
           ease: number
           examples: string[]
           id: string
+          image_url: string | null
           interval_days: number
           lapses: number
           last_rated_at: string | null
