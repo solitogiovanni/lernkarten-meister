@@ -374,6 +374,9 @@ function VerbsPage() {
           {filtered.map((r) => (
             <button key={r.id} onClick={() => setPreviewing(r)} className="text-left">
               <Card className="p-4 hover:border-primary transition-colors h-full">
+                {r.image_url && (
+                  <img src={r.image_url} alt={r.present} className="mb-2 h-24 w-full rounded-md object-cover border" />
+                )}
                 <div className="flex items-center gap-2 mb-1">
                   <div className="font-semibold text-lg">{r.present}</div>
                   <SpeakButton
