@@ -142,6 +142,7 @@ export function AutoDetectDialog({
               themes: d.themes,
               synonyms: d.synonyms,
               antonyms: d.antonyms,
+              image_url: (d as any).image_url ?? null,
             },
           };
         }
@@ -160,6 +161,7 @@ export function AutoDetectDialog({
               themes: d.themes,
               synonyms: d.synonyms,
               antonyms: d.antonyms,
+              image_url: (d as any).image_url ?? null,
             },
           };
         }

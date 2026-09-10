@@ -50,6 +50,7 @@ type Card = {
   synonyms: string[];
   antonyms: string[];
   comments: string | null;
+  image_url: string | null;
   ease: number;
   interval_days: number;
   reps: number;
@@ -94,13 +95,13 @@ function RunPage() {
       const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
       const [nRes, wRes, vRes] = await Promise.all([
         wantNoun
-          ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
         wantWords
           ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
-          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at"))
+          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
@@ -121,6 +122,7 @@ function RunPage() {
         synonyms: r.synonyms ?? [],
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
+        image_url: r.image_url ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -144,6 +146,7 @@ function RunPage() {
         synonyms: r.synonyms ?? [],
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
+        image_url: r.image_url ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -167,6 +170,7 @@ function RunPage() {
         synonyms: r.synonyms ?? [],
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
+        image_url: r.image_url ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -399,6 +403,13 @@ function FlashcardView({
                 variant="ghost"
               />
             </div>
+            {card.image_url && (
+              <img
+                src={card.image_url}
+                alt={card.word}
+                className="mt-4 mx-auto max-h-40 rounded-lg object-contain"
+              />
+            )}
             <div className="mt-6 space-y-3">
               {card.plural && (
                 <div className="text-muted-foreground flex items-center justify-center gap-1">

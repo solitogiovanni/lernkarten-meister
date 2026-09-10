@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ImagePicker } from "@/components/ImagePicker";
 
 export type VerbPrep = {
   preposition: string;
@@ -26,6 +27,7 @@ export type VerbFormValue = {
   synonyms: string[];
   antonyms: string[];
   comments: string;
+  imageUrl: string | null;
 };
 
 export const emptyVerb: VerbFormValue = {
@@ -41,6 +43,7 @@ export const emptyVerb: VerbFormValue = {
   synonyms: [],
   antonyms: [],
   comments: "",
+  imageUrl: null,
 };
 
 function ChipInput({
@@ -233,6 +236,13 @@ export function VerbForm({
           placeholder="andare, recarsi…"
         />
       </div>
+
+      <ImagePicker
+        value={value.imageUrl}
+        onChange={(v) => set("imageUrl", v)}
+        word={value.present}
+        meaning={value.meanings[0]}
+      />
 
       <div>
         <Label className="mb-2 block">Examples (German sentences)</Label>

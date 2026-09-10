@@ -23,6 +23,7 @@ export type RevealCard = {
   synonyms?: string[] | null;
   antonyms?: string[] | null;
   comments?: string | null;
+  imageUrl?: string | null;
 };
 
 const articleTextColor = {
@@ -70,6 +71,14 @@ export function CardRevealDialog({
             )}
             <SpeakButton text={speakText} size="icon" variant="ghost" />
           </div>
+
+          {card.imageUrl && (
+            <img
+              src={card.imageUrl}
+              alt={card.word}
+              className="mt-4 h-40 w-40 rounded-lg object-cover border"
+            />
+          )}
 
           <div className="mt-6 space-y-3 w-full">
             {card.plural && (
