@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { autofillNouns } from "@/lib/autofill.functions";
+import { generateCardImage } from "@/lib/cardImage.functions";
+import { shrinkToDataUrl, b64PngToDataUrl } from "@/lib/cardImage";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
@@ -31,6 +33,7 @@ type NounRow = {
   synonyms: string[];
   antonyms: string[];
   comments: string | null;
+  image_url: string | null;
   due_at: string;
   reps: number;
   created_at: string;
@@ -69,11 +72,29 @@ function DeckPage() {
   const [newValue, setNewValue] = useState<NounFormValue>(emptyNoun);
   const [aiBusy, setAiBusy] = useState(false);
   const autofillFn = useServerFn(autofillNouns);
+  const imageFn = useServerFn(generateCardImage);
+
+  const withGeneratedImage = async <T extends { imageUrl: string | null }>(
+    v: T,
+    word: string,
+    meaning?: string,
+  ): Promise<T | null> => {
+    if (!word.trim()) return null;
+    try {
+      const { b64 } = await imageFn({
+        data: { word: word.trim(), hint: [word.trim(), meaning].filter(Boolean).join(" — ") },
+      });
+      if (!b64) return null;
+      return { ...v, imageUrl: await shrinkToDataUrl(b64PngToDataUrl(b64)) };
+    } catch {
+      return null;
+    }
+  };
 
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<NounRow>("nouns", (q) =>
-      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
+      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,due_at,reps,created_at")
         .order("noun", { ascending: true }),
     );
     if (error) toast.error(error.message);
@@ -161,6 +182,7 @@ function DeckPage() {
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
+      imageUrl: r.image_url ?? null,
     });
   };
 
@@ -179,6 +201,7 @@ function DeckPage() {
         synonyms: editValue.synonyms,
         antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
+        image_url: editValue.imageUrl,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -212,6 +235,7 @@ function DeckPage() {
       synonyms: newValue.synonyms,
       antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
+      image_url: newValue.imageUrl,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");
@@ -243,10 +267,18 @@ function DeckPage() {
         synonyms: v.synonyms.length ? v.synonyms : r.synonyms ?? [],
         antonyms: v.antonyms.length ? v.antonyms : r.antonyms ?? [],
         comments: v.comments,
+        imageUrl: v.imageUrl,
       };
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
       toast.success("Filled with AI");
+      if (!merged.imageUrl) {
+        const withImage = await withGeneratedImage(merged, merged.noun, merged.meanings[0]);
+        if (withImage) {
+          if (target === "edit") setEditValue(withImage);
+          else setNewValue(withImage);
+        }
+      }
     } finally {
       setAiBusy(false);
     }
@@ -367,6 +399,9 @@ function DeckPage() {
               className="text-left"
             >
               <Card className="p-4 hover:border-primary transition-colors h-full">
+                {r.image_url && (
+                  <img src={r.image_url} alt={r.noun} className="mb-2 h-24 w-full rounded-md object-cover border" />
+                )}
                 <div className="flex items-baseline gap-2 mb-1">
                   {r.article && (
                     <span className={`text-xs px-1.5 py-0.5 rounded ${articleColor[r.article]} font-medium`}>
@@ -420,6 +455,7 @@ function DeckPage() {
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,
+          imageUrl: previewing.image_url,
         } : null}
         onEdit={() => {
           if (previewing) {
