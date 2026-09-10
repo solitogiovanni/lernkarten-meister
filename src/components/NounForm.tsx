@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ImagePicker } from "@/components/ImagePicker";
 
 export type NounFormValue = {
   article: "der" | "die" | "das" | null;
@@ -17,6 +18,7 @@ export type NounFormValue = {
   synonyms: string[];
   antonyms: string[];
   comments: string;
+  imageUrl: string | null;
 };
 
 export const emptyNoun: NounFormValue = {
@@ -29,6 +31,7 @@ export const emptyNoun: NounFormValue = {
   synonyms: [],
   antonyms: [],
   comments: "",
+  imageUrl: null,
 };
 
 function ChipInput({
@@ -149,6 +152,13 @@ export function NounForm({
           placeholder="casa, abitazione…"
         />
       </div>
+
+      <ImagePicker
+        value={value.imageUrl}
+        onChange={(v) => set("imageUrl", v)}
+        word={value.noun}
+        meaning={value.meanings[0]}
+      />
 
       <div>
         <Label className="mb-2 block">Examples (German sentences)</Label>
