@@ -220,6 +220,7 @@ function VerbsPage() {
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
+      imageUrl: r.image_url ?? null,
     });
   };
 
@@ -241,6 +242,7 @@ function VerbsPage() {
         synonyms: editValue.synonyms,
         antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
+        image_url: editValue.imageUrl,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -277,6 +279,7 @@ function VerbsPage() {
       synonyms: newValue.synonyms,
       antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
+      image_url: newValue.imageUrl,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");
