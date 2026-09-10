@@ -12,7 +12,7 @@ import { autofillNouns, autofillVerbs, autofillWords, type MixedItem, type Mixed
 import { Loader2, Sparkles } from "lucide-react";
 import { useThemeSuggestions } from "@/hooks/useThemeSuggestions";
 
-export type DraftItem = MixedItem & { comments?: string };
+export type DraftItem = MixedItem & { comments?: string; image_url?: string | null };
 
 export function DraftEditDialog({
   open,
@@ -37,6 +37,7 @@ export function DraftEditDialog({
     synonyms: draft.synonyms ?? [],
     antonyms: draft.antonyms ?? [],
     comments: draft.comments ?? "",
+    imageUrl: draft.image_url ?? null,
   });
   const [word, setWord] = useState<WordFormValue>({
     word: draft.word ?? draft.noun ?? draft.present ?? draft.input,
@@ -64,6 +65,7 @@ export function DraftEditDialog({
     synonyms: draft.synonyms ?? [],
     antonyms: draft.antonyms ?? [],
     comments: draft.comments ?? "",
+    imageUrl: draft.image_url ?? null,
   });
   const [aiBusy, setAiBusy] = useState(false);
   const autofillNounsFn = useServerFn(autofillNouns);
@@ -89,6 +91,7 @@ export function DraftEditDialog({
           synonyms: noun.synonyms.length ? noun.synonyms : r.synonyms ?? [],
           antonyms: noun.antonyms.length ? noun.antonyms : r.antonyms ?? [],
           comments: noun.comments,
+          imageUrl: noun.imageUrl,
         });
       } else if (kind === "verb") {
         if (!verb.present.trim()) return toast.error("Type a verb first");
@@ -109,6 +112,7 @@ export function DraftEditDialog({
           synonyms: verb.synonyms.length ? verb.synonyms : r.synonyms ?? [],
           antonyms: verb.antonyms.length ? verb.antonyms : r.antonyms ?? [],
           comments: verb.comments,
+          imageUrl: verb.imageUrl,
         });
       } else {
         if (!word.word.trim()) return toast.error("Type a word first");
@@ -140,7 +144,7 @@ export function DraftEditDialog({
         ...draft, kind, article: noun.article, noun: noun.noun.trim(), plural: noun.plural.trim() || null,
         word: undefined, present: undefined,
         meanings: noun.meanings, examples: noun.examples.filter((e) => e.trim()), themes: noun.themes,
-        synonyms: noun.synonyms, antonyms: noun.antonyms, comments: noun.comments,
+        synonyms: noun.synonyms, antonyms: noun.antonyms, comments: noun.comments, image_url: noun.imageUrl,
       };
     } else if (kind === "verb") {
       if (!verb.present.trim()) return toast.error("Verb is required");
@@ -151,7 +155,7 @@ export function DraftEditDialog({
         prepositions: verb.prepositions.filter((p) => p.preposition.trim()),
         noun: undefined, article: null, plural: null, word: undefined,
         meanings: verb.meanings, examples: verb.examples.filter((e) => e.trim()), themes: verb.themes,
-        synonyms: verb.synonyms, antonyms: verb.antonyms, comments: verb.comments,
+        synonyms: verb.synonyms, antonyms: verb.antonyms, comments: verb.comments, image_url: verb.imageUrl,
       };
     } else {
       if (!word.word.trim()) return toast.error("Word is required");
@@ -159,7 +163,7 @@ export function DraftEditDialog({
         ...draft, kind, word: word.word.trim(), noun: undefined, present: undefined, article: null, plural: null,
         prepositions: [],
         meanings: word.meanings, examples: word.examples.filter((e) => e.trim()), themes: word.themes,
-        synonyms: word.synonyms, antonyms: word.antonyms, comments: word.comments,
+        synonyms: word.synonyms, antonyms: word.antonyms, comments: word.comments, image_url: null,
       };
     }
     onSave(next);
