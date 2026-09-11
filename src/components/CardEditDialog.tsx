@@ -68,6 +68,7 @@ export function CardEditDialog({
     imageUrl: card.image_url ?? null,
   });
   const [word, setWord] = useState<WordFormValue>({
+    imageUrl: card.image_url ?? null,
     word: card.word,
     meanings: card.meanings,
     examples: card.examples,
@@ -175,7 +176,12 @@ export function CardEditDialog({
           synonyms: word.synonyms.length ? word.synonyms : r.synonyms ?? [],
           antonyms: word.antonyms.length ? word.antonyms : r.antonyms ?? [],
           comments: word.comments,
+          imageUrl: word.imageUrl ?? null,
         });
+        if ((kind === "adjective" || kind === "adverb") && !word.imageUrl) {
+          const img = await makeImage(r.word || word.word, (r.meanings ?? [])[0]);
+          if (img) setWord((prev) => ({ ...prev, imageUrl: prev.imageUrl ?? img }));
+        }
       }
       toast.success("Filled with AI");
     } finally {
@@ -274,6 +280,7 @@ export function CardEditDialog({
           synonyms: word.synonyms,
           antonyms: word.antonyms,
           comments: word.comments.trim() || null,
+          image_url: word.imageUrl ?? null,
         };
         if (!payload.word) throw new Error("Word is required");
         if (kindChanged) {
@@ -288,7 +295,7 @@ export function CardEditDialog({
         } else {
           const { error } = await (supabase as any).from("words").update(payload).eq("id", card.id);
           if (error) throw error;
-          next = { ...card, kind, article: null, plural: null, word: payload.word, image_url: null,
+          next = { ...card, kind, article: null, plural: null, word: payload.word, image_url: payload.image_url ?? null,
             meanings: payload.meanings, examples: payload.examples, themes: payload.themes, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
         }
       }
@@ -339,6 +346,7 @@ export function CardEditDialog({
               recentThemes={recentThemes}
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
               showSynonyms={kind === "adjective" || kind === "adverb"}
+              showImage={kind === "adjective" || kind === "adverb"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}

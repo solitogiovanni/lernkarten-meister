@@ -98,7 +98,7 @@ function RunPage() {
           ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
         wantWords
-          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
+          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
           ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))

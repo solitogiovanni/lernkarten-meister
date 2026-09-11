@@ -227,6 +227,7 @@ export type Database = {
           ease: number
           examples: string[]
           id: string
+          image_url: string | null
           interval_days: number
           kind: Database["public"]["Enums"]["word_kind"]
           lapses: number
@@ -246,6 +247,7 @@ export type Database = {
           ease?: number
           examples?: string[]
           id?: string
+          image_url?: string | null
           interval_days?: number
           kind: Database["public"]["Enums"]["word_kind"]
           lapses?: number
@@ -265,6 +267,7 @@ export type Database = {
           ease?: number
           examples?: string[]
           id?: string
+          image_url?: string | null
           interval_days?: number
           kind?: Database["public"]["Enums"]["word_kind"]
           lapses?: number
@@ -357,6 +360,7 @@ export type Database = {
           ease: number
           examples: string[]
           id: string
+          image_url: string | null
           interval_days: number
           kind: Database["public"]["Enums"]["word_kind"]
           lapses: number

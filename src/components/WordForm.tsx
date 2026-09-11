@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ImagePicker } from "@/components/ImagePicker";
 
 export type WordFormValue = {
   word: string;
@@ -15,6 +16,7 @@ export type WordFormValue = {
   synonyms: string[];
   antonyms: string[];
   comments: string;
+  imageUrl?: string | null;
 };
 
 export const emptyWord: WordFormValue = {
@@ -25,6 +27,7 @@ export const emptyWord: WordFormValue = {
   synonyms: [],
   antonyms: [],
   comments: "",
+  imageUrl: null,
 };
 
 function ChipInput({
@@ -89,6 +92,7 @@ export function WordForm({
   label,
   placeholder,
   showSynonyms = true,
+  showImage = false,
 }: {
   value: WordFormValue;
   onChange: (v: WordFormValue) => void;
@@ -97,6 +101,7 @@ export function WordForm({
   label: string;
   placeholder: string;
   showSynonyms?: boolean;
+  showImage?: boolean;
 }) {
   const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
   const set = <K extends keyof WordFormValue>(k: K, v: WordFormValue[K]) =>
@@ -123,6 +128,15 @@ export function WordForm({
           placeholder="bello, grande…"
         />
       </div>
+
+      {showImage && (
+        <ImagePicker
+          value={value.imageUrl ?? null}
+          onChange={(v) => set("imageUrl", v)}
+          word={value.word}
+          meaning={value.meanings[0]}
+        />
+      )}
 
       <div>
         <Label className="mb-2 block">Examples (German sentences)</Label>

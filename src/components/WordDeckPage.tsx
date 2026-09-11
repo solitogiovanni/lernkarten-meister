@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { isDue } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { autofillWords } from "@/lib/autofill.functions";
+import { generateCardImage } from "@/lib/cardImage.functions";
+import { shrinkToDataUrl, b64PngToDataUrl } from "@/lib/cardImage";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
@@ -29,6 +31,7 @@ type Row = {
   synonyms: string[];
   antonyms: string[];
   comments: string | null;
+  image_url: string | null;
   due_at: string;
   reps: number;
   created_at: string;
@@ -62,11 +65,26 @@ export function WordDeckPage({
   const [newValue, setNewValue] = useState<WordFormValue>(emptyWord);
   const [aiBusy, setAiBusy] = useState(false);
   const autofillFn = useServerFn(autofillWords);
+  const imageFn = useServerFn(generateCardImage);
+  const hasImages = kind === "adjective" || kind === "adverb";
+
+  const makeImage = async (word: string, meaning?: string): Promise<string | null> => {
+    if (!word.trim()) return null;
+    try {
+      const { b64 } = await imageFn({
+        data: { word: word.trim(), hint: [word.trim(), meaning].filter(Boolean).join(" — ") },
+      });
+      if (!b64) return null;
+      return await shrinkToDataUrl(b64PngToDataUrl(b64));
+    } catch {
+      return null;
+    }
+  };
 
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("words", (q) =>
-      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
+      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,due_at,reps,created_at")
         .eq("kind", kind)
         .order("word", { ascending: true }),
     );
@@ -153,6 +171,7 @@ export function WordDeckPage({
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
+      imageUrl: r.image_url ?? null,
     });
   };
 
@@ -169,6 +188,7 @@ export function WordDeckPage({
         synonyms: editValue.synonyms,
         antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
+        image_url: editValue.imageUrl ?? null,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -205,6 +225,7 @@ export function WordDeckPage({
       synonyms: newValue.synonyms,
       antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
+      image_url: newValue.imageUrl ?? null,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");
@@ -230,10 +251,19 @@ export function WordDeckPage({
         synonyms: v.synonyms.length ? v.synonyms : r.synonyms ?? [],
         antonyms: v.antonyms.length ? v.antonyms : r.antonyms ?? [],
         comments: v.comments,
+        imageUrl: v.imageUrl ?? null,
       };
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
       toast.success("Filled with AI");
+      if (hasImages && !merged.imageUrl) {
+        const img = await makeImage(merged.word, merged.meanings[0]);
+        if (img) {
+          const withImg = { ...merged, imageUrl: img };
+          if (target === "edit") setEditValue(withImg);
+          else setNewValue(withImg);
+        }
+      }
     } finally {
       setAiBusy(false);
     }
@@ -341,6 +371,9 @@ export function WordDeckPage({
             <button key={r.id} onClick={() => setPreviewing(r)} className="text-left">
               <Card className="p-4 hover:border-primary transition-colors h-full">
                 <div className="flex items-baseline gap-2 mb-1">
+                  {r.image_url && (
+                    <img src={r.image_url} alt={r.word} className="h-10 w-10 rounded object-cover self-center" loading="lazy" />
+                  )}
                   <span className="font-semibold text-lg">{r.word}</span>
                   <SpeakButton text={r.word} className="ml-auto" />
                 </div>
@@ -377,6 +410,7 @@ export function WordDeckPage({
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,
+          imageUrl: previewing.image_url,
         } : null}
         onEdit={() => {
           if (previewing) {
@@ -393,7 +427,7 @@ export function WordDeckPage({
             <SheetTitle>Edit {formLabel.toLowerCase()}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
+            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={hasImages} showImage={hasImages} />
             <div className="flex justify-between mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
@@ -415,7 +449,7 @@ export function WordDeckPage({
             <SheetTitle>{addLabel}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={kind === "adjective" || kind === "adverb"} />
+            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={hasImages} showImage={hasImages} />
             {newDuplicate && (
               <div className="mt-3 text-sm text-amber-700 dark:text-amber-400 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2">
                 ⚠ "{newValue.word.trim()}" is already in your deck
