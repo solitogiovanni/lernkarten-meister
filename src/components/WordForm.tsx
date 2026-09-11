@@ -15,6 +15,7 @@ export type WordFormValue = {
   synonyms: string[];
   antonyms: string[];
   comments: string;
+  imageUrl?: string | null;
 };
 
 export const emptyWord: WordFormValue = {
@@ -25,6 +26,7 @@ export const emptyWord: WordFormValue = {
   synonyms: [],
   antonyms: [],
   comments: "",
+  imageUrl: null,
 };
 
 function ChipInput({
