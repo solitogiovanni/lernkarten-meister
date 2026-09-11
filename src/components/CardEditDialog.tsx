@@ -346,6 +346,7 @@ export function CardEditDialog({
               recentThemes={recentThemes}
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
               showSynonyms={kind === "adjective" || kind === "adverb"}
+              showImage={kind === "adjective" || kind === "adverb"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}
