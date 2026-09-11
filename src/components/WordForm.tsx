@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ImagePicker } from "@/components/ImagePicker";
 
 export type WordFormValue = {
   word: string;
