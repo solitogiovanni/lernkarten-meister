@@ -91,6 +91,7 @@ export function WordForm({
   label,
   placeholder,
   showSynonyms = true,
+  showImage = false,
 }: {
   value: WordFormValue;
   onChange: (v: WordFormValue) => void;
@@ -99,6 +100,7 @@ export function WordForm({
   label: string;
   placeholder: string;
   showSynonyms?: boolean;
+  showImage?: boolean;
 }) {
   const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
   const set = <K extends keyof WordFormValue>(k: K, v: WordFormValue[K]) =>
