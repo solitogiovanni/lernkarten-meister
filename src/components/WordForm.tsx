@@ -128,6 +128,15 @@ export function WordForm({
         />
       </div>
 
+      {showImage && (
+        <ImagePicker
+          value={value.imageUrl ?? null}
+          onChange={(v) => set("imageUrl", v)}
+          word={value.word}
+          meaning={value.meanings[0]}
+        />
+      )}
+
       <div>
         <Label className="mb-2 block">Examples (German sentences)</Label>
         <div className="space-y-2">
