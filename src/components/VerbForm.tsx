@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,7 +118,16 @@ export function VerbForm({
   themeSuggestions?: string[];
   recentThemes?: string[];
 }) {
-  const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
+  const global = useGlobalThemes();
+  useEffect(() => { registerThemes(value.themes); }, [value.themes]);
+  const suggestions = Array.from(
+    new Set([
+      ...global.recentThemes,
+      ...(recentThemes ?? []),
+      ...(themeSuggestions ?? []),
+      ...global.allThemes,
+    ]),
+  );
 
   const set = <K extends keyof VerbFormValue>(k: K, v: VerbFormValue[K]) =>
     onChange({ ...value, [k]: v });
