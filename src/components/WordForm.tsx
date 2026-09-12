@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -103,7 +104,16 @@ export function WordForm({
   showSynonyms?: boolean;
   showImage?: boolean;
 }) {
-  const suggestions = Array.from(new Set([...(recentThemes ?? []), ...(themeSuggestions ?? [])]));
+  const global = useGlobalThemes();
+  useEffect(() => { registerThemes(value.themes); }, [value.themes]);
+  const suggestions = Array.from(
+    new Set([
+      ...global.recentThemes,
+      ...(recentThemes ?? []),
+      ...(themeSuggestions ?? []),
+      ...global.allThemes,
+    ]),
+  );
   const set = <K extends keyof WordFormValue>(k: K, v: WordFormValue[K]) =>
     onChange({ ...value, [k]: v });
 
