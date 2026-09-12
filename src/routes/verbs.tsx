@@ -73,12 +73,14 @@ function VerbsPage() {
   ): Promise<T | null> => {
     if (!word.trim()) return null;
     try {
-      const { b64 } = await imageFn({
+      const { b64, error } = await imageFn({
         data: { word: word.trim(), hint: [word.trim(), meaning].filter(Boolean).join(" — ") },
       });
+      if (error) toast.error(error);
       if (!b64) return null;
       return { ...v, imageUrl: await shrinkToDataUrl(b64PngToDataUrl(b64)) };
-    } catch {
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not create the picture");
       return null;
     }
   };
