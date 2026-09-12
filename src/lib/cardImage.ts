@@ -2,6 +2,19 @@
 
 const MAX_SIDE = 384;
 
+function dataUrlToBlob(src: string): Blob | null {
+  const m = /^data:([^;,]+);base64,(.*)$/s.exec(src);
+  if (!m) return null;
+  try {
+    const bin = atob(m[2]);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: m[1] });
+  } catch {
+    return null;
+  }
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -12,10 +25,41 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function drawToDataUrl(img: HTMLImageElement): string {
-  const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-  const w = Math.max(1, Math.round(img.naturalWidth * scale));
-  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+type Source = { width: number; height: number; draw: CanvasImageSource };
+
+/** Decodes a source into something drawable, preferring the low-memory bitmap path. */
+async function decode(src: string | Blob): Promise<Source> {
+  const blob = typeof src === "string" ? dataUrlToBlob(src) : src;
+  if (blob && typeof createImageBitmap === "function") {
+    try {
+      const bmp = await createImageBitmap(blob);
+      return { width: bmp.width, height: bmp.height, draw: bmp };
+    } catch {
+      // fall through to the <img> path
+    }
+  }
+  const url = typeof src === "string" ? src : URL.createObjectURL(src);
+  try {
+    const img = await loadImage(url);
+    return { width: img.naturalWidth, height: img.naturalHeight, draw: img };
+  } finally {
+    if (typeof src !== "string") URL.revokeObjectURL(url);
+  }
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read the picture"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function shrink(source: Source): Promise<string> {
+  const scale = Math.min(1, MAX_SIDE / Math.max(source.width, source.height));
+  const w = Math.max(1, Math.round(source.width * scale));
+  const h = Math.max(1, Math.round(source.height * scale));
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
@@ -23,23 +67,33 @@ function drawToDataUrl(img: HTMLImageElement): string {
   if (!ctx) throw new Error("Canvas not supported");
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(img, 0, 0, w, h);
-  return canvas.toDataURL("image/jpeg", 0.82);
+  ctx.drawImage(source.draw, 0, 0, w, h);
+
+  // toBlob keeps memory far lower than toDataURL on mobile browsers.
+  const blob = await new Promise<Blob | null>((resolve) => {
+    try {
+      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.82);
+    } catch {
+      resolve(null);
+    }
+  });
+  if (blob && blob.size > 0) return await blobToDataUrl(blob);
+
+  const url = canvas.toDataURL("image/jpeg", 0.82);
+  if (!url || url.length < 32) throw new Error("Could not resize the picture");
+  return url;
 }
 
 /** Shrinks any source (file, data url, remote url) into a compact JPEG data url. */
 export async function shrinkToDataUrl(source: File | Blob | string): Promise<string> {
-  const src =
-    typeof source === "string"
-      ? source
-      : await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = () => reject(new Error("Could not read the file"));
-          reader.readAsDataURL(source);
-        });
-  const img = await loadImage(src);
-  return drawToDataUrl(img);
+  try {
+    return await shrink(await decode(source));
+  } catch (e) {
+    // If we cannot resize it but we already hold the bytes, keep them as-is
+    // rather than losing the picture entirely.
+    if (typeof source === "string" && source.startsWith("data:")) return source;
+    throw e;
+  }
 }
 
 export function b64PngToDataUrl(b64: string): string {
