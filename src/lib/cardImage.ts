@@ -84,15 +84,28 @@ async function shrink(source: Source): Promise<string> {
   return url;
 }
 
+/** Checks that a data url can actually be displayed by the browser. */
+async function isDisplayable(src: string): Promise<boolean> {
+  try {
+    await loadImage(src);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Shrinks any source (file, data url, remote url) into a compact JPEG data url. */
 export async function shrinkToDataUrl(source: File | Blob | string): Promise<string> {
   try {
     return await shrink(await decode(source));
   } catch (e) {
-    // If we cannot resize it but we already hold the bytes, keep them as-is
-    // rather than losing the picture entirely.
-    if (typeof source === "string" && source.startsWith("data:")) return source;
-    throw e;
+    // If we cannot resize it but we already hold usable bytes, keep them as-is
+    // rather than losing the picture entirely — but never keep bytes the
+    // browser cannot display, which would show up as a broken image.
+    if (typeof source === "string" && source.startsWith("data:") && (await isDisplayable(source))) {
+      return source;
+    }
+    throw e instanceof Error ? e : new Error("Could not prepare the picture");
   }
 }
 
