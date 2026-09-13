@@ -245,14 +245,18 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
           .split(";")
           .filter((decl) => {
             const prop = decl.split(":")[0]?.trim().toLowerCase() ?? "";
+            const val = decl.slice(decl.indexOf(":") + 1).trim().toLowerCase();
             return (
               prop &&
               !prop.startsWith("mso-") &&
               !prop.startsWith("--") &&
+              !prop.startsWith("border") &&
+              !val.includes("var(--") &&
               !["font-family", "tab-stops", "line-height"].includes(prop)
             );
           })
           .join(";");
+
         if (cleaned.trim()) el.setAttribute("style", cleaned);
         else el.removeAttribute("style");
       }
