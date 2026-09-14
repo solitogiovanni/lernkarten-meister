@@ -498,13 +498,13 @@ function FlashcardView({
               {card.comments && (
                 <div className="text-sm text-amber-700 dark:text-amber-300 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2 mt-3 text-left max-w-md">
                   📝{" "}
-                  {/<[a-z][\s\S]*>/i.test(card.comments) ? (
+                  {looksLikeHtml(sanitizeRichText(card.comments)) ? (
                     <span
                       className="rich-text-view inline"
-                      dangerouslySetInnerHTML={{ __html: card.comments }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(card.comments) }}
                     />
                   ) : (
-                    <span className="whitespace-pre-wrap">{card.comments}</span>
+                    <span className="whitespace-pre-wrap">{sanitizeRichText(card.comments)}</span>
                   )}
                 </div>
               )}
