@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SpeakButton } from "@/components/SpeakButton";
 import { Pencil } from "lucide-react";
+import { sanitizeRichText, looksLikeHtml } from "@/lib/sanitizeHtml";
 import type { VerbPrep } from "@/components/VerbForm";
 
 export type RevealKind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
