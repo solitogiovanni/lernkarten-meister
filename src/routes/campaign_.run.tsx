@@ -13,6 +13,7 @@ import { applyRating, isDue, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
 import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
 import { SpeakButton } from "@/components/SpeakButton";
+import { sanitizeRichText, looksLikeHtml } from "@/lib/sanitizeHtml";
 
 const searchSchema = z.object({
   mode: fallback(z.enum(["flashcards", "quiz"]), "flashcards").default("flashcards"),
