@@ -16,6 +16,7 @@ import {
   BrushCleaning,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { sanitizeRichText } from "@/lib/sanitizeHtml";
 
 const FONT_FAMILIES = [
   { name: "Default", value: "" },
@@ -199,7 +200,10 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
 
   const cleanHtml = () => {
     if (!ref.current) return;
-    const doc = new DOMParser().parseFromString(ref.current.innerHTML, "text/html");
+    const doc = new DOMParser().parseFromString(
+      sanitizeRichText(ref.current.innerHTML),
+      "text/html",
+    );
 
     // Remove comments
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);

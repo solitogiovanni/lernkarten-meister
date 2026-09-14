@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { Loader2, Plus, Trash2, Search, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeRichText } from "@/lib/sanitizeHtml";
 
 type Row = {
   id: string;
@@ -144,7 +145,7 @@ function GrammarPage() {
                 {r.content && (
                   <div
                     className="rich-text-view text-sm text-muted-foreground line-clamp-4 [&_*]:!text-muted-foreground"
-                    dangerouslySetInnerHTML={{ __html: r.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(r.content) }}
                   />
                 )}
               </Card>
@@ -166,7 +167,7 @@ function GrammarPage() {
                 {previewing.content ? (
                   <div
                     className="rich-text-view text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: previewing.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(previewing.content) }}
                   />
                 ) : (
                   <p className="text-sm text-muted-foreground italic">No notes yet.</p>
