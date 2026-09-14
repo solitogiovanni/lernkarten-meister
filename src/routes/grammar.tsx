@@ -145,7 +145,7 @@ function GrammarPage() {
                 {r.content && (
                   <div
                     className="rich-text-view text-sm text-muted-foreground line-clamp-4 [&_*]:!text-muted-foreground"
-                    dangerouslySetInnerHTML={{ __html: r.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(r.content) }}
                   />
                 )}
               </Card>
