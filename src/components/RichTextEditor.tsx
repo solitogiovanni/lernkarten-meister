@@ -16,6 +16,7 @@ import {
   BrushCleaning,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { sanitizeRichText } from "@/lib/sanitizeHtml";
 
 const FONT_FAMILIES = [
   { name: "Default", value: "" },
