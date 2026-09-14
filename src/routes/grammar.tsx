@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { Loader2, Plus, Trash2, Search, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeRichText } from "@/lib/sanitizeHtml";
 
 type Row = {
   id: string;
