@@ -167,7 +167,7 @@ function GrammarPage() {
                 {previewing.content ? (
                   <div
                     className="rich-text-view text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: previewing.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(previewing.content) }}
                   />
                 ) : (
                   <p className="text-sm text-muted-foreground italic">No notes yet.</p>
