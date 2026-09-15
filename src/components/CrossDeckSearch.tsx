@@ -100,7 +100,7 @@ export function CrossDeckSearch({
   useEffect(() => {
     const term = q.trim();
     if (term.length < 2) {
-      setNouns([]); setVerbs([]); setWords([]);
+      setNouns([]); setVerbs([]); setWords([]); setSearchFailed(false);
       return;
     }
     let cancelled = false;
@@ -311,12 +311,14 @@ export function CrossDeckSearch({
     navigate({ to: targetFor[preview.kind] });
   };
 
-  const noMatchAnywhere = !hasLocalMatches && otherTotal === 0 && !busy;
+  const noMatchAnywhere = !hasLocalMatches && otherTotal === 0 && !busy && !searchFailed;
 
   const addBar = (
     <Card className="p-6 text-center mt-6">
       <p className="text-muted-foreground mb-4">
-        {noMatchAnywhere ? (
+        {searchFailed ? (
+          <>Search took too long, so these results may be incomplete. Try again before adding "<span className="font-medium text-foreground">{term}</span>".</>
+        ) : noMatchAnywhere ? (
           <>No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere.</>
         ) : (
           <>Add "<span className="font-medium text-foreground">{term}</span>"?</>
