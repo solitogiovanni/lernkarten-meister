@@ -314,12 +314,12 @@ export function CrossDeckSearch({
     <Card className="p-6 text-center mt-6">
       <p className="text-muted-foreground mb-4">
         {noMatchAnywhere ? (
-          <>No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere. Add it as:</>
+          <>No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere.</>
         ) : (
-          <>Add "<span className="font-medium text-foreground">{term}</span>" as:</>
+          <>Add "<span className="font-medium text-foreground">{term}</span>"?</>
         )}
       </p>
-      <div className="flex flex-wrap justify-center gap-2 mb-3">
+      <div className="hidden sm:flex flex-wrap justify-center gap-2 mb-3">
         {(["noun", "verb", "adjective", "adverb"] as DeckKind[]).map((k) => (
           <Button key={k} variant={k === currentKind ? "default" : "outline"} size="sm" onClick={() => proposeAdd(k)}>
             <Plus className="h-4 w-4 mr-1" /> {labelFor[k].slice(0, -1)}
@@ -327,8 +327,8 @@ export function CrossDeckSearch({
         ))}
       </div>
       <div className="flex justify-center">
-        <Button variant="secondary" size="sm" onClick={() => setAutoDetect(true)}>
-          <Sparkles className="h-4 w-4 mr-1" /> Auto-detect type
+        <Button variant="secondary" className="w-full sm:w-auto h-11 sm:h-9 text-base sm:text-sm" onClick={() => setAutoDetect(true)}>
+          <Sparkles className="h-5 w-5 sm:h-4 sm:w-4 mr-2 sm:mr-1" /> Auto-detect type
         </Button>
       </div>
       <AutoDetectDialog
