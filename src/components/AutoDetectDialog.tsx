@@ -290,7 +290,7 @@ export function AutoDetectDialog({
                       )}
                       {d.existingId && (
                         <span className="text-xs px-2 py-0.5 rounded font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                          already exists — will be updated
+                          already exists — missing details will be added
                         </span>
                       )}
                       <Button

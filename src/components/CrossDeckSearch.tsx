@@ -138,6 +138,8 @@ export function CrossDeckSearch({
       const wordsAll = dedupe<WordHit>((wWord.data ?? []) as WordHit[], (wMean.data ?? []) as WordHit[])
         .filter((x) => x.kind !== currentKind);
       setWords(wordsAll);
+      const failed = [nWord, nMean, vWord, vMean, wWord, wMean].some((r: any) => r?.error);
+      setSearchFailed(failed);
       setBusy(false);
     }, 250);
     return () => { cancelled = true; clearTimeout(handle); };
