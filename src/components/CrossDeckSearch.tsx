@@ -93,6 +93,7 @@ export function CrossDeckSearch({
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
   const [autoDetect, setAutoDetect] = useState(false);
   const [tick, setTick] = useState(0);
+  const [searchFailed, setSearchFailed] = useState(false);
 
 
 
