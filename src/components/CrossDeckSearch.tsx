@@ -93,13 +93,14 @@ export function CrossDeckSearch({
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
   const [autoDetect, setAutoDetect] = useState(false);
   const [tick, setTick] = useState(0);
+  const [searchFailed, setSearchFailed] = useState(false);
 
 
 
   useEffect(() => {
     const term = q.trim();
     if (term.length < 2) {
-      setNouns([]); setVerbs([]); setWords([]);
+      setNouns([]); setVerbs([]); setWords([]); setSearchFailed(false);
       return;
     }
     let cancelled = false;
@@ -138,6 +139,8 @@ export function CrossDeckSearch({
       const wordsAll = dedupe<WordHit>((wWord.data ?? []) as WordHit[], (wMean.data ?? []) as WordHit[])
         .filter((x) => x.kind !== currentKind);
       setWords(wordsAll);
+      const failed = [nWord, nMean, vWord, vMean, wWord, wMean].some((r: any) => r?.error);
+      setSearchFailed(failed);
       setBusy(false);
     }, 250);
     return () => { cancelled = true; clearTimeout(handle); };
@@ -308,12 +311,14 @@ export function CrossDeckSearch({
     navigate({ to: targetFor[preview.kind] });
   };
 
-  const noMatchAnywhere = !hasLocalMatches && otherTotal === 0 && !busy;
+  const noMatchAnywhere = !hasLocalMatches && otherTotal === 0 && !busy && !searchFailed;
 
   const addBar = (
     <Card className="p-6 text-center mt-6">
       <p className="text-muted-foreground mb-4">
-        {noMatchAnywhere ? (
+        {searchFailed ? (
+          <>Search took too long, so these results may be incomplete. Try again before adding "<span className="font-medium text-foreground">{term}</span>".</>
+        ) : noMatchAnywhere ? (
           <>No matches for "<span className="font-medium text-foreground">{term}</span>" anywhere.</>
         ) : (
           <>Add "<span className="font-medium text-foreground">{term}</span>"?</>

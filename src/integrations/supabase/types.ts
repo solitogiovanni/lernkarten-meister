@@ -287,6 +287,8 @@ export type Database = {
     }
     Functions: {
       fold_de: { Args: { t: string }; Returns: string }
+      fold_de_arr: { Args: { t: string[] }; Returns: string }
+      fold_de_i: { Args: { t: string }; Returns: string }
       search_nouns_by_meaning: {
         Args: { term: string }
         Returns: {
@@ -379,6 +381,8 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       german_article: "der" | "die" | "das"

@@ -179,12 +179,46 @@ export function AutoDetectDialog({
         };
       };
 
+      // Merge into an existing card without destroying what's already there:
+      // arrays are unioned, scalars/pictures are only filled when empty.
+      const mergeRow = (row: Record<string, any>, existing: Record<string, any>) => {
+        const merged: Record<string, any> = {};
+        for (const [key, incoming] of Object.entries(row)) {
+          const current = existing?.[key];
+          if (Array.isArray(incoming)) {
+            const currentArr = Array.isArray(current) ? current : [];
+            if (key === "prepositions") {
+              merged[key] = currentArr.length ? currentArr : incoming;
+            } else {
+              const seen = new Set(currentArr.map((v) => JSON.stringify(v)));
+              const extra = incoming.filter((v) => !seen.has(JSON.stringify(v)));
+              merged[key] = [...currentArr, ...extra];
+            }
+            continue;
+          }
+          const currentEmpty = current === null || current === undefined || current === "";
+          merged[key] = currentEmpty ? incoming : current;
+        }
+        return merged;
+      };
+
       for (const d of valid) {
         const { table, row } = payloadFor(d);
         const existingId = d.existingId ?? (await findExistingId(d));
         if (existingId) {
-          // Update everything except comments so no duplicate card is created.
-          const { error } = await (supabase as any).from(table).update(row).eq("id", existingId);
+          const { data: existing, error: readError } = await (supabase as any)
+            .from(table)
+            .select("*")
+            .eq("id", existingId)
+            .maybeSingle();
+          if (readError) {
+            errors.push(`${table}: ${readError.message}`);
+            continue;
+          }
+          const { error } = await (supabase as any)
+            .from(table)
+            .update(mergeRow(row, existing ?? {}))
+            .eq("id", existingId);
           if (error) errors.push(`${table}: ${error.message}`);
           else updated += 1;
         } else {
@@ -256,7 +290,7 @@ export function AutoDetectDialog({
                       )}
                       {d.existingId && (
                         <span className="text-xs px-2 py-0.5 rounded font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                          already exists — will be updated
+                          already exists — missing details will be added
                         </span>
                       )}
                       <Button
