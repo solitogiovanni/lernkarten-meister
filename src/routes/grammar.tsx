@@ -103,14 +103,17 @@ function GrammarPage() {
   return (
     <div className="space-y-4">
       <div className="sticky top-14 z-20 -mx-4 px-4 bg-background pt-2 pb-3 space-y-4 border-b">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold tracking-tight">Your grammar deck</h1>
             <p className="text-sm text-muted-foreground">
               {rows.length} {rows.length === 1 ? "rule" : "rules"}
             </p>
           </div>
-          <Button onClick={() => setCreating(true)} className="flex-1 sm:flex-initial">
+          <Button onClick={() => setCreating(true)} size="icon" className="shrink-0 sm:hidden" aria-label="Add rule">
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => setCreating(true)} className="hidden sm:inline-flex">
             <Plus className="h-4 w-4 mr-1" /> Add rule
           </Button>
         </div>
@@ -122,7 +125,7 @@ function GrammarPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search title or content…"
-              className="pl-8"
+              className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
         </Card>

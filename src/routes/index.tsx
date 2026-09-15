@@ -289,57 +289,69 @@ function DeckPage() {
   return (
     <div className="space-y-4">
       <div className="sticky top-14 z-20 -mx-4 px-4 bg-background pt-2 pb-3 space-y-4 border-b max-h-[calc(100vh-3.5rem)] overflow-y-auto">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight">Your noun deck</h1>
           <p className="text-sm text-muted-foreground">
             {rows.length} {rows.length === 1 ? "noun" : "nouns"} · {dueCount} due today
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" asChild className="hidden sm:inline-flex">
             <Link to="/import">
               <Upload className="h-4 w-4 mr-1" /> Import
             </Link>
           </Button>
-          <Button asChild className="flex-1 sm:flex-initial">
+          <Button asChild size="icon" className="shrink-0 sm:hidden" aria-label="Campaign">
+            <Link to="/campaign">
+              <Play className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Button asChild className="hidden sm:inline-flex">
             <Link to="/campaign">
               <Play className="h-4 w-4 mr-1" /> Campaign
             </Link>
           </Button>
-          <Button onClick={() => setCreating(true)} className="flex-1 sm:flex-initial">
+          <Button onClick={() => setCreating(true)} size="icon" className="shrink-0 sm:hidden" aria-label="Add noun">
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => setCreating(true)} className="hidden sm:inline-flex">
             <Plus className="h-4 w-4 mr-1" /> Add noun
           </Button>
         </div>
       </div>
 
       <Card className="p-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               value={q}
               onChange={(e) => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, q: e.target.value }) })}
               placeholder="Search noun, plural, meaning…"
-              className="pl-8"
+              className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
-          <Button
-            variant={due ? "default" : "outline"}
-            size="sm"
-            onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, due: !p.due }) })}
-          >
-            Due today ({dueCount})
-          </Button>
-          {(q || theme || due) && (
+          <div className="flex gap-2 sm:items-center">
             <Button
-              variant="ghost"
+              variant={due ? "default" : "outline"}
               size="sm"
-              onClick={() => navigate({ search: { q: "", theme: "", due: false } })}
+              className="hidden sm:inline-flex"
+              onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, due: !p.due }) })}
             >
-              Clear
+              Due today ({dueCount})
             </Button>
-          )}
+            {(q || theme || due) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto sm:ml-0"
+                onClick={() => navigate({ search: { q: "", theme: "", due: false } })}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
         </div>
         {allThemes.length > 0 && (
           <details className="mt-3 group">
