@@ -47,6 +47,9 @@ export type Database = {
           due_at: string
           ease: number
           examples: string[]
+          fold_meanings: string | null
+          fold_noun: string | null
+          fold_plural: string | null
           id: string
           image_url: string | null
           interval_days: number
@@ -68,6 +71,9 @@ export type Database = {
           due_at?: string
           ease?: number
           examples?: string[]
+          fold_meanings?: string | null
+          fold_noun?: string | null
+          fold_plural?: string | null
           id?: string
           image_url?: string | null
           interval_days?: number
@@ -89,6 +95,9 @@ export type Database = {
           due_at?: string
           ease?: number
           examples?: string[]
+          fold_meanings?: string | null
+          fold_noun?: string | null
+          fold_plural?: string | null
           id?: string
           image_url?: string | null
           interval_days?: number
@@ -152,6 +161,10 @@ export type Database = {
           due_at: string
           ease: number
           examples: string[]
+          fold_meanings: string | null
+          fold_perfect: string | null
+          fold_praeteritum: string | null
+          fold_present: string | null
           id: string
           image_url: string | null
           interval_days: number
@@ -176,6 +189,10 @@ export type Database = {
           due_at?: string
           ease?: number
           examples?: string[]
+          fold_meanings?: string | null
+          fold_perfect?: string | null
+          fold_praeteritum?: string | null
+          fold_present?: string | null
           id?: string
           image_url?: string | null
           interval_days?: number
@@ -200,6 +217,10 @@ export type Database = {
           due_at?: string
           ease?: number
           examples?: string[]
+          fold_meanings?: string | null
+          fold_perfect?: string | null
+          fold_praeteritum?: string | null
+          fold_present?: string | null
           id?: string
           image_url?: string | null
           interval_days?: number
@@ -226,6 +247,8 @@ export type Database = {
           due_at: string
           ease: number
           examples: string[]
+          fold_meanings: string | null
+          fold_word: string | null
           id: string
           image_url: string | null
           interval_days: number
@@ -246,6 +269,8 @@ export type Database = {
           due_at?: string
           ease?: number
           examples?: string[]
+          fold_meanings?: string | null
+          fold_word?: string | null
           id?: string
           image_url?: string | null
           interval_days?: number
@@ -266,6 +291,8 @@ export type Database = {
           due_at?: string
           ease?: number
           examples?: string[]
+          fold_meanings?: string | null
+          fold_word?: string | null
           id?: string
           image_url?: string | null
           interval_days?: number
@@ -299,6 +326,9 @@ export type Database = {
           due_at: string
           ease: number
           examples: string[]
+          fold_meanings: string | null
+          fold_noun: string | null
+          fold_plural: string | null
           id: string
           image_url: string | null
           interval_days: number
@@ -329,6 +359,10 @@ export type Database = {
           due_at: string
           ease: number
           examples: string[]
+          fold_meanings: string | null
+          fold_perfect: string | null
+          fold_praeteritum: string | null
+          fold_present: string | null
           id: string
           image_url: string | null
           interval_days: number
@@ -361,6 +395,8 @@ export type Database = {
           due_at: string
           ease: number
           examples: string[]
+          fold_meanings: string | null
+          fold_word: string | null
           id: string
           image_url: string | null
           interval_days: number
