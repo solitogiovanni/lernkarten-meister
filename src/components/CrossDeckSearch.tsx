@@ -112,21 +112,24 @@ export function CrossDeckSearch({
       const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments";
       const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments";
 
+      // Meaning search folds text and uses trigram indexes, which need at least
+      // 3 characters; shorter terms would force a full scan and can time out.
+      const deep = term.length >= 3;
       const [nWord, nMean, vWord, vMean, wWord, wMean] = await Promise.all([
         currentKind === "noun"
           ? Promise.resolve({ data: [] as NounHit[] })
           : sb.from("nouns").select(nounSel).or(`noun.ilike.${like},plural.ilike.${like}`).limit(20),
-        currentKind === "noun"
+        currentKind === "noun" || !deep
           ? Promise.resolve({ data: [] as NounHit[] })
           : sb.rpc("search_nouns_by_meaning", { term }),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
           : sb.from("verbs").select(verbSel).ilike("present", like).limit(20),
-        currentKind === "verb"
+        currentKind === "verb" || !deep
           ? Promise.resolve({ data: [] as VerbHit[] })
           : sb.rpc("search_verbs_by_meaning", { term }),
         sb.from("words").select(wordSel).ilike("word", like).limit(40),
-        sb.rpc("search_words_by_meaning", { term }),
+        deep ? sb.rpc("search_words_by_meaning", { term }) : Promise.resolve({ data: [] as WordHit[] }),
       ]);
       if (cancelled) return;
       const dedupe = <T extends { id: string }>(...lists: T[][]) => {
