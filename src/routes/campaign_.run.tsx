@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Loader2, Check, X, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
-import { applyRating, isDue, type Rating } from "@/lib/srs";
+import { applyRating, isDueReview, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
 import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
 import { SpeakButton } from "@/components/SpeakButton";
@@ -180,7 +180,7 @@ function RunPage() {
       }));
 
       let pool = [...nounCards, ...wordCards, ...verbCards].filter((c) => {
-        if (scope === "due" && !isDue(c.due_at)) return false;
+        if (scope === "due" && !isDueReview(c.due_at, c.reps)) return false;
         if (themeList.length > 0 && !c.themes.some((t) => themeList.includes(t))) return false;
         return true;
       });

@@ -49,3 +49,9 @@ export function applyRating(state: SrsState, rating: Rating): SrsUpdate {
 export function isDue(due_at: string): boolean {
   return new Date(due_at).getTime() <= Date.now();
 }
+
+// A card counts as "due for review" only after it has been rated at least once.
+// Brand-new cards (reps === 0) are fresh material, not review backlog.
+export function isDueReview(due_at: string, reps: number): boolean {
+  return reps > 0 && isDue(due_at);
+}

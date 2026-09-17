@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { VerbForm, type VerbFormValue, type VerbPrep, emptyVerb } from "@/components/VerbForm";
 import { Loader2, Plus, Trash2, Upload, Play, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { isDue } from "@/lib/srs";
+import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { autofillVerbs } from "@/lib/autofill.functions";
 import { generateCardImage } from "@/lib/cardImage.functions";
@@ -200,12 +200,12 @@ function VerbsPage() {
         if (!hay.includes(needle)) return false;
       }
       if (theme && !r.themes.includes(theme)) return false;
-      if (due && !isDue(r.due_at)) return false;
+      if (due && !isDueReview(r.due_at, r.reps)) return false;
       return true;
     });
   }, [rows, q, theme, due]);
 
-  const dueCount = rows.filter((r) => isDue(r.due_at)).length;
+  const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
   const openEdit = (r: Row) => {
     setEditing(r);
@@ -420,7 +420,7 @@ function VerbsPage() {
                     ))}
                   </div>
                 )}
-                {isDue(r.due_at) && r.reps > 0 && (
+                {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
               </Card>
