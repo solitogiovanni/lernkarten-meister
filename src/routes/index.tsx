@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { NounForm, type NounFormValue, emptyNoun } from "@/components/NounForm";
 import { Loader2, Plus, Sparkles, Trash2, Upload, Play, Search } from "lucide-react";
 import { toast } from "sonner";
-import { isDue } from "@/lib/srs";
+import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { autofillNouns } from "@/lib/autofill.functions";
 import { generateCardImage } from "@/lib/cardImage.functions";
@@ -443,7 +443,7 @@ function DeckPage() {
                     ))}
                   </div>
                 )}
-                {isDue(r.due_at) && r.reps > 0 && (
+                {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
               </Card>

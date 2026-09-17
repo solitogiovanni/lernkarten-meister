@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { isDue } from "@/lib/srs";
+import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { Loader2, Play, Save, Bookmark, Trash2, Pencil, Check, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
