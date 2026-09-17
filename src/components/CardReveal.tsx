@@ -188,7 +188,7 @@ export function CardRevealDialog({
           </div>
         </div>
 
-        <DialogFooter className="sm:justify-between gap-2">
+        <DialogFooter className="flex-row justify-start gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
           <Button onClick={onEdit}>
             <Pencil className="h-4 w-4 mr-1" /> Edit
