@@ -464,7 +464,7 @@ function VerbsPage() {
           <SheetHeader><SheetTitle>Edit verb</SheetTitle></SheetHeader>
           <div className="mt-4">
             <VerbForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
-            <div className="flex justify-between mt-6 gap-2">
+            <div className="flex justify-start mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
               </Button>
@@ -485,7 +485,7 @@ function VerbsPage() {
           <SheetHeader><SheetTitle>Add verb</SheetTitle></SheetHeader>
           <div className="mt-4">
             <VerbForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="flex justify-start gap-2 mt-6">
               <Button variant="outline" onClick={() => aiFillCurrent("new")} disabled={aiBusy || !newValue.present.trim()}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
                 AI fill

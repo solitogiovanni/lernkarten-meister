@@ -488,7 +488,7 @@ function DeckPage() {
           </SheetHeader>
           <div className="mt-4">
             <NounForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
-            <div className="flex justify-between mt-6 gap-2">
+            <div className="flex justify-start mt-6 gap-2">
               <Button variant="ghost" size="sm" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" />
                 Delete
@@ -518,7 +518,7 @@ function DeckPage() {
                 ⚠ "{newValue.noun.trim()}" is already in your deck
               </div>
             )}
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="flex justify-start gap-2 mt-6">
               <Button variant="outline" onClick={() => aiFillCurrent("new")} disabled={aiBusy || !newValue.noun.trim()}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
                 AI fill
