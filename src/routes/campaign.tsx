@@ -20,7 +20,7 @@ export const Route = createFileRoute("/campaign")({
   component: CampaignSetup,
 });
 
-type Item = { kind: "noun" | "adjective" | "adverb" | "verb"; themes: string[]; due_at: string };
+type Item = { kind: "noun" | "adjective" | "adverb" | "verb"; themes: string[]; due_at: string; reps: number };
 
 function CampaignSetup() {
   const [items, setItems] = useState<Item[]>([]);
