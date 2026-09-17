@@ -124,14 +124,14 @@ function CampaignSetup() {
   useEffect(() => {
     (async () => {
       const [nounsRes, wordsRes, verbsRes] = await Promise.all([
-        fetchAll<{ themes: string[]; due_at: string }>("nouns", (q) => q.select("themes,due_at")),
-        fetchAll<{ kind: "adjective" | "adverb"; themes: string[]; due_at: string }>("words", (q) => q.select("kind,themes,due_at")),
-        fetchAll<{ themes: string[]; due_at: string }>("verbs", (q) => q.select("themes,due_at")),
+        fetchAll<{ themes: string[]; due_at: string; reps: number }>("nouns", (q) => q.select("themes,due_at,reps")),
+        fetchAll<{ kind: "adjective" | "adverb"; themes: string[]; due_at: string; reps: number }>("words", (q) => q.select("kind,themes,due_at,reps")),
+        fetchAll<{ themes: string[]; due_at: string; reps: number }>("verbs", (q) => q.select("themes,due_at,reps")),
       ]);
       const all: Item[] = [
-        ...nounsRes.data.map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at })),
-        ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at })),
-        ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at })),
+        ...nounsRes.data.map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at, reps: r.reps })),
+        ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at, reps: r.reps })),
+        ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at, reps: r.reps })),
       ];
       setItems(all);
       setLoading(false);
@@ -147,7 +147,7 @@ function CampaignSetup() {
   const matching = useMemo(() => {
     return items.filter((r) => {
       if (!kinds.has(r.kind)) return false;
-      if (scope === "due" && !isDue(r.due_at)) return false;
+      if (scope === "due" && !isDueReview(r.due_at, r.reps)) return false;
       if (themes.length > 0 && !r.themes.some((t) => themes.includes(t))) return false;
       return true;
     });
