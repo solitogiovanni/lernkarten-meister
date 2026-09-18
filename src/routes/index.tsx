@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { NounForm, type NounFormValue, emptyNoun } from "@/components/NounForm";
-import { Loader2, Plus, Sparkles, Trash2, Upload, Play, Search } from "lucide-react";
+import { Loader2, Sparkles, Trash2, Upload, Play, Search } from "lucide-react";
 import { toast } from "sonner";
 import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
@@ -312,12 +312,6 @@ function DeckPage() {
               <Play className="h-4 w-4 mr-1" /> Campaign
             </Link>
           </Button>
-          <Button onClick={() => setCreating(true)} size="icon" className="shrink-0 sm:hidden" aria-label="Add noun">
-            <Plus className="h-4 w-4" />
-          </Button>
-          <Button onClick={() => setCreating(true)} className="hidden sm:inline-flex">
-            <Plus className="h-4 w-4 mr-1" /> Add noun
-          </Button>
         </div>
       </div>
 
@@ -452,7 +446,7 @@ function DeckPage() {
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} onProposeAdd={(_, word) => { setNewValue({ ...emptyNoun, noun: word }); setCreating(true); }} />
+      <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
       {/* Reveal preview */}
       <CardRevealDialog

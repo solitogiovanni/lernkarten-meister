@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Sparkles } from "lucide-react";
+import { BookOpen, Loader2, Sparkles } from "lucide-react";
 import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
 import { AutoDetectDialog } from "@/components/AutoDetectDialog";
 import { SpeakButton } from "@/components/SpeakButton";
@@ -71,18 +71,17 @@ const labelFor: Record<DeckKind, string> = {
 
 export const ADD_PREFILL_KEY = "wortschatz:addPrefill";
 export const EDIT_PREFILL_KEY = "wortschatz:editPrefill";
+export const GRAMMAR_PREFILL_KEY = "wortschatz:grammarPrefill";
 
 export function CrossDeckSearch({
   q,
   currentKind,
   hasLocalMatches,
-  onProposeAdd,
   onRefresh,
 }: {
   q: string;
   currentKind: DeckKind;
   hasLocalMatches: boolean;
-  onProposeAdd?: (kind: DeckKind, word: string) => void;
   onRefresh?: () => void;
 }) {
   const navigate = useNavigate();
@@ -298,15 +297,6 @@ export function CrossDeckSearch({
 
   if (busy && otherTotal === 0 && hasLocalMatches) return null;
 
-  const proposeAdd = (kind: DeckKind) => {
-    if (kind === currentKind && onProposeAdd) {
-      onProposeAdd(kind, term);
-      return;
-    }
-    sessionStorage.setItem(ADD_PREFILL_KEY, JSON.stringify({ kind, word: term, q: term }));
-    navigate({ to: targetFor[kind] });
-  };
-
   const onEditPreview = () => {
     if (!preview) return;
     sessionStorage.setItem(EDIT_PREFILL_KEY, JSON.stringify({ kind: preview.kind, id: preview.id, q: term }));
@@ -315,6 +305,11 @@ export function CrossDeckSearch({
   };
 
   const noMatchAnywhere = !hasLocalMatches && otherTotal === 0 && !busy && !searchFailed;
+
+  const addToGrammar = () => {
+    sessionStorage.setItem(GRAMMAR_PREFILL_KEY, term);
+    navigate({ to: "/grammar" });
+  };
 
   const addBar = (
     <Card className="p-6 text-center mt-6">
@@ -327,16 +322,12 @@ export function CrossDeckSearch({
           <>Add "<span className="font-medium text-foreground">{term}</span>"?</>
         )}
       </p>
-      <div className="hidden sm:flex flex-wrap justify-center gap-2 mb-3">
-        {(["noun", "verb", "adjective", "adverb"] as DeckKind[]).map((k) => (
-          <Button key={k} variant={k === currentKind ? "default" : "outline"} size="sm" onClick={() => proposeAdd(k)}>
-            <Plus className="h-4 w-4 mr-1" /> {labelFor[k].slice(0, -1)}
-          </Button>
-        ))}
-      </div>
-      <div className="flex justify-center">
-        <Button variant="secondary" className="w-full sm:w-auto h-11 sm:h-9 text-base sm:text-sm" onClick={() => setAutoDetect(true)}>
-          <Sparkles className="h-5 w-5 sm:h-4 sm:w-4 mr-2 sm:mr-1" /> Auto-detect type
+      <div className="flex flex-col sm:flex-row justify-center gap-3">
+        <Button variant="secondary" size="lg" className="w-full sm:w-auto min-h-12 text-base" onClick={() => setAutoDetect(true)}>
+          <Sparkles className="h-5 w-5 mr-2" /> Auto-detect type
+        </Button>
+        <Button variant="outline" size="lg" className="w-full sm:w-auto min-h-12 text-base" onClick={addToGrammar}>
+          <BookOpen className="h-5 w-5 mr-2" /> Add to Grammar
         </Button>
       </div>
       <AutoDetectDialog
