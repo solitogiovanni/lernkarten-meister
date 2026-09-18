@@ -12,6 +12,7 @@ import { RichTextEditor } from "@/components/RichTextEditor";
 import { Loader2, Plus, Trash2, Search, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeRichText } from "@/lib/sanitizeHtml";
+import { GRAMMAR_PREFILL_KEY } from "@/components/CrossDeckSearch";
 
 type Row = {
   id: string;
@@ -50,6 +51,14 @@ function GrammarPage() {
 
   useEffect(() => {
     load();
+  }, []);
+
+  useEffect(() => {
+    const title = sessionStorage.getItem(GRAMMAR_PREFILL_KEY)?.trim();
+    if (!title) return;
+    sessionStorage.removeItem(GRAMMAR_PREFILL_KEY);
+    setNewValue({ title, content: "" });
+    setCreating(true);
   }, []);
 
   const filtered = useMemo(() => {
