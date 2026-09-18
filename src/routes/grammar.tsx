@@ -218,17 +218,15 @@ function GrammarPage() {
               />
             </div>
             <div className="flex justify-start mt-6 gap-2">
-              <Button variant="ghost" size="sm" onClick={deleteEditing}>
+              <Button variant="outline" onClick={() => saveEdit(false)}>
+                Save
+              </Button>
+              <Button onClick={() => saveEdit(true)}>
+                Save & close
+              </Button>
+              <Button variant="outline" onClick={deleteEditing}>
                 <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
               </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => saveEdit(false)}>
-                  Save
-                </Button>
-                <Button onClick={() => saveEdit(true)}>
-                  Save & close
-                </Button>
-              </div>
             </div>
           </div>
         </SheetContent>
