@@ -133,6 +133,8 @@ export function AutoDetectDialog({
     if (!open || !word.trim()) return;
     let cancelled = false;
     setDrafts([]);
+    setSelectedThemes([]);
+    setThemeQuery("");
     setBusy(true);
     detectFn({ data: { word: word.trim() } })
       .then(async ({ results, error }) => {
