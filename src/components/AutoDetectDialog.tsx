@@ -9,6 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition } from "@/lib/autofill.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { DraftEditDialog } from "@/components/DraftEditDialog";
+import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
 
 type Draft = MixedItem & { include: boolean; comments?: string; existingId?: string | null };
 
@@ -61,6 +62,47 @@ export function AutoDetectDialog({
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const [themeQuery, setThemeQuery] = useState("");
+  const { recentThemes, allThemes } = useGlobalThemes(open);
+
+  const themeOptions = (() => {
+    const ordered = [...recentThemes, ...allThemes.filter((t) => !recentThemes.includes(t))];
+    const q = themeQuery.trim().toLowerCase();
+    const filtered = q ? ordered.filter((t) => t.toLowerCase().includes(q)) : ordered.slice(0, 12);
+    return Array.from(new Set([...selectedThemes, ...filtered])).slice(0, 40);
+  })();
+
+  const toggleTheme = (theme: string) => {
+    const t = theme.trim();
+    if (!t) return;
+    const on = selectedThemes.includes(t);
+    setSelectedThemes((ts) => (on ? ts.filter((x) => x !== t) : [...ts, t]));
+    if (!on) registerThemes([t]);
+    setDrafts((ds) =>
+      ds.map((d) =>
+        d.include
+          ? {
+              ...d,
+              themes: on
+                ? (d.themes ?? []).filter((x) => x !== t)
+                : Array.from(new Set([...(d.themes ?? []), t])),
+            }
+          : d,
+      ),
+    );
+  };
+
+  const toggleInclude = (i: number) =>
+    setDrafts((ds) =>
+      ds.map((d, idx) => {
+        if (idx !== i) return d;
+        const include = !d.include;
+        return include
+          ? { ...d, include, themes: Array.from(new Set([...(d.themes ?? []), ...selectedThemes])) }
+          : { ...d, include };
+      }),
+    );
 
 
   const findExistingId = async (d: Draft): Promise<string | null> => {
@@ -91,6 +133,8 @@ export function AutoDetectDialog({
     if (!open || !word.trim()) return;
     let cancelled = false;
     setDrafts([]);
+    setSelectedThemes([]);
+    setThemeQuery("");
     setBusy(true);
     detectFn({ data: { word: word.trim() } })
       .then(async ({ results, error }) => {
@@ -266,12 +310,59 @@ export function AutoDetectDialog({
 
         {!busy && drafts.length > 0 && (
           <div className="space-y-2">
+            <Card className="p-3 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium">Apply themes</span>
+                <span className="text-xs text-muted-foreground">to all selected results</span>
+                <Input
+                  value={themeQuery}
+                  onChange={(e) => setThemeQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && themeQuery.trim()) {
+                      toggleTheme(themeQuery.trim());
+                      setThemeQuery("");
+                    }
+                  }}
+                  placeholder="Filter or type a new theme…"
+                  className="h-8 ml-auto w-full sm:w-56 text-sm"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {themeOptions.map((t) => {
+                  const on = selectedThemes.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTheme(t)}
+                      className={`text-xs px-2 py-1 rounded-full border ${
+                        on
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-muted-foreground border-transparent hover:text-foreground"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+                {themeQuery.trim() && !themeOptions.some((t) => t.toLowerCase() === themeQuery.trim().toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={() => { toggleTheme(themeQuery.trim()); setThemeQuery(""); }}
+                    className="text-xs px-2 py-1 rounded-full border border-dashed text-muted-foreground hover:text-foreground"
+                  >
+                    + {themeQuery.trim()}
+                  </button>
+                )}
+              </div>
+            </Card>
+
             {drafts.map((d, i) => (
               <Card key={i} className={`p-3 ${!d.include ? "opacity-50" : ""}`}>
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
-                    onClick={() => updateDraft(i, { include: !d.include })}
+                    onClick={() => toggleInclude(i)}
                     className={`mt-1 h-5 w-5 rounded border flex items-center justify-center shrink-0 ${
                       d.include ? "bg-primary border-primary" : "border-input"
                     }`}
@@ -360,6 +451,16 @@ export function AutoDetectDialog({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <Input value={d.word ?? ""} onChange={(e) => updateDraft(i, { word: e.target.value })} placeholder="Word" />
                         <Input value={d.meanings.join(", ")} onChange={(e) => updateDraft(i, { meanings: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="meanings (comma)" />
+                      </div>
+                    )}
+
+                    {(d.themes ?? []).length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {(d.themes ?? []).map((t) => (
+                          <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                            {t}
+                          </span>
+                        ))}
                       </div>
                     )}
 
