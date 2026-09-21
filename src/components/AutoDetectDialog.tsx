@@ -454,6 +454,16 @@ export function AutoDetectDialog({
                       </div>
                     )}
 
+                    {(d.themes ?? []).length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {(d.themes ?? []).map((t) => (
+                          <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {d.examples.length > 0 && (
                       <div className="text-xs text-muted-foreground italic line-clamp-2">
                         {d.examples.join(" · ")}
