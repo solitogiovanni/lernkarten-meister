@@ -362,7 +362,7 @@ export function AutoDetectDialog({
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
-                    onClick={() => updateDraft(i, { include: !d.include })}
+                    onClick={() => toggleInclude(i)}
                     className={`mt-1 h-5 w-5 rounded border flex items-center justify-center shrink-0 ${
                       d.include ? "bg-primary border-primary" : "border-input"
                     }`}
