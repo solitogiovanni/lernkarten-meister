@@ -62,6 +62,47 @@ export function AutoDetectDialog({
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const [themeQuery, setThemeQuery] = useState("");
+  const { recentThemes, allThemes } = useGlobalThemes(open);
+
+  const themeOptions = (() => {
+    const ordered = [...recentThemes, ...allThemes.filter((t) => !recentThemes.includes(t))];
+    const q = themeQuery.trim().toLowerCase();
+    const filtered = q ? ordered.filter((t) => t.toLowerCase().includes(q)) : ordered.slice(0, 12);
+    return Array.from(new Set([...selectedThemes, ...filtered])).slice(0, 40);
+  })();
+
+  const toggleTheme = (theme: string) => {
+    const t = theme.trim();
+    if (!t) return;
+    const on = selectedThemes.includes(t);
+    setSelectedThemes((ts) => (on ? ts.filter((x) => x !== t) : [...ts, t]));
+    if (!on) registerThemes([t]);
+    setDrafts((ds) =>
+      ds.map((d) =>
+        d.include
+          ? {
+              ...d,
+              themes: on
+                ? (d.themes ?? []).filter((x) => x !== t)
+                : Array.from(new Set([...(d.themes ?? []), t])),
+            }
+          : d,
+      ),
+    );
+  };
+
+  const toggleInclude = (i: number) =>
+    setDrafts((ds) =>
+      ds.map((d, idx) => {
+        if (idx !== i) return d;
+        const include = !d.include;
+        return include
+          ? { ...d, include, themes: Array.from(new Set([...(d.themes ?? []), ...selectedThemes])) }
+          : { ...d, include };
+      }),
+    );
 
 
   const findExistingId = async (d: Draft): Promise<string | null> => {
