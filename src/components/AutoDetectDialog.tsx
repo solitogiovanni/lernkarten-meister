@@ -310,6 +310,53 @@ export function AutoDetectDialog({
 
         {!busy && drafts.length > 0 && (
           <div className="space-y-2">
+            <Card className="p-3 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium">Apply themes</span>
+                <span className="text-xs text-muted-foreground">to all selected results</span>
+                <Input
+                  value={themeQuery}
+                  onChange={(e) => setThemeQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && themeQuery.trim()) {
+                      toggleTheme(themeQuery.trim());
+                      setThemeQuery("");
+                    }
+                  }}
+                  placeholder="Filter or type a new theme…"
+                  className="h-8 ml-auto w-full sm:w-56 text-sm"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {themeOptions.map((t) => {
+                  const on = selectedThemes.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTheme(t)}
+                      className={`text-xs px-2 py-1 rounded-full border ${
+                        on
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-muted-foreground border-transparent hover:text-foreground"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+                {themeQuery.trim() && !themeOptions.some((t) => t.toLowerCase() === themeQuery.trim().toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={() => { toggleTheme(themeQuery.trim()); setThemeQuery(""); }}
+                    className="text-xs px-2 py-1 rounded-full border border-dashed text-muted-foreground hover:text-foreground"
+                  >
+                    + {themeQuery.trim()}
+                  </button>
+                )}
+              </div>
+            </Card>
+
             {drafts.map((d, i) => (
               <Card key={i} className={`p-3 ${!d.include ? "opacity-50" : ""}`}>
                 <div className="flex items-start gap-3">
