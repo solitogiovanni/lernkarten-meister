@@ -9,6 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { detectWordKinds, type MixedItem, type MixedKind, type VerbPreposition } from "@/lib/autofill.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { DraftEditDialog } from "@/components/DraftEditDialog";
+import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
 
 type Draft = MixedItem & { include: boolean; comments?: string; existingId?: string | null };
 
