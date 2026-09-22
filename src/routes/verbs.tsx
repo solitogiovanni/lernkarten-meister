@@ -54,7 +54,9 @@ function VerbsPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-  const [theme, setTheme] = useState("");
+  const [themes, setThemes] = useState<string[]>([]);
+  const toggleTheme = (t: string) =>
+    setThemes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   const [themeFilter, setThemeFilter] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
