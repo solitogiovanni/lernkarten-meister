@@ -22,6 +22,7 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 import { CrossDeckThemes } from "@/components/CrossDeckThemes";
+import { ThemeMatchToggle, type ThemeMatchMode } from "@/components/ThemeMatchToggle";
 
 type NounRow = {
   id: string;
@@ -43,8 +44,12 @@ type NounRow = {
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
   theme: fallback(z.string(), "").default(""),
+  mode: fallback(z.string(), "any").default("any"),
   due: fallback(z.boolean(), false).default(false),
 });
+
+type DeckSearch = { q: string; theme: string; mode: string; due: boolean };
+
 
 export const Route = createFileRoute("/")({
   validateSearch: zodValidator(searchSchema),
@@ -61,7 +66,7 @@ const articleColor = {
 };
 
 function DeckPage() {
-  const { q, theme, due } = Route.useSearch();
+  const { q, theme, mode, due } = Route.useSearch();
   const navigate = useNavigate({ from: "/" });
   const [rows, setRows] = useState<NounRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +120,7 @@ function DeckPage() {
     try {
       const p = JSON.parse(raw) as { kind: string; word: string; q?: string };
       if (p.kind === "noun" && p.word) {
-        if (p.q) navigate({ search: (prev: { q: string; theme: string; due: boolean }) => ({ ...prev, q: p.q as string }) });
+        if (p.q) navigate({ search: (prev: DeckSearch) => ({ ...prev, q: p.q as string }) });
         setNewValue({ ...emptyNoun, noun: p.word });
         setCreating(true);
       }
@@ -130,7 +135,7 @@ function DeckPage() {
     try {
       const p = JSON.parse(raw) as { kind: string; id: string; q?: string };
       if (p.kind === "noun" && p.id) {
-        if (p.q) navigate({ search: (prev: { q: string; theme: string; due: boolean }) => ({ ...prev, q: p.q as string }) });
+        if (p.q) navigate({ search: (prev: DeckSearch) => ({ ...prev, q: p.q as string }) });
         const r = rows.find((x) => x.id === p.id);
         if (r) openEdit(r);
       }
@@ -159,9 +164,13 @@ function DeckPage() {
 
 
   const selectedThemes = useMemo(() => theme.split(",").map((t) => t.trim()).filter(Boolean), [theme]);
+  const themeMode: ThemeMatchMode = mode === "all" ? "all" : "any";
 
   const setThemes = (next: string[]) =>
-    navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: next.join(",") }) });
+    navigate({ search: (p: DeckSearch) => ({ ...p, theme: next.join(",") }) });
+
+  const setThemeMode = (next: ThemeMatchMode) =>
+    navigate({ search: (p: DeckSearch) => ({ ...p, mode: next }) });
 
   const toggleTheme = (t: string) =>
     setThemes(selectedThemes.includes(t) ? selectedThemes.filter((x) => x !== t) : [...selectedThemes, t]);
@@ -173,11 +182,17 @@ function DeckPage() {
         const hay = fold([r.noun, r.plural ?? "", ...r.meanings].join(" "));
         if (!hay.includes(needle)) return false;
       }
-      if (selectedThemes.length && !r.themes.some((t) => selectedThemes.includes(t))) return false;
+      if (selectedThemes.length) {
+        const ok = themeMode === "all"
+          ? selectedThemes.every((t) => r.themes.includes(t))
+          : r.themes.some((t) => selectedThemes.includes(t));
+        if (!ok) return false;
+      }
       if (due && !isDueReview(r.due_at, r.reps)) return false;
       return true;
     });
-  }, [rows, q, selectedThemes, due]);
+  }, [rows, q, selectedThemes, themeMode, due]);
+
 
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
@@ -330,7 +345,7 @@ function DeckPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               value={q}
-              onChange={(e) => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, q: e.target.value }) })}
+              onChange={(e) => navigate({ search: (p: DeckSearch) => ({ ...p, q: e.target.value }) })}
               placeholder="Search noun, plural, meaning…"
               className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
             />
@@ -340,7 +355,7 @@ function DeckPage() {
               variant={due ? "default" : "outline"}
               size="sm"
               className="hidden sm:inline-flex"
-              onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, due: !p.due }) })}
+              onClick={() => navigate({ search: (p: DeckSearch) => ({ ...p, due: !p.due }) })}
             >
               Due today ({dueCount})
             </Button>
@@ -349,7 +364,7 @@ function DeckPage() {
                 variant="ghost"
                 size="sm"
                 className="ml-auto sm:ml-0"
-                onClick={() => navigate({ search: { q: "", theme: "", due: false } })}
+                onClick={() => navigate({ search: { q: "", theme: "", mode: "any", due: false } })}
               >
                 Clear
               </Button>
@@ -382,7 +397,11 @@ function DeckPage() {
                 <button onClick={() => setThemes([])} className="text-xs text-muted-foreground hover:text-foreground underline">
                   Clear all
                 </button>
+                {selectedThemes.length > 1 && (
+                  <ThemeMatchToggle mode={themeMode} onChange={setThemeMode} />
+                )}
               </div>
+
             )}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => (
@@ -473,7 +492,7 @@ function DeckPage() {
 
       <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
-      <CrossDeckThemes themes={selectedThemes} currentKind="noun" />
+      <CrossDeckThemes themes={selectedThemes} currentKind="noun" mode={themeMode} />
 
       {/* Reveal preview */}
       <CardRevealDialog
