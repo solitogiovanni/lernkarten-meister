@@ -157,6 +157,14 @@ function DeckPage() {
   }, [rows]);
 
 
+  const selectedThemes = useMemo(() => theme.split(",").map((t) => t.trim()).filter(Boolean), [theme]);
+
+  const setThemes = (next: string[]) =>
+    navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: next.join(",") }) });
+
+  const toggleTheme = (t: string) =>
+    setThemes(selectedThemes.includes(t) ? selectedThemes.filter((x) => x !== t) : [...selectedThemes, t]);
+
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (q) {
@@ -164,11 +172,11 @@ function DeckPage() {
         const hay = fold([r.noun, r.plural ?? "", ...r.meanings].join(" "));
         if (!hay.includes(needle)) return false;
       }
-      if (theme && !r.themes.includes(theme)) return false;
+      if (selectedThemes.length && !r.themes.some((t) => selectedThemes.includes(t))) return false;
       if (due && !isDueReview(r.due_at, r.reps)) return false;
       return true;
     });
-  }, [rows, q, theme, due]);
+  }, [rows, q, selectedThemes, due]);
 
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
