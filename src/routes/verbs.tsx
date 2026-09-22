@@ -19,6 +19,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
+import { CrossDeckThemes } from "@/components/CrossDeckThemes";
 
 export const Route = createFileRoute("/verbs")({
   head: () => ({
@@ -54,7 +55,9 @@ function VerbsPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-  const [theme, setTheme] = useState("");
+  const [themes, setThemes] = useState<string[]>([]);
+  const toggleTheme = (t: string) =>
+    setThemes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   const [themeFilter, setThemeFilter] = useState("");
   const [due, setDue] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
@@ -199,11 +202,11 @@ function VerbsPage() {
         ].join(" "));
         if (!hay.includes(needle)) return false;
       }
-      if (theme && !r.themes.includes(theme)) return false;
+      if (themes.length && !r.themes.some((t) => themes.includes(t))) return false;
       if (due && !isDueReview(r.due_at, r.reps)) return false;
       return true;
     });
-  }, [rows, q, theme, due]);
+  }, [rows, q, themes, due]);
 
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
@@ -329,8 +332,8 @@ function VerbsPage() {
             <Button variant={due ? "default" : "outline"} size="sm" className="hidden sm:inline-flex" onClick={() => setDue(!due)}>
               Due today ({dueCount})
             </Button>
-            {(q || theme || due) && (
-              <Button variant="ghost" size="sm" className="ml-auto sm:ml-0" onClick={() => { setQ(""); setTheme(""); setDue(false); }}>Clear</Button>
+            {(q || themes.length > 0 || due) && (
+              <Button variant="ghost" size="sm" className="ml-auto sm:ml-0" onClick={() => { setQ(""); setThemes([]); setDue(false); }}>Clear</Button>
             )}
           </div>
         </div>
@@ -338,7 +341,7 @@ function VerbsPage() {
           <details className="mt-3 group">
             <summary className="text-xs text-muted-foreground cursor-pointer select-none hover:text-foreground inline-flex items-center gap-1">
               <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
-              Themes {theme && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{theme}</span>}
+              Themes {themes.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{themes.length}</span>}
             </summary>
             <Input
               value={themeFilter}
@@ -346,13 +349,23 @@ function VerbsPage() {
               placeholder="Filter themes…"
               className="mt-2 h-8 text-xs"
             />
+            {themes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                {themes.map((t) => (
+                  <button key={t} onClick={() => toggleTheme(t)} className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground border border-primary">
+                    {t} ✕
+                  </button>
+                ))}
+                <button onClick={() => setThemes([])} className="text-xs text-muted-foreground hover:text-foreground underline">Clear all</button>
+              </div>
+            )}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => (
                 <button
                   key={t}
-                  onClick={() => setTheme(theme === t ? "" : t)}
+                  onClick={() => toggleTheme(t)}
                   className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                    theme === t ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"
+                    themes.includes(t) ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {t}
@@ -430,6 +443,8 @@ function VerbsPage() {
       )}
 
       <CrossDeckSearch q={q} currentKind="verb" hasLocalMatches={filtered.length > 0} onRefresh={load} />
+
+      <CrossDeckThemes themes={themes} currentKind="verb" />
 
       <CardRevealDialog
         open={!!previewing}
