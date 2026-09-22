@@ -359,7 +359,7 @@ function DeckPage() {
           <details className="mt-3 group">
             <summary className="text-xs text-muted-foreground cursor-pointer select-none hover:text-foreground inline-flex items-center gap-1">
               <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
-              Themes {theme && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{theme}</span>}
+              Themes {selectedThemes.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground">{selectedThemes.length}</span>}
             </summary>
             <Input
               value={themeFilter}
@@ -367,13 +367,29 @@ function DeckPage() {
               placeholder="Filter themes…"
               className="mt-2 h-8 text-xs"
             />
+            {selectedThemes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                {selectedThemes.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => toggleTheme(t)}
+                    className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground border border-primary"
+                  >
+                    {t} ✕
+                  </button>
+                ))}
+                <button onClick={() => setThemes([])} className="text-xs text-muted-foreground hover:text-foreground underline">
+                  Clear all
+                </button>
+              </div>
+            )}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => (
                 <button
                   key={t}
-                  onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: p.theme === t ? "" : t }) })}
+                  onClick={() => toggleTheme(t)}
                   className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                    theme === t
+                    selectedThemes.includes(t)
                       ? "bg-primary text-primary-foreground border-primary"
                       : "border-border text-muted-foreground hover:text-foreground"
                   }`}
