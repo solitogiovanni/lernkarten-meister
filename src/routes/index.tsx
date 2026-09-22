@@ -396,7 +396,11 @@ function DeckPage() {
                 <button onClick={() => setThemes([])} className="text-xs text-muted-foreground hover:text-foreground underline">
                   Clear all
                 </button>
+                {selectedThemes.length > 1 && (
+                  <ThemeMatchToggle mode={themeMode} onChange={setThemeMode} />
+                )}
               </div>
+
             )}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {allThemes.filter((t) => fold(t).includes(fold(themeFilter))).map((t) => (
