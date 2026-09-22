@@ -65,7 +65,7 @@ const articleColor = {
 };
 
 function DeckPage() {
-  const { q, theme, due } = Route.useSearch();
+  const { q, theme, mode, due } = Route.useSearch();
   const navigate = useNavigate({ from: "/" });
   const [rows, setRows] = useState<NounRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +119,7 @@ function DeckPage() {
     try {
       const p = JSON.parse(raw) as { kind: string; word: string; q?: string };
       if (p.kind === "noun" && p.word) {
-        if (p.q) navigate({ search: (prev: { q: string; theme: string; due: boolean }) => ({ ...prev, q: p.q as string }) });
+        if (p.q) navigate({ search: (prev: DeckSearch) => ({ ...prev, q: p.q as string }) });
         setNewValue({ ...emptyNoun, noun: p.word });
         setCreating(true);
       }
@@ -134,7 +134,7 @@ function DeckPage() {
     try {
       const p = JSON.parse(raw) as { kind: string; id: string; q?: string };
       if (p.kind === "noun" && p.id) {
-        if (p.q) navigate({ search: (prev: { q: string; theme: string; due: boolean }) => ({ ...prev, q: p.q as string }) });
+        if (p.q) navigate({ search: (prev: DeckSearch) => ({ ...prev, q: p.q as string }) });
         const r = rows.find((x) => x.id === p.id);
         if (r) openEdit(r);
       }
@@ -165,7 +165,7 @@ function DeckPage() {
   const selectedThemes = useMemo(() => theme.split(",").map((t) => t.trim()).filter(Boolean), [theme]);
 
   const setThemes = (next: string[]) =>
-    navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, theme: next.join(",") }) });
+    navigate({ search: (p: DeckSearch) => ({ ...p, theme: next.join(",") }) });
 
   const toggleTheme = (t: string) =>
     setThemes(selectedThemes.includes(t) ? selectedThemes.filter((x) => x !== t) : [...selectedThemes, t]);
@@ -334,7 +334,7 @@ function DeckPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               value={q}
-              onChange={(e) => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, q: e.target.value }) })}
+              onChange={(e) => navigate({ search: (p: DeckSearch) => ({ ...p, q: e.target.value }) })}
               placeholder="Search noun, plural, meaning…"
               className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
             />
@@ -344,7 +344,7 @@ function DeckPage() {
               variant={due ? "default" : "outline"}
               size="sm"
               className="hidden sm:inline-flex"
-              onClick={() => navigate({ search: (p: { q: string; theme: string; due: boolean }) => ({ ...p, due: !p.due }) })}
+              onClick={() => navigate({ search: (p: DeckSearch) => ({ ...p, due: !p.due }) })}
             >
               Due today ({dueCount})
             </Button>
@@ -353,7 +353,7 @@ function DeckPage() {
                 variant="ghost"
                 size="sm"
                 className="ml-auto sm:ml-0"
-                onClick={() => navigate({ search: { q: "", theme: "", due: false } })}
+                onClick={() => navigate({ search: { q: "", theme: "", mode: "any", due: false } })}
               >
                 Clear
               </Button>
