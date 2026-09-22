@@ -75,9 +75,11 @@ const labelFor: Record<DeckKind, string> = {
 export function CrossDeckThemes({
   themes,
   currentKind,
+  mode = "any",
 }: {
   themes: string[];
   currentKind: DeckKind;
+  mode?: "any" | "all";
 }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -87,6 +89,7 @@ export function CrossDeckThemes({
   const [preview, setPreview] = useState<{ card: RevealCard; kind: DeckKind; id: string } | null>(null);
 
   const key = themes.join("\u0000");
+
 
   useEffect(() => {
     if (themes.length === 0) {
