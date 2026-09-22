@@ -201,11 +201,11 @@ function VerbsPage() {
         ].join(" "));
         if (!hay.includes(needle)) return false;
       }
-      if (theme && !r.themes.includes(theme)) return false;
+      if (themes.length && !r.themes.some((t) => themes.includes(t))) return false;
       if (due && !isDueReview(r.due_at, r.reps)) return false;
       return true;
     });
-  }, [rows, q, theme, due]);
+  }, [rows, q, themes, due]);
 
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
