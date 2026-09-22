@@ -422,6 +422,8 @@ export function WordDeckPage({
 
       <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
+      <CrossDeckThemes themes={themes} currentKind={kind} />
+
       <CardRevealDialog
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
