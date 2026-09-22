@@ -103,14 +103,16 @@ export function CrossDeckThemes({
       const nounSel = "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url";
       const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url";
       const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments,image_url";
+      const match = (query: any) =>
+        mode === "all" ? query.contains("themes", themes) : query.overlaps("themes", themes);
       const [n, v, w] = await Promise.all([
         currentKind === "noun"
           ? Promise.resolve({ data: [] as NounHit[] })
-          : sb.from("nouns").select(nounSel).overlaps("themes", themes).order("noun").limit(200),
+          : match(sb.from("nouns").select(nounSel)).order("noun").limit(200),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
-          : sb.from("verbs").select(verbSel).overlaps("themes", themes).order("present").limit(200),
-        sb.from("words").select(wordSel).overlaps("themes", themes).neq("kind", currentKind).order("word").limit(400),
+          : match(sb.from("verbs").select(verbSel)).order("present").limit(200),
+        match(sb.from("words").select(wordSel)).neq("kind", currentKind).order("word").limit(400),
       ]);
       if (cancelled) return;
       setNouns((n.data ?? []) as NounHit[]);
@@ -119,9 +121,10 @@ export function CrossDeckThemes({
       setBusy(false);
     })();
     return () => { cancelled = true; };
-  }, [key, currentKind]);
+  }, [key, currentKind, mode]);
 
   if (themes.length === 0) return null;
+
 
   const total = nouns.length + verbs.length + words.length;
   if (!busy && total === 0) return null;
