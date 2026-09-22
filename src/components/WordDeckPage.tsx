@@ -323,8 +323,8 @@ export function WordDeckPage({
             <Button variant={due ? "default" : "outline"} size="sm" className="hidden sm:inline-flex" onClick={() => setDue(!due)}>
               Due today ({dueCount})
             </Button>
-            {(q || theme || due) && (
-              <Button variant="ghost" size="sm" className="ml-auto sm:ml-0" onClick={() => { setQ(""); setTheme(""); setDue(false); }}>
+            {(q || themes.length > 0 || due) && (
+              <Button variant="ghost" size="sm" className="ml-auto sm:ml-0" onClick={() => { setQ(""); setThemes([]); setDue(false); }}>
                 Clear
               </Button>
             )}
