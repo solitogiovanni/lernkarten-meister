@@ -20,6 +20,7 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 import { CrossDeckThemes } from "@/components/CrossDeckThemes";
+import { ThemeMatchToggle, type ThemeMatchMode } from "@/components/ThemeMatchToggle";
 
 export type Kind = "adjective" | "adverb" | "preposition" | "pronoun" | "conjunction";
 
@@ -158,11 +159,16 @@ export function WordDeckPage({
         const hay = fold([r.word, ...r.meanings].join(" "));
         if (!hay.includes(needle)) return false;
       }
-      if (themes.length && !r.themes.some((t) => themes.includes(t))) return false;
+      if (themes.length) {
+        const ok = themeMode === "all"
+          ? themes.every((t) => r.themes.includes(t))
+          : r.themes.some((t) => themes.includes(t));
+        if (!ok) return false;
+      }
       if (due && !isDueReview(r.due_at, r.reps)) return false;
       return true;
     });
-  }, [rows, q, themes, due]);
+  }, [rows, q, themes, themeMode, due]);
 
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
@@ -351,6 +357,7 @@ export function WordDeckPage({
                   </button>
                 ))}
                 <button onClick={() => setThemes([])} className="text-xs text-muted-foreground hover:text-foreground underline">Clear all</button>
+                {themes.length > 1 && <ThemeMatchToggle mode={themeMode} onChange={setThemeMode} />}
               </div>
             )}
             <div className="flex flex-wrap gap-1.5 mt-2">
@@ -423,7 +430,7 @@ export function WordDeckPage({
 
       <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
-      <CrossDeckThemes themes={themes} currentKind={kind} />
+      <CrossDeckThemes themes={themes} currentKind={kind} mode={themeMode} />
 
       <CardRevealDialog
         open={!!previewing}
