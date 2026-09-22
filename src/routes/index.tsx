@@ -22,6 +22,7 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 import { CrossDeckThemes } from "@/components/CrossDeckThemes";
+import { ThemeMatchToggle, type ThemeMatchMode } from "@/components/ThemeMatchToggle";
 
 type NounRow = {
   id: string;
@@ -491,7 +492,7 @@ function DeckPage() {
 
       <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
-      <CrossDeckThemes themes={selectedThemes} currentKind="noun" />
+      <CrossDeckThemes themes={selectedThemes} currentKind="noun" mode={themeMode} />
 
       {/* Reveal preview */}
       <CardRevealDialog
