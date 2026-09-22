@@ -472,6 +472,8 @@ function DeckPage() {
 
       <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
+      <CrossDeckThemes themes={selectedThemes} currentKind="noun" />
+
       {/* Reveal preview */}
       <CardRevealDialog
         open={!!previewing}
