@@ -21,6 +21,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
+import { CrossDeckThemes } from "@/components/CrossDeckThemes";
 
 type NounRow = {
   id: string;
