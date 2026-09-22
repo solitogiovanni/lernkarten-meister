@@ -58,6 +58,7 @@ export function WordDeckPage({
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [themes, setThemes] = useState<string[]>([]);
+  const [themeMode, setThemeMode] = useState<ThemeMatchMode>("any");
   const toggleTheme = (t: string) =>
     setThemes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   const [themeFilter, setThemeFilter] = useState("");
