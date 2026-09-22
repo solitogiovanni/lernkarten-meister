@@ -43,8 +43,12 @@ type NounRow = {
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
   theme: fallback(z.string(), "").default(""),
+  mode: fallback(z.string(), "any").default("any"),
   due: fallback(z.boolean(), false).default(false),
 });
+
+type DeckSearch = { q: string; theme: string; mode: string; due: boolean };
+
 
 export const Route = createFileRoute("/")({
   validateSearch: zodValidator(searchSchema),
