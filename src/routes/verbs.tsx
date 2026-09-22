@@ -443,6 +443,8 @@ function VerbsPage() {
 
       <CrossDeckSearch q={q} currentKind="verb" hasLocalMatches={filtered.length > 0} onRefresh={load} />
 
+      <CrossDeckThemes themes={themes} currentKind="verb" />
+
       <CardRevealDialog
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
