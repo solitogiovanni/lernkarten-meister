@@ -49,12 +49,15 @@ export function CardRevealDialog({
   onOpenChange,
   card,
   onEdit,
+  onToggleTheme,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   card: RevealCard | null;
   onEdit: () => void;
+  onToggleTheme?: (theme: string, add: boolean) => void;
 }) {
+  const { recentThemes } = useGlobalThemes(open && !!onToggleTheme);
   if (!card) return null;
   const speakText = card.kind === "noun" && card.article ? `${card.article} ${card.word}` : card.word;
 
