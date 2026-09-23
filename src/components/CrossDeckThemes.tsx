@@ -111,10 +111,10 @@ export function CrossDeckThemes({
       const otherWordKinds = wordKinds.filter((k) => k !== currentKind);
       const [n, v, w] = await Promise.all([
         currentKind === "noun"
-          ? Promise.resolve({ data: [] as NounHit[] })
+          ? Promise.resolve({ data: [] as NounHit[], error: null as any })
           : match(sb.from("nouns").select(nounSel)).order("noun").limit(200),
         currentKind === "verb"
-          ? Promise.resolve({ data: [] as VerbHit[] })
+          ? Promise.resolve({ data: [] as VerbHit[], error: null as any })
           : match(sb.from("verbs").select(verbSel)).order("present").limit(200),
         match(sb.from("words").select(wordSel).in("kind", otherWordKinds)).order("word").limit(400),
       ]);
