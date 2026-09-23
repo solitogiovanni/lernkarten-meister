@@ -450,6 +450,16 @@ function VerbsPage() {
             openEdit(r);
           }
         }}
+        onToggleTheme={async (theme, add) => {
+          if (!previewing) return;
+          try {
+            const themes = await toggleCardTheme("verb", previewing.id, theme, add, previewing.themes);
+            setPreviewing({ ...previewing, themes });
+            setRows((rs) => rs.map((r) => (r.id === previewing.id ? { ...r, themes } : r)));
+          } catch (e: any) {
+            toast.error(e?.message ?? "Could not update themes");
+          }
+        }}
       />
 
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
