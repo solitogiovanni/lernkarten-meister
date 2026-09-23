@@ -182,6 +182,30 @@ export function CardRevealDialog({
                 )}
               </div>
             )}
+            {onToggleTheme && recentThemes.length > 0 && (
+              <div className="pt-2 w-full max-w-md mx-auto">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Quick themes</p>
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {recentThemes.map((t) => {
+                    const active = card.themes.includes(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => onToggleTheme(t, !active)}
+                        className={
+                          active
+                            ? "text-xs px-2 py-0.5 rounded-full border bg-primary text-primary-foreground"
+                            : "text-xs px-2 py-0.5 rounded-full border border-dashed text-muted-foreground hover:border-primary hover:text-foreground transition-colors"
+                        }
+                      >
+                        {active ? `✓ ${t}` : `+ ${t}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {card.themes.length > 0 && (
               <div className="flex flex-wrap gap-1 justify-center pt-2">
                 {card.themes.map((t) => (
