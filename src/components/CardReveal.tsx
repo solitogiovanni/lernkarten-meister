@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { SpeakButton } from "@/components/SpeakButton";
 import { Pencil } from "lucide-react";
 import { sanitizeRichText, looksLikeHtml } from "@/lib/sanitizeHtml";
+import { useGlobalThemes } from "@/lib/themeStore";
 import type { VerbPrep } from "@/components/VerbForm";
 
 export type RevealKind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
@@ -48,12 +49,15 @@ export function CardRevealDialog({
   onOpenChange,
   card,
   onEdit,
+  onToggleTheme,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   card: RevealCard | null;
   onEdit: () => void;
+  onToggleTheme?: (theme: string, add: boolean) => void;
 }) {
+  const { recentThemes } = useGlobalThemes(open && !!onToggleTheme);
   if (!card) return null;
   const speakText = card.kind === "noun" && card.article ? `${card.article} ${card.word}` : card.word;
 
@@ -176,6 +180,30 @@ export function CardRevealDialog({
                 ) : (
                   <span className="whitespace-pre-wrap">{sanitizeRichText(card.comments)}</span>
                 )}
+              </div>
+            )}
+            {onToggleTheme && recentThemes.length > 0 && (
+              <div className="pt-2 w-full max-w-md mx-auto">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Quick themes</p>
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {recentThemes.map((t) => {
+                    const active = card.themes.includes(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => onToggleTheme(t, !active)}
+                        className={
+                          active
+                            ? "text-xs px-2 py-0.5 rounded-full border bg-primary text-primary-foreground"
+                            : "text-xs px-2 py-0.5 rounded-full border border-dashed text-muted-foreground hover:border-primary hover:text-foreground transition-colors"
+                        }
+                      >
+                        {active ? `✓ ${t}` : `+ ${t}`}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
             {card.themes.length > 0 && (

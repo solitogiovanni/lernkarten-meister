@@ -19,6 +19,7 @@ import { autofillNouns } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
+import { toggleCardTheme } from "@/lib/cardThemes";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 import { CrossDeckThemes } from "@/components/CrossDeckThemes";
 import { ThemeMatchToggle, type ThemeMatchMode } from "@/components/ThemeMatchToggle";
@@ -484,6 +485,16 @@ function DeckPage() {
             const r = previewing;
             setPreviewing(null);
             openEdit(r);
+          }
+        }}
+        onToggleTheme={async (theme, add) => {
+          if (!previewing) return;
+          try {
+            const themes = await toggleCardTheme("noun", previewing.id, theme, add, previewing.themes);
+            setPreviewing({ ...previewing, themes });
+            setRows((rs) => rs.map((r) => (r.id === previewing.id ? { ...r, themes } : r)));
+          } catch (e: any) {
+            toast.error(e?.message ?? "Could not update themes");
           }
         }}
       />
