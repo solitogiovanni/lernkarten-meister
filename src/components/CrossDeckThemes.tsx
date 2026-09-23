@@ -249,6 +249,20 @@ export function CrossDeckThemes({
         onOpenChange={(o) => !o && setPreview(null)}
         card={preview?.card ?? null}
         onEdit={onEditPreview}
+        onToggleTheme={async (theme, add) => {
+          if (!preview) return;
+          try {
+            const themes = await toggleCardTheme(preview.kind, preview.id, theme, add, preview.card.themes);
+            setPreview({ ...preview, card: { ...preview.card, themes } });
+            const patch = <T extends { id: string; themes: string[] }>(list: T[]) =>
+              list.map((r) => (r.id === preview.id ? { ...r, themes } : r));
+            if (preview.kind === "noun") setNouns((l) => patch(l));
+            else if (preview.kind === "verb") setVerbs((l) => patch(l));
+            else setWords((l) => patch(l));
+          } catch (e: any) {
+            toast.error(e?.message ?? "Could not update themes");
+          }
+        }}
       />
     </>
   );
