@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { VerbForm, type VerbFormValue, type VerbPrep, emptyVerb } from "@/components/VerbForm";
-import { Loader2, Plus, Trash2, Upload, Play, Search, Sparkles } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload, Play, Sparkles } from "lucide-react";
+import { SearchField } from "@/components/SearchField";
 import { toast } from "sonner";
 import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
@@ -302,10 +303,7 @@ function VerbsPage() {
 
       <Card className="p-3">
         <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search verb, meaning…" className="pl-8 h-11 text-base sm:h-9 sm:text-sm" />
-          </div>
+          <SearchField value={q} onChange={setQ} placeholder="Search verb, meaning…" />
           <div className="flex gap-2 sm:items-center">
             <Button variant={due ? "default" : "outline"} size="sm" className="hidden sm:inline-flex" onClick={() => setDue(!due)}>
               Due today ({dueCount})
