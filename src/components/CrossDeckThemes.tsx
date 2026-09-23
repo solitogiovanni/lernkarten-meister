@@ -107,19 +107,25 @@ export function CrossDeckThemes({
       const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments,image_url";
       const match = (query: any) =>
         mode === "all" ? query.contains("themes", themes) : query.overlaps("themes", themes);
+      const wordKinds = ["adjective", "adverb", "preposition", "pronoun", "conjunction"] as const;
+      const otherWordKinds = wordKinds.filter((k) => k !== currentKind);
       const [n, v, w] = await Promise.all([
         currentKind === "noun"
-          ? Promise.resolve({ data: [] as NounHit[] })
+          ? Promise.resolve({ data: [] as NounHit[], error: null as any })
           : match(sb.from("nouns").select(nounSel)).order("noun").limit(200),
         currentKind === "verb"
-          ? Promise.resolve({ data: [] as VerbHit[] })
+          ? Promise.resolve({ data: [] as VerbHit[], error: null as any })
           : match(sb.from("verbs").select(verbSel)).order("present").limit(200),
-        match(sb.from("words").select(wordSel)).neq("kind", currentKind).order("word").limit(400),
+        match(sb.from("words").select(wordSel).in("kind", otherWordKinds)).order("word").limit(400),
       ]);
       if (cancelled) return;
+      if (n.error) console.error(n.error);
+      if (v.error) console.error(v.error);
+      if (w.error) console.error(w.error);
       setNouns((n.data ?? []) as NounHit[]);
       setVerbs((v.data ?? []) as VerbHit[]);
       setWords((w.data ?? []) as WordHit[]);
+
       setBusy(false);
     })();
     return () => { cancelled = true; };
