@@ -312,15 +312,11 @@ function DeckPage() {
 
       <Card className="p-3">
         <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => navigate({ search: (p: DeckSearch) => ({ ...p, q: e.target.value }) })}
-              placeholder="Search noun, plural, meaning…"
-              className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
-            />
-          </div>
+          <SearchField
+            value={q}
+            onChange={(v) => navigate({ search: (p: DeckSearch) => ({ ...p, q: v }) })}
+            placeholder="Search noun, plural, meaning…"
+          />
           <div className="flex gap-2 sm:items-center">
             <Button
               variant={due ? "default" : "outline"}

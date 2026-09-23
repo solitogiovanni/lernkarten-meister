@@ -304,7 +304,7 @@ function VerbsPage() {
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search verb, meaning…" className="pl-8 h-11 text-base sm:h-9 sm:text-sm" />
+            <SearchField value={q} onChange={setQ} placeholder="Search verb, meaning…" />
           </div>
           <div className="flex gap-2 sm:items-center">
             <Button variant={due ? "default" : "outline"} size="sm" className="hidden sm:inline-flex" onClick={() => setDue(!due)}>
