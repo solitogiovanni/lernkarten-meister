@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { SpeakButton } from "@/components/SpeakButton";
 import { Pencil } from "lucide-react";
 import { sanitizeRichText, looksLikeHtml } from "@/lib/sanitizeHtml";
+import { useGlobalThemes } from "@/lib/themeStore";
 import type { VerbPrep } from "@/components/VerbForm";
 
 export type RevealKind = "noun" | "adjective" | "adverb" | "verb" | "preposition" | "pronoun" | "conjunction";
