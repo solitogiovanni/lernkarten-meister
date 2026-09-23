@@ -10,8 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { autofillNouns, autofillVerbs, autofillWords } from "@/lib/autofill.functions";
-import { generateCardImage } from "@/lib/cardImage.functions";
-import { shrinkToDataUrl, b64PngToDataUrl } from "@/lib/cardImage";
 import { Loader2, Sparkles } from "lucide-react";
 import { useThemeSuggestions } from "@/hooks/useThemeSuggestions";
 
@@ -97,22 +95,6 @@ export function CardEditDialog({
   const autofillNounsFn = useServerFn(autofillNouns);
   const autofillVerbsFn = useServerFn(autofillVerbs);
   const autofillWordsFn = useServerFn(autofillWords);
-  const imageFn = useServerFn(generateCardImage);
-
-  const makeImage = async (word: string, meaning?: string): Promise<string | null> => {
-    if (!word.trim()) return null;
-    try {
-      const { b64, error } = await imageFn({
-        data: { word: word.trim(), hint: [word.trim(), meaning].filter(Boolean).join(" — ") },
-      });
-      if (error) toast.error(error);
-      if (!b64) return null;
-      return await shrinkToDataUrl(b64PngToDataUrl(b64));
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not create the picture");
-      return null;
-    }
-  };
 
   const aiFill = async () => {
     setAiBusy(true);
@@ -135,10 +117,6 @@ export function CardEditDialog({
           comments: noun.comments,
           imageUrl: noun.imageUrl,
         });
-        if (!noun.imageUrl) {
-          const img = await makeImage(r.noun || noun.noun, (r.meanings ?? [])[0]);
-          if (img) setNoun((prev) => ({ ...prev, imageUrl: prev.imageUrl ?? img }));
-        }
       } else if (kind === "verb") {
         if (!verb.present.trim()) return toast.error("Type a verb first");
         const { results, error } = await autofillVerbsFn({ data: { verbs: [verb.present.trim()] } });
@@ -160,10 +138,6 @@ export function CardEditDialog({
           comments: verb.comments,
           imageUrl: verb.imageUrl,
         });
-        if (!verb.imageUrl) {
-          const img = await makeImage(r.present || verb.present, (r.meanings ?? [])[0]);
-          if (img) setVerb((prev) => ({ ...prev, imageUrl: prev.imageUrl ?? img }));
-        }
       } else {
         if (!word.word.trim()) return toast.error("Type a word first");
         const { results, error } = await autofillWordsFn({ data: { kind, words: [word.word.trim()] } });
@@ -180,10 +154,6 @@ export function CardEditDialog({
           comments: word.comments,
           imageUrl: word.imageUrl ?? null,
         });
-        if ((kind === "adjective" || kind === "adverb") && !word.imageUrl) {
-          const img = await makeImage(r.word || word.word, (r.meanings ?? [])[0]);
-          if (img) setWord((prev) => ({ ...prev, imageUrl: prev.imageUrl ?? img }));
-        }
       }
       toast.success("Filled with AI");
     } finally {

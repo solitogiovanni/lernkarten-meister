@@ -13,8 +13,6 @@ import { toast } from "sonner";
 import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { autofillWords } from "@/lib/autofill.functions";
-import { generateCardImage } from "@/lib/cardImage.functions";
-import { shrinkToDataUrl, b64PngToDataUrl } from "@/lib/cardImage";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
@@ -70,23 +68,7 @@ export function WordDeckPage({
   const [newValue, setNewValue] = useState<WordFormValue>(emptyWord);
   const [aiBusy, setAiBusy] = useState(false);
   const autofillFn = useServerFn(autofillWords);
-  const imageFn = useServerFn(generateCardImage);
   const hasImages = kind === "adjective" || kind === "adverb";
-
-  const makeImage = async (word: string, meaning?: string): Promise<string | null> => {
-    if (!word.trim()) return null;
-    try {
-      const { b64, error } = await imageFn({
-        data: { word: word.trim(), hint: [word.trim(), meaning].filter(Boolean).join(" — ") },
-      });
-      if (error) toast.error(error);
-      if (!b64) return null;
-      return await shrinkToDataUrl(b64PngToDataUrl(b64));
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not create the picture");
-      return null;
-    }
-  };
 
   const load = async () => {
     setLoading(true);
@@ -268,14 +250,6 @@ export function WordDeckPage({
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
       toast.success("Filled with AI");
-      if (hasImages && !merged.imageUrl) {
-        const img = await makeImage(merged.word, merged.meanings[0]);
-        if (img) {
-          const withImg = { ...merged, imageUrl: img };
-          if (target === "edit") setEditValue(withImg);
-          else setNewValue(withImg);
-        }
-      }
     } finally {
       setAiBusy(false);
     }

@@ -15,8 +15,6 @@ import { toast } from "sonner";
 import { isDueReview } from "@/lib/srs";
 import { fold } from "@/lib/normalize";
 import { autofillNouns } from "@/lib/autofill.functions";
-import { generateCardImage } from "@/lib/cardImage.functions";
-import { shrinkToDataUrl, b64PngToDataUrl } from "@/lib/cardImage";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
@@ -78,26 +76,6 @@ function DeckPage() {
   const [newValue, setNewValue] = useState<NounFormValue>(emptyNoun);
   const [aiBusy, setAiBusy] = useState(false);
   const autofillFn = useServerFn(autofillNouns);
-  const imageFn = useServerFn(generateCardImage);
-
-  const withGeneratedImage = async <T extends { imageUrl: string | null }>(
-    v: T,
-    word: string,
-    meaning?: string,
-  ): Promise<T | null> => {
-    if (!word.trim()) return null;
-    try {
-      const { b64, error } = await imageFn({
-        data: { word: word.trim(), hint: [word.trim(), meaning].filter(Boolean).join(" — ") },
-      });
-      if (error) toast.error(error);
-      if (!b64) return null;
-      return { ...v, imageUrl: await shrinkToDataUrl(b64PngToDataUrl(b64)) };
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not create the picture");
-      return null;
-    }
-  };
 
   const load = async () => {
     setLoading(true);
@@ -298,13 +276,6 @@ function DeckPage() {
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
       toast.success("Filled with AI");
-      if (!merged.imageUrl) {
-        const withImage = await withGeneratedImage(merged, merged.noun, merged.meanings[0]);
-        if (withImage) {
-          if (target === "edit") setEditValue(withImage);
-          else setNewValue(withImage);
-        }
-      }
     } finally {
       setAiBusy(false);
     }
