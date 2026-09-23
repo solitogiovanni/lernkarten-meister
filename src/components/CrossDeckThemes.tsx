@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
+import { toggleCardTheme } from "@/lib/cardThemes";
+import { toast } from "sonner";
 import { SpeakButton } from "@/components/SpeakButton";
 import { EDIT_PREFILL_KEY, type DeckKind } from "@/components/CrossDeckSearch";
 import type { VerbPrep } from "@/components/VerbForm";

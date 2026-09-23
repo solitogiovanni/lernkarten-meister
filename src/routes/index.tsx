@@ -19,6 +19,7 @@ import { autofillNouns } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { SpeakButton } from "@/components/SpeakButton";
 import { CardRevealDialog } from "@/components/CardReveal";
+import { toggleCardTheme } from "@/lib/cardThemes";
 import { CrossDeckSearch, ADD_PREFILL_KEY, EDIT_PREFILL_KEY } from "@/components/CrossDeckSearch";
 import { CrossDeckThemes } from "@/components/CrossDeckThemes";
 import { ThemeMatchToggle, type ThemeMatchMode } from "@/components/ThemeMatchToggle";

@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Loader2, Sparkles } from "lucide-react";
 import { CardRevealDialog, type RevealCard } from "@/components/CardReveal";
+import { toggleCardTheme } from "@/lib/cardThemes";
+import { toast } from "sonner";
 import { AutoDetectDialog } from "@/components/AutoDetectDialog";
 import { SpeakButton } from "@/components/SpeakButton";
 import type { VerbPrep } from "@/components/VerbForm";
