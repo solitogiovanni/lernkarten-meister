@@ -37,8 +37,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       clearTimeout(timer);
       timer = setTimeout(() => {
         supabase.auth.signOut();
-        toast.info("Signed out after 15 minutes of inactivity");
-      }, 15 * 60 * 1000);
+        toast.info("Signed out after 24 hours of inactivity");
+      }, 24 * 60 * 60 * 1000);
     };
     const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
     events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
