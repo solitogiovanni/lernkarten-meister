@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef } from "react";
 import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,11 +105,17 @@ export function WordForm({
   showImage?: boolean;
 }) {
   const global = useGlobalThemes();
-  useEffect(() => { registerThemes(value.themes); }, [value.themes]);
+  const prevThemes = useRef<string[] | null>(null);
+  useEffect(() => {
+    const prev = prevThemes.current;
+    prevThemes.current = value.themes ?? [];
+    if (prev === null) return;
+    const added = (value.themes ?? []).filter((t) => !prev.includes(t));
+    if (added.length) registerThemes(added);
+  }, [value.themes]);
   const suggestions = Array.from(
     new Set([
       ...global.recentThemes,
-      ...(recentThemes ?? []),
       ...(themeSuggestions ?? []),
       ...global.allThemes,
     ]),
