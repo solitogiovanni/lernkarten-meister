@@ -113,6 +113,21 @@ export type Database = {
         }
         Relationships: []
       }
+      recent_themes: {
+        Row: {
+          theme: string
+          used_at: string
+        }
+        Insert: {
+          theme: string
+          used_at?: string
+        }
+        Update: {
+          theme?: string
+          used_at?: string
+        }
+        Relationships: []
+      }
       saved_campaigns: {
         Row: {
           created_at: string

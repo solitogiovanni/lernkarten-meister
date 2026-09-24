@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
  * registered immediately so it shows up as a suggestion everywhere.
  */
 
+const RECENT_MAX = 5;
 let recent: string[] = [];
 let all = new Set<string>();
 let loaded = false;
@@ -45,8 +46,11 @@ async function fetchThemes(): Promise<void> {
       }
     }
   }
-  // Keep locally registered themes at the front, they are the freshest.
-  recent = Array.from(new Set([...recent, ...nextRecent])).slice(0, 8);
+  const { data: rt } = await sb.from("recent_themes").select("theme").order("used_at", { ascending: false }).limit(RECENT_MAX);
+  const saved = ((rt ?? []) as { theme: string }[]).map((r) => r.theme);
+  for (const t of saved) all.add(t);
+  // Locally registered themes stay at the front, they are the freshest.
+  recent = Array.from(new Set([...recent, ...(saved.length ? saved : nextRecent)])).slice(0, RECENT_MAX);
   loaded = true;
   notify();
 }
@@ -65,7 +69,8 @@ export function loadGlobalThemes(force = false): Promise<void> {
 export function registerThemes(themes: string[] | undefined | null) {
   if (!themes?.length) return;
   let changed = false;
-  for (const t of themes) {
+  const touched: string[] = [];
+  for (const t of [...themes].reverse()) {
     const v = t.trim();
     if (!v) continue;
     if (!all.has(v)) {
@@ -73,9 +78,15 @@ export function registerThemes(themes: string[] | undefined | null) {
       changed = true;
     }
     if (recent[0] !== v) {
-      recent = [v, ...recent.filter((x) => x !== v)].slice(0, 8);
+      recent = [v, ...recent.filter((x) => x !== v)].slice(0, RECENT_MAX);
       changed = true;
     }
+    touched.push(v);
+  }
+  if (touched.length) {
+    const now = Date.now();
+    const rows = touched.map((theme, i) => ({ theme, used_at: new Date(now - i).toISOString() }));
+    (supabase as any).from("recent_themes").upsert(rows, { onConflict: "theme" }).then(() => {});
   }
   if (changed) notify();
 }
