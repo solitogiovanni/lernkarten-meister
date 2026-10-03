@@ -19,6 +19,8 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          pinned: boolean
+          sort_order: number | null
           title: string
           updated_at: string
         }
@@ -26,6 +28,8 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          pinned?: boolean
+          sort_order?: number | null
           title: string
           updated_at?: string
         }
@@ -33,6 +37,8 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          pinned?: boolean
+          sort_order?: number | null
           title?: string
           updated_at?: string
         }

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { Loader2, Plus, Trash2, Search, Pencil } from "lucide-react";
+import { Loader2, Plus, Trash2, Search, Pencil, Pin, PinOff, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeRichText } from "@/lib/sanitizeHtml";
 import { GRAMMAR_PREFILL_KEY } from "@/components/CrossDeckSearch";
@@ -19,6 +19,8 @@ type Row = {
   title: string;
   content: string | null;
   updated_at: string;
+  pinned: boolean;
+  sort_order: number | null;
 };
 
 type FormValue = { title: string; content: string };
@@ -42,10 +44,10 @@ function GrammarPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("grammar_notes", (q) =>
-      q.select("id,title,content,updated_at").order("title", { ascending: true }),
+      q.select("id,title,content,updated_at,pinned,sort_order").order("title", { ascending: true }),
     );
     if (error) toast.error(error.message);
-    setRows(data);
+    setRows(sortRows(data));
     setLoading(false);
   };
 
@@ -60,6 +62,37 @@ function GrammarPage() {
     setNewValue({ title, content: "" });
     setCreating(true);
   }, []);
+
+  const sortRows = (list: Row[]) =>
+    [...list].sort((a, b) =>
+      Number(b.pinned) - Number(a.pinned) ||
+      (a.sort_order ?? 1e9) - (b.sort_order ?? 1e9) ||
+      a.title.localeCompare(b.title),
+    );
+
+  const togglePin = async (r: Row) => {
+    const pinned = !r.pinned;
+    setRows((l) => sortRows(l.map((x) => (x.id === r.id ? { ...x, pinned } : x))));
+    const { error } = await (supabase as any).from("grammar_notes").update({ pinned }).eq("id", r.id);
+    if (error) { toast.error(error.message); load(); }
+  };
+
+  const move = async (r: Row, dir: -1 | 1) => {
+    const group = rows.filter((x) => x.pinned === r.pinned);
+    const i = group.findIndex((x) => x.id === r.id);
+    const j = i + dir;
+    if (j < 0 || j >= group.length) return;
+    const reordered = [...group];
+    [reordered[i], reordered[j]] = [reordered[j], reordered[i]];
+    const updates = reordered.map((x, k) => ({ ...x, sort_order: k + 1 }));
+    const changed = updates.filter((u, k) => group[k].id !== u.id || group[k].sort_order !== u.sort_order);
+    setRows((l) => sortRows(l.map((x) => updates.find((u) => u.id === x.id) ?? x)));
+    const results = await Promise.all(
+      changed.map((u) => (supabase as any).from("grammar_notes").update({ sort_order: u.sort_order }).eq("id", u.id)),
+    );
+    const err = results.find((x: any) => x.error);
+    if (err) { toast.error(err.error.message); load(); }
+  };
 
   const filtered = useMemo(() => {
     if (!q) return rows;
@@ -101,6 +134,7 @@ function GrammarPage() {
     const { error } = await (supabase as any).from("grammar_notes").insert({
       title: newValue.title.trim(),
       content: newValue.content || null,
+      sort_order: rows.reduce((m, r) => Math.max(m, r.sort_order ?? 0), 0) + 1,
     });
     if (error) return toast.error(error.message);
     toast.success("Added");
@@ -151,9 +185,26 @@ function GrammarPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((r) => (
-            <button key={r.id} onClick={() => setPreviewing(r)} className="text-left">
-              <Card className="p-4 hover:border-primary transition-colors h-full">
-                <div className="font-semibold text-lg mb-1 line-clamp-2">{r.title}</div>
+            <div key={r.id} role="button" tabIndex={0} onClick={() => setPreviewing(r)} className="text-left cursor-pointer">
+              <Card className={`p-4 hover:border-primary transition-colors h-full ${r.pinned ? "border-primary/60 bg-primary/5" : ""}`}>
+                <div className="flex items-start gap-2 mb-1">
+                  <div className="font-semibold text-lg line-clamp-2 flex-1">{r.title}</div>
+                  <div className="flex shrink-0 -mr-2 -mt-1" onClick={(e) => e.stopPropagation()}>
+                    {!q && (
+                      <>
+                        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Move up" onClick={() => move(r, -1)}>
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Move down" onClick={() => move(r, 1)}>
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    <Button size="icon" variant="ghost" className="h-7 w-7" aria-label={r.pinned ? "Unpin" : "Pin to top"} onClick={() => togglePin(r)}>
+                      {r.pinned ? <PinOff className="h-4 w-4 text-primary" /> : <Pin className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
                 {r.content && (
                   <div
                     className="rich-text-view text-sm text-muted-foreground line-clamp-4 [&_*]:!text-muted-foreground"
@@ -161,7 +212,7 @@ function GrammarPage() {
                   />
                 )}
               </Card>
-            </button>
+            </div>
           ))}
         </div>
       )}
