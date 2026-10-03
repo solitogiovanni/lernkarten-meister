@@ -40,6 +40,16 @@ function GrammarPage() {
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<FormValue>(emptyValue);
   const [previewing, setPreviewing] = useState<Row | null>(null);
+  const [cols, setCols] = useState<1 | 2 | 3>(1);
+  useEffect(() => {
+    const v = Number(localStorage.getItem("wortschatz:grammar_columns"));
+    if (v === 1 || v === 2 || v === 3) setCols(v);
+    else setCols(window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1);
+  }, []);
+  const changeCols = (n: 1 | 2 | 3) => {
+    setCols(n);
+    localStorage.setItem("wortschatz:grammar_columns", String(n));
+  };
 
   const load = async () => {
     setLoading(true);
@@ -153,12 +163,29 @@ function GrammarPage() {
               {rows.length} {rows.length === 1 ? "rule" : "rules"}
             </p>
           </div>
-          <Button onClick={() => setCreating(true)} size="icon" className="shrink-0 sm:hidden" aria-label="Add rule">
-            <Plus className="h-4 w-4" />
-          </Button>
-          <Button onClick={() => setCreating(true)} className="hidden sm:inline-flex">
-            <Plus className="h-4 w-4 mr-1" /> Add rule
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="inline-flex rounded-md border p-0.5" role="group" aria-label="Columns">
+              {([1, 2, 3] as const).map((n) => (
+                <Button
+                  key={n}
+                  size="sm"
+                  variant={cols === n ? "default" : "ghost"}
+                  className="h-8 w-8 px-0"
+                  aria-label={`${n} column${n > 1 ? "s" : ""}`}
+                  aria-pressed={cols === n}
+                  onClick={() => changeCols(n)}
+                >
+                  {n}
+                </Button>
+              ))}
+            </div>
+            <Button onClick={() => setCreating(true)} size="icon" className="sm:hidden" aria-label="Add rule">
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button onClick={() => setCreating(true)} className="hidden sm:inline-flex">
+              <Plus className="h-4 w-4 mr-1" /> Add rule
+            </Button>
+          </div>
         </div>
 
         <Card className="p-3">
@@ -183,7 +210,7 @@ function GrammarPage() {
           {rows.length === 0 ? "Your grammar deck is empty." : "No rules match your search."}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className={`grid gap-3 ${cols === 1 ? "grid-cols-1" : cols === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
           {filtered.map((r) => (
             <div key={r.id} role="button" tabIndex={0} onClick={() => setPreviewing(r)} className="text-left cursor-pointer">
               <Card className={`p-4 hover:border-primary transition-colors h-full ${r.pinned ? "border-primary/60 bg-primary/5" : ""}`}>
