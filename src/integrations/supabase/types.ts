@@ -14,10 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      grammar_folders: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       grammar_notes: {
         Row: {
           content: string | null
           created_at: string
+          folder_id: string | null
           id: string
           pinned: boolean
           sort_order: number | null
@@ -27,6 +52,7 @@ export type Database = {
         Insert: {
           content?: string | null
           created_at?: string
+          folder_id?: string | null
           id?: string
           pinned?: boolean
           sort_order?: number | null
@@ -36,13 +62,22 @@ export type Database = {
         Update: {
           content?: string | null
           created_at?: string
+          folder_id?: string | null
           id?: string
           pinned?: boolean
           sort_order?: number | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "grammar_notes_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "grammar_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nouns: {
         Row: {

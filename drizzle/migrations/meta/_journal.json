@@ -15,6 +15,13 @@
       "when": 1791005931272,
       "tag": "0001_grammar_pin_sort",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791373859997,
+      "tag": "0002_grammar_folders",
+      "breakpoints": true
     }
   ]
 }
