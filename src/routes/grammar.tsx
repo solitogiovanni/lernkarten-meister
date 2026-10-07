@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { Loader2, Plus, Trash2, Search, Pencil, Pin, PinOff, ArrowUp, ArrowDown } from "lucide-react";
+import { Loader2, Plus, Trash2, Search, Pencil, Pin, PinOff, ArrowUp, ArrowDown, FolderPlus } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeRichText } from "@/lib/sanitizeHtml";
 import { GRAMMAR_PREFILL_KEY } from "@/components/CrossDeckSearch";
@@ -21,15 +21,63 @@ type Row = {
   updated_at: string;
   pinned: boolean;
   sort_order: number | null;
+  folder_id: string | null;
 };
 
-type FormValue = { title: string; content: string };
-const emptyValue: FormValue = { title: "", content: "" };
+type Folder = { id: string; name: string; color: string; sort_order: number | null };
+
+const FOLDER_COLORS = ["#10b981", "#0ea5e9", "#6366f1", "#8b5cf6", "#f59e0b", "#f43f5e", "#14b8a6", "#64748b"];
+
+type FormValue = { title: string; content: string; folder_id: string | null };
+const emptyValue: FormValue = { title: "", content: "", folder_id: null };
 
 export const Route = createFileRoute("/grammar")({
-  head: () => ({ meta: [{ title: "Grammar — Wortschatz" }] }),
+  head: () => ({
+    meta: [
+      { title: "Grammar — Wortschatz" },
+      { name: "description", content: "Your German grammar rules, organized in colored folders." },
+      { property: "og:title", content: "Grammar — Wortschatz" },
+      { property: "og:description", content: "Your German grammar rules, organized in colored folders." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: GrammarPage,
 });
+
+function FolderChip({
+  label,
+  count,
+  color,
+  active,
+  onClick,
+  onEdit,
+}: {
+  label: string;
+  count: number;
+  color?: string;
+  active: boolean;
+  onClick: () => void;
+  onEdit?: () => void;
+}) {
+  return (
+    <div
+      className={`shrink-0 inline-flex items-center rounded-full border h-8 text-sm transition-colors ${active ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}
+    >
+      <button type="button" onClick={onClick} className="inline-flex items-center gap-1.5 pl-3 pr-2 h-full">
+        {color && <span className="h-2.5 w-2.5 rounded-full ring-1 ring-background" style={{ backgroundColor: color }} />}
+        <span className="whitespace-nowrap">{label}</span>
+        <span className={`text-xs ${active ? "opacity-80" : "text-muted-foreground"}`}>{count}</span>
+      </button>
+      {onEdit && active && (
+        <button type="button" onClick={onEdit} aria-label={`Edit folder ${label}`} className="pr-2.5 pl-0.5 h-full">
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {!(onEdit && active) && <span className="w-1" />}
+    </div>
+  );
+}
 
 function GrammarPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -40,6 +88,9 @@ function GrammarPage() {
   const [creating, setCreating] = useState(false);
   const [newValue, setNewValue] = useState<FormValue>(emptyValue);
   const [previewing, setPreviewing] = useState<Row | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [activeFolder, setActiveFolder] = useState<string>("all");
+  const [folderDialog, setFolderDialog] = useState<{ id?: string; name: string; color: string } | null>(null);
   const [cols, setCols] = useState<1 | 2 | 3>(1);
   useEffect(() => {
     const v = Number(localStorage.getItem("wortschatz:grammar_columns"));
@@ -54,16 +105,34 @@ function GrammarPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("grammar_notes", (q) =>
-      q.select("id,title,content,updated_at,pinned,sort_order").order("title", { ascending: true }),
+      q.select("id,title,content,updated_at,pinned,sort_order,folder_id").order("title", { ascending: true }),
     );
     if (error) toast.error(error.message);
     setRows(sortRows(data));
     setLoading(false);
   };
 
+  const loadFolders = async () => {
+    const { data, error } = await (supabase as any)
+      .from("grammar_folders")
+      .select("id,name,color,sort_order")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("name");
+    if (error) toast.error(error.message);
+    setFolders(data ?? []);
+  };
+
   useEffect(() => {
     load();
+    loadFolders();
   }, []);
+
+  // New rule defaults to the folder being viewed
+  useEffect(() => {
+    if (creating && !newValue.folder_id && activeFolder !== "all" && activeFolder !== "none") {
+      setNewValue((v) => ({ ...v, folder_id: activeFolder }));
+    }
+  }, [creating]);
 
   useEffect(() => {
     const title = sessionStorage.getItem(GRAMMAR_PREFILL_KEY)?.trim();
@@ -88,33 +157,69 @@ function GrammarPage() {
   };
 
   const move = async (r: Row, dir: -1 | 1) => {
-    const group = rows.filter((x) => x.pinned === r.pinned);
+    const group = filtered.filter((x) => x.pinned === r.pinned);
     const i = group.findIndex((x) => x.id === r.id);
     const j = i + dir;
     if (j < 0 || j >= group.length) return;
-    const reordered = [...group];
-    [reordered[i], reordered[j]] = [reordered[j], reordered[i]];
-    const updates = reordered.map((x, k) => ({ ...x, sort_order: k + 1 }));
-    const changed = updates.filter((u, k) => group[k].id !== u.id || group[k].sort_order !== u.sort_order);
-    setRows((l) => sortRows(l.map((x) => updates.find((u) => u.id === x.id) ?? x)));
+    const other = group[j];
+    let a = r.sort_order ?? i + 1;
+    let b = other.sort_order ?? j + 1;
+    if (a === b) b = a + dir;
+    const updates = [
+      { id: r.id, sort_order: b },
+      { id: other.id, sort_order: a },
+    ];
+    setRows((l) => sortRows(l.map((x) => {
+      const u = updates.find((u) => u.id === x.id);
+      return u ? { ...x, sort_order: u.sort_order } : x;
+    })));
     const results = await Promise.all(
-      changed.map((u) => (supabase as any).from("grammar_notes").update({ sort_order: u.sort_order }).eq("id", u.id)),
+      updates.map((u) => (supabase as any).from("grammar_notes").update({ sort_order: u.sort_order }).eq("id", u.id)),
     );
     const err = results.find((x: any) => x.error);
     if (err) { toast.error(err.error.message); load(); }
   };
 
+  const folderById = useMemo(() => new Map(folders.map((f) => [f.id, f])), [folders]);
+
   const filtered = useMemo(() => {
-    if (!q) return rows;
+    let list = rows;
+    if (activeFolder === "none") list = list.filter((r) => !r.folder_id);
+    else if (activeFolder !== "all") list = list.filter((r) => r.folder_id === activeFolder);
+    if (!q) return list;
     const needle = q.toLowerCase();
-    return rows.filter((r) =>
+    return list.filter((r) =>
       (r.title + " " + (r.content ?? "")).toLowerCase().includes(needle),
     );
-  }, [rows, q]);
+  }, [rows, q, activeFolder]);
+
+  const saveFolder = async () => {
+    if (!folderDialog) return;
+    const name = folderDialog.name.trim();
+    if (!name) return toast.error("Name is required");
+    const db = (supabase as any).from("grammar_folders");
+    const { error } = folderDialog.id
+      ? await db.update({ name, color: folderDialog.color }).eq("id", folderDialog.id)
+      : await db.insert({ name, color: folderDialog.color, sort_order: folders.length + 1 });
+    if (error) return toast.error(error.message);
+    setFolderDialog(null);
+    loadFolders();
+  };
+
+  const deleteFolder = async () => {
+    if (!folderDialog?.id) return;
+    if (!confirm(`Delete folder "${folderDialog.name}"? Its notes are kept and become unassigned.`)) return;
+    const { error } = await (supabase as any).from("grammar_folders").delete().eq("id", folderDialog.id);
+    if (error) return toast.error(error.message);
+    if (activeFolder === folderDialog.id) setActiveFolder("all");
+    setFolderDialog(null);
+    await loadFolders();
+    load();
+  };
 
   const openEdit = (r: Row) => {
     setEditing(r);
-    setEditValue({ title: r.title, content: r.content ?? "" });
+    setEditValue({ title: r.title, content: r.content ?? "", folder_id: r.folder_id });
   };
 
   const saveEdit = async (close = true) => {
@@ -122,7 +227,7 @@ function GrammarPage() {
     if (!editValue.title.trim()) return toast.error("Title is required");
     const { error } = await (supabase as any)
       .from("grammar_notes")
-      .update({ title: editValue.title.trim(), content: editValue.content || null })
+      .update({ title: editValue.title.trim(), content: editValue.content || null, folder_id: editValue.folder_id })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
     toast.success("Saved");
@@ -144,6 +249,7 @@ function GrammarPage() {
     const { error } = await (supabase as any).from("grammar_notes").insert({
       title: newValue.title.trim(),
       content: newValue.content || null,
+      folder_id: newValue.folder_id,
       sort_order: rows.reduce((m, r) => Math.max(m, r.sort_order ?? 0), 0) + 1,
     });
     if (error) return toast.error(error.message);
@@ -198,6 +304,36 @@ function GrammarPage() {
               className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
+          <div className="flex gap-2 overflow-x-auto mt-3 pb-1 -mx-1 px-1">
+            <FolderChip label="All rules" count={rows.length} active={activeFolder === "all"} onClick={() => setActiveFolder("all")} />
+            {folders.map((f) => (
+              <FolderChip
+                key={f.id}
+                label={f.name}
+                color={f.color}
+                count={rows.filter((r) => r.folder_id === f.id).length}
+                active={activeFolder === f.id}
+                onClick={() => setActiveFolder(f.id)}
+                onEdit={() => setFolderDialog({ id: f.id, name: f.name, color: f.color })}
+              />
+            ))}
+            {rows.some((r) => !r.folder_id) && folders.length > 0 && (
+              <FolderChip
+                label="Unassigned"
+                count={rows.filter((r) => !r.folder_id).length}
+                active={activeFolder === "none"}
+                onClick={() => setActiveFolder("none")}
+              />
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0 h-8 border-dashed"
+              onClick={() => setFolderDialog({ name: "", color: FOLDER_COLORS[0] })}
+            >
+              <FolderPlus className="h-4 w-4 mr-1" /> Folder
+            </Button>
+          </div>
         </Card>
       </div>
 
@@ -232,6 +368,12 @@ function GrammarPage() {
                     </Button>
                   </div>
                 </div>
+                {activeFolder === "all" && r.folder_id && folderById.get(r.folder_id) && (
+                  <span className="inline-flex items-center gap-1.5 text-xs rounded-full border px-2 py-0.5 mb-2">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: folderById.get(r.folder_id)!.color }} />
+                    {folderById.get(r.folder_id)!.name}
+                  </span>
+                )}
                 {r.content && (
                   <div
                     className="rich-text-view text-sm text-muted-foreground line-clamp-4 [&_*]:!text-muted-foreground"
@@ -297,6 +439,7 @@ function GrammarPage() {
                 placeholder="z.B. Trennbare Verben"
               />
             </div>
+            <FolderSelect folders={folders} value={editValue.folder_id} onChange={(folder_id) => setEditValue({ ...editValue, folder_id })} />
             <div className="space-y-1.5">
               <Label>Notes</Label>
               <RichTextEditor
@@ -334,6 +477,7 @@ function GrammarPage() {
                 placeholder="z.B. Trennbare Verben"
               />
             </div>
+            <FolderSelect folders={folders} value={newValue.folder_id} onChange={(folder_id) => setNewValue({ ...newValue, folder_id })} />
             <div className="space-y-1.5">
               <Label>Notes</Label>
               <RichTextEditor
@@ -347,6 +491,78 @@ function GrammarPage() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Folder dialog */}
+      <Dialog open={!!folderDialog} onOpenChange={(o) => !o && setFolderDialog(null)}>
+        <DialogContent className="max-w-sm">
+          {folderDialog && (
+            <>
+              <h2 className="text-lg font-semibold">{folderDialog.id ? "Edit folder" : "New folder"}</h2>
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label>Name</Label>
+                  <Input
+                    autoFocus
+                    value={folderDialog.name}
+                    onChange={(e) => setFolderDialog({ ...folderDialog, name: e.target.value })}
+                    onKeyDown={(e) => e.key === "Enter" && saveFolder()}
+                    placeholder="z.B. Nebensätze"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Color</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {FOLDER_COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        aria-label={`Color ${c}`}
+                        onClick={() => setFolderDialog({ ...folderDialog, color: c })}
+                        className={`h-8 w-8 rounded-full border-2 ${folderDialog.color === c ? "border-foreground scale-110" : "border-transparent"}`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="sm:justify-start gap-2">
+                <Button onClick={saveFolder}>Save</Button>
+                {folderDialog.id && (
+                  <Button variant="outline" onClick={deleteFolder}>
+                    <Trash2 className="h-4 w-4 mr-1 text-destructive" /> Delete
+                  </Button>
+                )}
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function FolderSelect({
+  folders,
+  value,
+  onChange,
+}: {
+  folders: Folder[];
+  value: string | null;
+  onChange: (v: string | null) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label>Folder</Label>
+      <select
+        className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value || null)}
+      >
+        <option value="">No folder</option>
+        {folders.map((f) => (
+          <option key={f.id} value={f.id}>{f.name}</option>
+        ))}
+      </select>
     </div>
   );
 }
