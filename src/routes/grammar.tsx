@@ -138,7 +138,7 @@ function GrammarPage() {
     const title = sessionStorage.getItem(GRAMMAR_PREFILL_KEY)?.trim();
     if (!title) return;
     sessionStorage.removeItem(GRAMMAR_PREFILL_KEY);
-    setNewValue({ title, content: "" });
+    setNewValue({ title, content: "", folder_id: null });
     setCreating(true);
   }, []);
 
