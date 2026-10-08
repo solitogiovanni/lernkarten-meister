@@ -46,6 +46,7 @@ export type Database = {
           id: string
           pinned: boolean
           sort_order: number | null
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -56,6 +57,7 @@ export type Database = {
           id?: string
           pinned?: boolean
           sort_order?: number | null
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           id?: string
           pinned?: boolean
           sort_order?: number | null
+          tags?: string[]
           title?: string
           updated_at?: string
         }
