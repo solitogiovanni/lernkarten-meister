@@ -579,6 +579,7 @@ For EACH item return:
 If kind = "noun": noun (capitalized singular), article (der/die/das), plural (or null).
 If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), conjugation (the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"), praeteritum_conjugation (the six Präteritum forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "kam / kamst / kam / kamen / kamt / kamen"), prepositions (array, possibly empty).
 If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction": word (lowercase German base form).
+${COMP_RULE}
 
 Only include kinds the word genuinely could be. If unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
 
