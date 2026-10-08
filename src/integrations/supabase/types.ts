@@ -302,6 +302,7 @@ export type Database = {
         Row: {
           antonyms: string[]
           comments: string | null
+          comparative: string | null
           created_at: string
           due_at: string
           ease: number
@@ -316,6 +317,8 @@ export type Database = {
           last_rated_at: string | null
           meanings: string[]
           reps: number
+          superlative_absolute: string | null
+          superlative_relative: string | null
           synonyms: string[]
           themes: string[]
           updated_at: string
@@ -324,6 +327,7 @@ export type Database = {
         Insert: {
           antonyms?: string[]
           comments?: string | null
+          comparative?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -338,6 +342,8 @@ export type Database = {
           last_rated_at?: string | null
           meanings?: string[]
           reps?: number
+          superlative_absolute?: string | null
+          superlative_relative?: string | null
           synonyms?: string[]
           themes?: string[]
           updated_at?: string
@@ -346,6 +352,7 @@ export type Database = {
         Update: {
           antonyms?: string[]
           comments?: string | null
+          comparative?: string | null
           created_at?: string
           due_at?: string
           ease?: number
@@ -360,6 +367,8 @@ export type Database = {
           last_rated_at?: string | null
           meanings?: string[]
           reps?: number
+          superlative_absolute?: string | null
+          superlative_relative?: string | null
           synonyms?: string[]
           themes?: string[]
           updated_at?: string
@@ -450,6 +459,7 @@ export type Database = {
         Returns: {
           antonyms: string[]
           comments: string | null
+          comparative: string | null
           created_at: string
           due_at: string
           ease: number
@@ -464,6 +474,8 @@ export type Database = {
           last_rated_at: string | null
           meanings: string[]
           reps: number
+          superlative_absolute: string | null
+          superlative_relative: string | null
           synonyms: string[]
           themes: string[]
           updated_at: string

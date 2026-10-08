@@ -34,6 +34,9 @@ type Row = {
   antonyms: string[];
   comments: string | null;
   image_url: string | null;
+  comparative: string | null;
+  superlative_relative: string | null;
+  superlative_absolute: string | null;
   due_at: string;
   reps: number;
   created_at: string;
@@ -72,10 +75,19 @@ export function WordDeckPage({
   const autofillFn = useServerFn(autofillWords);
   const hasImages = kind === "adjective" || kind === "adverb";
 
+  const cmpPayload = (v: WordFormValue) =>
+    kind === "adjective"
+      ? {
+          comparative: v.comparative?.trim() || null,
+          superlative_relative: v.superlativeRelative?.trim() || null,
+          superlative_absolute: v.superlativeAbsolute?.trim() || null,
+        }
+      : {};
+
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("words", (q) =>
-      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,due_at,reps,created_at")
+      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
         .eq("kind", kind)
         .order("word", { ascending: true }),
     );
@@ -168,6 +180,9 @@ export function WordDeckPage({
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
       imageUrl: r.image_url ?? null,
+      comparative: r.comparative ?? "",
+      superlativeRelative: r.superlative_relative ?? "",
+      superlativeAbsolute: r.superlative_absolute ?? "",
     });
   };
 
@@ -185,6 +200,7 @@ export function WordDeckPage({
         antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
         image_url: editValue.imageUrl ?? null,
+        ...cmpPayload(editValue),
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -212,7 +228,16 @@ export function WordDeckPage({
     if (rows.some((r) => r.word.trim().toLowerCase() === key)) {
       return toast.error(`"${newValue.word.trim()}" is already in your deck`);
     }
+    let nv = newValue;
+    if (kind === "adjective" && !nv.comparative?.trim() && !nv.superlativeRelative?.trim()) {
+      try {
+        const { results } = await autofillFn({ data: { kind, words: [nv.word.trim()] } });
+        const r = results[0];
+        if (r) nv = { ...nv, comparative: r.comparative ?? "", superlativeRelative: r.superlative_relative ?? "", superlativeAbsolute: r.superlative_absolute ?? "" };
+      } catch { /* save anyway */ }
+    }
     const { error } = await (supabase as any).from("words").insert({
+      ...cmpPayload(nv),
       kind,
       word: newValue.word.trim(),
       meanings: newValue.meanings,
@@ -248,6 +273,9 @@ export function WordDeckPage({
         antonyms: v.antonyms.length ? v.antonyms : r.antonyms ?? [],
         comments: v.comments,
         imageUrl: v.imageUrl ?? null,
+        comparative: v.comparative?.trim() || r.comparative || "",
+        superlativeRelative: v.superlativeRelative?.trim() || r.superlative_relative || "",
+        superlativeAbsolute: v.superlativeAbsolute?.trim() || r.superlative_absolute || "",
       };
       if (target === "edit") setEditValue(merged);
       else setNewValue(merged);
@@ -414,6 +442,9 @@ export function WordDeckPage({
           antonyms: previewing.antonyms,
           comments: previewing.comments,
           imageUrl: previewing.image_url,
+          comparative: previewing.comparative,
+          superlative_relative: previewing.superlative_relative,
+          superlative_absolute: previewing.superlative_absolute,
         } : null}
         onEdit={() => {
           if (previewing) {
@@ -440,7 +471,7 @@ export function WordDeckPage({
             <SheetTitle>Edit {formLabel.toLowerCase()}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={hasImages} showImage={hasImages} />
+            <WordForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={hasImages} showImage={hasImages} showComparison={kind === "adjective"} />
             <div className="flex justify-start mt-6 gap-2">
               <Button variant="outline" onClick={() => aiFillCurrent("edit")} disabled={aiBusy}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />} AI fill
@@ -460,7 +491,7 @@ export function WordDeckPage({
             <SheetTitle>{addLabel}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={hasImages} showImage={hasImages} />
+            <WordForm value={newValue} onChange={setNewValue} themeSuggestions={allThemes} recentThemes={recentThemes} label={formLabel} placeholder={formPlaceholder} showSynonyms={hasImages} showImage={hasImages} showComparison={kind === "adjective"} />
             {newDuplicate && (
               <div className="mt-3 text-sm text-amber-700 dark:text-amber-400 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2">
                 ⚠ "{newValue.word.trim()}" is already in your deck

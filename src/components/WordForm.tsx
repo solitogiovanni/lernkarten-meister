@@ -18,6 +18,9 @@ export type WordFormValue = {
   antonyms: string[];
   comments: string;
   imageUrl?: string | null;
+  comparative?: string;
+  superlativeRelative?: string;
+  superlativeAbsolute?: string;
 };
 
 export const emptyWord: WordFormValue = {
@@ -94,6 +97,7 @@ export function WordForm({
   placeholder,
   showSynonyms = true,
   showImage = false,
+  showComparison = false,
 }: {
   value: WordFormValue;
   onChange: (v: WordFormValue) => void;
@@ -103,6 +107,7 @@ export function WordForm({
   placeholder: string;
   showSynonyms?: boolean;
   showImage?: boolean;
+  showComparison?: boolean;
 }) {
   const global = useGlobalThemes();
   const prevThemes = useRef<string[] | null>(null);
@@ -144,6 +149,26 @@ export function WordForm({
           placeholder="bello, grande…"
         />
       </div>
+
+      {showComparison && (
+        <div className="space-y-2">
+          <Label className="block">Comparison (Steigerung)</Label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="cmp" className="mb-1 block text-xs text-muted-foreground">Comparative</Label>
+              <Input id="cmp" value={value.comparative ?? ""} onChange={(e) => set("comparative", e.target.value)} placeholder="schöner" />
+            </div>
+            <div>
+              <Label htmlFor="suprel" className="mb-1 block text-xs text-muted-foreground">Superlative (relative)</Label>
+              <Input id="suprel" value={value.superlativeRelative ?? ""} onChange={(e) => set("superlativeRelative", e.target.value)} placeholder="am schönsten" />
+            </div>
+            <div>
+              <Label htmlFor="supabs" className="mb-1 block text-xs text-muted-foreground">Superlative (absolute)</Label>
+              <Input id="supabs" value={value.superlativeAbsolute ?? ""} onChange={(e) => set("superlativeAbsolute", e.target.value)} placeholder="sehr schön" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {showImage && (
         <ImagePicker

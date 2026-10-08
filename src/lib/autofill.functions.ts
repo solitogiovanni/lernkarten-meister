@@ -126,6 +126,22 @@ export type AutofilledWord = {
   examples: string[];
   synonyms: string[];
   antonyms: string[];
+  comparative?: string | null;
+  superlative_relative?: string | null;
+  superlative_absolute?: string | null;
+};
+
+const COMP_RULE = `
+For ADJECTIVES also return the comparison forms (Steigerung):
+- comparative: e.g. "schöner", "besser", "größer" (respect umlaut/irregular forms)
+- superlative_relative: with "am", e.g. "am schönsten", "am besten"
+- superlative_absolute: the absolute superlative / elative, e.g. "sehr schön, äußerst schön" (or a fixed form like "wunderschön" when common)
+If the adjective cannot be compared (e.g. "tot", "schwanger"), return empty strings.`;
+
+const COMP_PROPS = {
+  comparative: { type: "string" },
+  superlative_relative: { type: "string" },
+  superlative_absolute: { type: "string" },
 };
 
 export const autofillWords = createServerFn({ method: "POST" })
@@ -140,7 +156,7 @@ export const autofillWords = createServerFn({ method: "POST" })
 - meanings: 1 to 4 Italian translations, each a short phrase
 - themes: 1 to 3 short Italian thematic tags (e.g. "qualità", "tempo", "frequenza", "modo", "luogo", "quantità"), lowercase
 - examples: exactly 2 short, natural German example sentences using the ${kindLabel}
-
+${data.kind === "adjective" ? COMP_RULE : ""}
 Be accurate.`;
 
     try {
@@ -173,6 +189,7 @@ Be accurate.`;
                         examples: { type: "array", items: { type: "string" } },
                         synonyms: { type: "array", items: { type: "string" } },
                         antonyms: { type: "array", items: { type: "string" } },
+                        ...COMP_PROPS,
                       },
                       required: ["input", "word", "meanings", "themes", "examples"],
                     },
@@ -203,6 +220,9 @@ Be accurate.`;
         examples: it.examples ?? [],
         synonyms: it.synonyms ?? [],
         antonyms: it.antonyms ?? [],
+        comparative: it.comparative || null,
+        superlative_relative: it.superlative_relative || null,
+        superlative_absolute: it.superlative_absolute || null,
       }));
       return { results, error: null };
     } catch (e) {
@@ -260,6 +280,9 @@ export type MixedItem = {
   prepositions?: VerbPreposition[];
   // adjective/adverb
   word?: string;
+  comparative?: string | null;
+  superlative_relative?: string | null;
+  superlative_absolute?: string | null;
   // common
   meanings: string[];
   themes: string[];
@@ -301,6 +324,7 @@ If kind = "verb", also return:
 
 If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction", also return:
 - word: base form, lowercase
+${COMP_RULE}
 
 Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctions, capitalize nouns.`;
 
@@ -355,6 +379,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
                         examples: { type: "array", items: { type: "string" } },
                         synonyms: { type: "array", items: { type: "string" } },
                         antonyms: { type: "array", items: { type: "string" } },
+                        ...COMP_PROPS,
                       },
                       required: ["input", "kind", "meanings", "themes", "examples"],
                     },
@@ -394,6 +419,9 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
           meaning: p.meaning ?? "",
         })),
         word: it.word ?? undefined,
+        comparative: it.comparative || null,
+        superlative_relative: it.superlative_relative || null,
+        superlative_absolute: it.superlative_absolute || null,
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],
@@ -551,6 +579,7 @@ For EACH item return:
 If kind = "noun": noun (capitalized singular), article (der/die/das), plural (or null).
 If kind = "verb": present (infinitive), praeteritum, perfect (with auxiliary), conjugation (the six present-tense forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "komme / kommst / kommt / kommen / kommt / kommen"), praeteritum_conjugation (the six Präteritum forms for ich / du / er-sie-es / wir / ihr / sie-Sie, in that order, WITHOUT pronouns, joined by " / " — e.g. for "kommen" → "kam / kamst / kam / kamen / kamt / kamen"), prepositions (array, possibly empty).
 If kind = "adjective", "adverb", "preposition", "pronoun" or "conjunction": word (lowercase German base form).
+${COMP_RULE}
 
 Only include kinds the word genuinely could be. If unambiguous, return exactly 1 item. Order items from most likely to least likely.`;
 
@@ -606,6 +635,7 @@ Only include kinds the word genuinely could be. If unambiguous, return exactly 1
                         examples: { type: "array", items: { type: "string" } },
                         synonyms: { type: "array", items: { type: "string" } },
                         antonyms: { type: "array", items: { type: "string" } },
+                        ...COMP_PROPS,
                       },
                       required: ["input", "kind", "meanings", "themes", "examples"],
                     },
@@ -645,6 +675,9 @@ Only include kinds the word genuinely could be. If unambiguous, return exactly 1
           meaning: p.meaning ?? "",
         })),
         word: it.word ?? undefined,
+        comparative: it.comparative || null,
+        superlative_relative: it.superlative_relative || null,
+        superlative_absolute: it.superlative_absolute || null,
         meanings: it.meanings ?? [],
         themes: it.themes ?? [],
         examples: it.examples ?? [],

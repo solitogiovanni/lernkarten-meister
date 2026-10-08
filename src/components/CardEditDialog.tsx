@@ -33,6 +33,9 @@ export type EditableCard = {
   antonyms?: string[] | null;
   comments?: string | null;
   image_url?: string | null;
+  comparative?: string | null;
+  superlative_relative?: string | null;
+  superlative_absolute?: string | null;
   ease: number;
   interval_days: number;
   reps: number;
@@ -67,6 +70,9 @@ export function CardEditDialog({
   });
   const [word, setWord] = useState<WordFormValue>({
     imageUrl: card.image_url ?? null,
+    comparative: card.comparative ?? "",
+    superlativeRelative: card.superlative_relative ?? "",
+    superlativeAbsolute: card.superlative_absolute ?? "",
     word: card.word,
     meanings: card.meanings,
     examples: card.examples,
@@ -153,6 +159,9 @@ export function CardEditDialog({
           antonyms: word.antonyms.length ? word.antonyms : r.antonyms ?? [],
           comments: word.comments,
           imageUrl: word.imageUrl ?? null,
+          comparative: word.comparative?.trim() || r.comparative || "",
+          superlativeRelative: word.superlativeRelative?.trim() || r.superlative_relative || "",
+          superlativeAbsolute: word.superlativeAbsolute?.trim() || r.superlative_absolute || "",
         });
       }
       toast.success("Filled with AI");
@@ -253,6 +262,9 @@ export function CardEditDialog({
           antonyms: word.antonyms,
           comments: word.comments.trim() || null,
           image_url: word.imageUrl ?? null,
+          comparative: kind === "adjective" ? word.comparative?.trim() || null : null,
+          superlative_relative: kind === "adjective" ? word.superlativeRelative?.trim() || null : null,
+          superlative_absolute: kind === "adjective" ? word.superlativeAbsolute?.trim() || null : null,
         };
         if (!payload.word) throw new Error("Word is required");
         if (kindChanged) {
@@ -268,7 +280,8 @@ export function CardEditDialog({
           const { error } = await (supabase as any).from("words").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind, article: null, plural: null, word: payload.word, image_url: payload.image_url ?? null,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments,
+            comparative: payload.comparative, superlative_relative: payload.superlative_relative, superlative_absolute: payload.superlative_absolute };
         }
       }
 
@@ -319,6 +332,7 @@ export function CardEditDialog({
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
               showSynonyms={kind === "adjective" || kind === "adverb"}
               showImage={kind === "adjective" || kind === "adverb"}
+              showComparison={kind === "adjective"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}

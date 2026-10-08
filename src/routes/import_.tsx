@@ -267,6 +267,9 @@ function ImportPage() {
           themes: d.themes,
           synonyms: d.synonyms,
           antonyms: d.antonyms,
+          comparative: d.kind === "adjective" ? (d as any).comparative || null : null,
+          superlative_relative: d.kind === "adjective" ? (d as any).superlative_relative || null : null,
+          superlative_absolute: d.kind === "adjective" ? (d as any).superlative_absolute || null : null,
         }));
 
       const errors: string[] = [];

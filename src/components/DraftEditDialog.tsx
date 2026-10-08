@@ -47,6 +47,9 @@ export function DraftEditDialog({
     synonyms: draft.synonyms ?? [],
     antonyms: draft.antonyms ?? [],
     comments: draft.comments ?? "",
+    comparative: draft.comparative ?? "",
+    superlativeRelative: draft.superlative_relative ?? "",
+    superlativeAbsolute: draft.superlative_absolute ?? "",
   });
   const [verb, setVerb] = useState<VerbFormValue>({
     present: draft.present ?? draft.word ?? draft.noun ?? draft.input,
@@ -128,6 +131,9 @@ export function DraftEditDialog({
           synonyms: word.synonyms.length ? word.synonyms : r.synonyms ?? [],
           antonyms: word.antonyms.length ? word.antonyms : r.antonyms ?? [],
           comments: word.comments,
+          comparative: word.comparative?.trim() || r.comparative || "",
+          superlativeRelative: word.superlativeRelative?.trim() || r.superlative_relative || "",
+          superlativeAbsolute: word.superlativeAbsolute?.trim() || r.superlative_absolute || "",
         });
       }
       toast.success("Filled with AI");
@@ -164,6 +170,9 @@ export function DraftEditDialog({
         prepositions: [],
         meanings: word.meanings, examples: word.examples.filter((e) => e.trim()), themes: word.themes,
         synonyms: word.synonyms, antonyms: word.antonyms, comments: word.comments, image_url: null,
+        comparative: word.comparative?.trim() || null,
+        superlative_relative: word.superlativeRelative?.trim() || null,
+        superlative_absolute: word.superlativeAbsolute?.trim() || null,
       };
     }
     onSave(next);
@@ -206,6 +215,7 @@ export function DraftEditDialog({
               recentThemes={recentThemes}
               label={kind.charAt(0).toUpperCase() + kind.slice(1)}
               showSynonyms={kind === "adjective" || kind === "adverb"}
+              showComparison={kind === "adjective"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
           )}

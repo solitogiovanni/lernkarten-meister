@@ -29,6 +29,13 @@
       "when": 1791467342938,
       "tag": "0003_grammar_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791467726801,
+      "tag": "0004_adjective_comparison",
+      "breakpoints": true
     }
   ]
 }

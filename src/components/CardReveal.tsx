@@ -26,6 +26,9 @@ export type RevealCard = {
   antonyms?: string[] | null;
   comments?: string | null;
   imageUrl?: string | null;
+  comparative?: string | null;
+  superlative_relative?: string | null;
+  superlative_absolute?: string | null;
 };
 
 const articleTextColor = {
@@ -118,6 +121,20 @@ export function CardRevealDialog({
                     <span className="font-medium text-foreground">{card.praeteritum_conjugation}</span>
                   </div>
                 )}
+              </div>
+            )}
+            {card.kind === "adjective" && (card.comparative || card.superlative_relative || card.superlative_absolute) && (
+              <div className="text-muted-foreground space-y-0.5">
+                {([
+                  ["Komparativ", card.comparative],
+                  ["Superlativ (relativ)", card.superlative_relative],
+                  ["Superlativ (absolut)", card.superlative_absolute],
+                ] as const).filter(([, v]) => v).map(([l, v]) => (
+                  <div key={l} className="flex items-center justify-center gap-1">
+                    <span>{l}: <span className="font-medium text-foreground">{v}</span></span>
+                    <SpeakButton text={v as string} size="icon" variant="ghost" />
+                  </div>
+                ))}
               </div>
             )}
             {card.kind === "verb" && card.prepositions && card.prepositions.length > 0 && (
