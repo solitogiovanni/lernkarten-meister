@@ -26,7 +26,10 @@ type Row = {
 
 type Folder = { id: string; name: string; color: string; sort_order: number | null };
 
-const FOLDER_COLORS = ["#10b981", "#0ea5e9", "#6366f1", "#8b5cf6", "#f59e0b", "#f43f5e", "#14b8a6", "#64748b"];
+const FOLDER_COLORS = [
+  "#10b981", "#0ea5e9", "#6366f1", "#8b5cf6", "#f59e0b", "#f43f5e", "#14b8a6", "#64748b",
+  "#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e", "#06b6d4", "#d946ef", "#a16207",
+];
 
 type FormValue = { title: string; content: string; folder_id: string | null };
 const emptyValue: FormValue = { title: "", content: "", folder_id: null };
