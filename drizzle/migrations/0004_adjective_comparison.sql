@@ -1,0 +1,1 @@
+ALTER TABLE public.words ADD COLUMN comparative text, ADD COLUMN superlative_relative text, ADD COLUMN superlative_absolute text;
