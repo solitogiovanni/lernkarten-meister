@@ -52,6 +52,9 @@ type Card = {
   antonyms: string[];
   comments: string | null;
   image_url: string | null;
+  comparative?: string | null;
+  superlative_relative?: string | null;
+  superlative_absolute?: string | null;
   ease: number;
   interval_days: number;
   reps: number;
@@ -99,7 +102,7 @@ function RunPage() {
           ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
           : Promise.resolve({ data: [] as any[] }),
         wantWords
-          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
+          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
           : Promise.resolve({ data: [] as any[] }),
         wantVerb
           ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
@@ -148,6 +151,9 @@ function RunPage() {
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
         image_url: r.image_url ?? null,
+        comparative: r.comparative ?? null,
+        superlative_relative: r.superlative_relative ?? null,
+        superlative_absolute: r.superlative_absolute ?? null,
         ease: r.ease,
         interval_days: r.interval_days,
         reps: r.reps,
@@ -453,6 +459,20 @@ function FlashcardView({
                       {p.preposition}{p.case ? ` +${p.case.charAt(0).toUpperCase() + p.case.slice(1)}` : ""}
                       {p.meaning && <span className="text-muted-foreground"> — {p.meaning}</span>}
                     </span>
+                  ))}
+                </div>
+              )}
+              {card.kind === "adjective" && (card.comparative || card.superlative_relative || card.superlative_absolute) && (
+                <div className="text-muted-foreground space-y-0.5">
+                  {([
+                    ["Komparativ", card.comparative],
+                    ["Superlativ (relativ)", card.superlative_relative],
+                    ["Superlativ (absolut)", card.superlative_absolute],
+                  ] as const).filter(([, v]) => v).map(([l, v]) => (
+                    <div key={l} className="flex items-center justify-center gap-1">
+                      <span>{l}: <span className="font-medium text-foreground">{v}</span></span>
+                      <SpeakButton text={v as string} size="icon" variant="ghost" />
+                    </div>
                   ))}
                 </div>
               )}
