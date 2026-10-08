@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { Loader2, Plus, Trash2, Search, Pencil, Pin, PinOff, ArrowUp, ArrowDown, FolderPlus } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, ArrowUp, ArrowDown, FolderPlus, ListTree, X } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeRichText } from "@/lib/sanitizeHtml";
 import { GRAMMAR_PREFILL_KEY } from "@/components/CrossDeckSearch";
+import { SearchField } from "@/components/SearchField";
+import { fold } from "@/lib/normalize";
 
 type Row = {
   id: string;
@@ -22,6 +24,7 @@ type Row = {
   pinned: boolean;
   sort_order: number | null;
   folder_id: string | null;
+  tags: string[];
 };
 
 type Folder = { id: string; name: string; color: string; sort_order: number | null };
@@ -31,8 +34,61 @@ const FOLDER_COLORS = [
   "#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e", "#06b6d4", "#d946ef", "#a16207",
 ];
 
-type FormValue = { title: string; content: string; folder_id: string | null };
-const emptyValue: FormValue = { title: "", content: "", folder_id: null };
+type FormValue = { title: string; content: string; folder_id: string | null; tags: string[] };
+const emptyValue: FormValue = { title: "", content: "", folder_id: null, tags: [] };
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<(style|script)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<br\s*\/?>|<\/(p|div|li|tr|h\d)>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Per-character fold (length-preserving) used to locate matches for highlighting.
+const foldChar = (c: string) => {
+  const l = c.toLowerCase();
+  if (l === "ß") return "s";
+  return l.normalize("NFD").replace(/[\u0300-\u036f]/g, "") || l;
+};
+const foldKeep = (s: string) => Array.from(s).map(foldChar).join("");
+
+function findMatch(text: string, needle: string): number {
+  const n = foldKeep(needle.trim());
+  if (!n) return -1;
+  return foldKeep(text).indexOf(n);
+}
+
+function snippet(text: string, needle: string, radius = 70): string {
+  const i = findMatch(text, needle);
+  if (i < 0) return text.slice(0, radius * 2) + (text.length > radius * 2 ? "…" : "");
+  const start = Math.max(0, i - radius);
+  const end = Math.min(text.length, i + needle.trim().length + radius);
+  return (start > 0 ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+}
+
+function Highlight({ text, needle }: { text: string; needle: string }) {
+  const n = needle.trim();
+  if (!n) return <>{text}</>;
+  const folded = foldKeep(text);
+  const fn = foldKeep(n);
+  const parts: React.ReactNode[] = [];
+  let pos = 0;
+  let i = folded.indexOf(fn);
+  while (i >= 0 && fn.length > 0) {
+    if (i > pos) parts.push(text.slice(pos, i));
+    parts.push(<mark key={i} className="bg-accent text-accent-foreground rounded px-0.5">{text.slice(i, i + fn.length)}</mark>);
+    pos = i + fn.length;
+    i = folded.indexOf(fn, pos);
+  }
+  parts.push(text.slice(pos));
+  return <>{parts}</>;
+}
 
 export const Route = createFileRoute("/grammar")({
   head: () => ({
@@ -95,6 +151,8 @@ function GrammarPage() {
   const [activeFolder, setActiveFolder] = useState<string>("all");
   const [folderDialog, setFolderDialog] = useState<{ id?: string; name: string; color: string } | null>(null);
   const [cols, setCols] = useState<1 | 2 | 3>(1);
+  const [scope, setScope] = useState<"folder" | "all">("folder");
+  const [outlineOpen, setOutlineOpen] = useState(false);
   useEffect(() => {
     const v = Number(localStorage.getItem("wortschatz:grammar_columns"));
     if (v === 1 || v === 2 || v === 3) setCols(v);
@@ -108,7 +166,7 @@ function GrammarPage() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await fetchAll<Row>("grammar_notes", (q) =>
-      q.select("id,title,content,updated_at,pinned,sort_order,folder_id").order("title", { ascending: true }),
+      q.select("id,title,content,updated_at,pinned,sort_order,folder_id,tags").order("title", { ascending: true }),
     );
     if (error) toast.error(error.message);
     setRows(sortRows(data));
@@ -141,7 +199,7 @@ function GrammarPage() {
     const title = sessionStorage.getItem(GRAMMAR_PREFILL_KEY)?.trim();
     if (!title) return;
     sessionStorage.removeItem(GRAMMAR_PREFILL_KEY);
-    setNewValue({ title, content: "", folder_id: null });
+    setNewValue({ title, content: "", folder_id: null, tags: [] });
     setCreating(true);
   }, []);
 
@@ -187,14 +245,17 @@ function GrammarPage() {
 
   const filtered = useMemo(() => {
     let list = rows;
-    if (activeFolder === "none") list = list.filter((r) => !r.folder_id);
-    else if (activeFolder !== "all") list = list.filter((r) => r.folder_id === activeFolder);
-    if (!q) return list;
-    const needle = q.toLowerCase();
+    const searchAll = !!q.trim() && scope === "all";
+    if (!searchAll) {
+      if (activeFolder === "none") list = list.filter((r) => !r.folder_id);
+      else if (activeFolder !== "all") list = list.filter((r) => r.folder_id === activeFolder);
+    }
+    const needle = fold(q.trim());
+    if (!needle) return list;
     return list.filter((r) =>
-      (r.title + " " + (r.content ?? "")).toLowerCase().includes(needle),
+      fold(r.title + " " + (r.tags ?? []).join(" ") + " " + stripHtml(r.content ?? "")).includes(needle),
     );
-  }, [rows, q, activeFolder]);
+  }, [rows, q, activeFolder, scope]);
 
   const saveFolder = async () => {
     if (!folderDialog) return;
@@ -222,7 +283,7 @@ function GrammarPage() {
 
   const openEdit = (r: Row) => {
     setEditing(r);
-    setEditValue({ title: r.title, content: r.content ?? "", folder_id: r.folder_id });
+    setEditValue({ title: r.title, content: r.content ?? "", folder_id: r.folder_id, tags: r.tags ?? [] });
   };
 
   const saveEdit = async (close = true) => {
@@ -230,7 +291,7 @@ function GrammarPage() {
     if (!editValue.title.trim()) return toast.error("Title is required");
     const { error } = await (supabase as any)
       .from("grammar_notes")
-      .update({ title: editValue.title.trim(), content: editValue.content || null, folder_id: editValue.folder_id })
+      .update({ title: editValue.title.trim(), content: editValue.content || null, folder_id: editValue.folder_id, tags: editValue.tags })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
     toast.success("Saved");
@@ -253,6 +314,7 @@ function GrammarPage() {
       title: newValue.title.trim(),
       content: newValue.content || null,
       folder_id: newValue.folder_id,
+      tags: newValue.tags,
       sort_order: rows.reduce((m, r) => Math.max(m, r.sort_order ?? 0), 0) + 1,
     });
     if (error) return toast.error(error.message);
@@ -298,15 +360,25 @@ function GrammarPage() {
         </div>
 
         <Card className="p-3">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
+          <div className="flex gap-2">
+            <SearchField
               value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search title or content…"
-              className="pl-8 h-11 text-base sm:h-9 sm:text-sm"
+              onChange={setQ}
+              placeholder="Search title, notes or tags…"
             />
+            <Button variant="outline" className="h-11 sm:h-9 shrink-0" onClick={() => setOutlineOpen(true)} aria-label="Outline">
+              <ListTree className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Outline</span>
+            </Button>
           </div>
+          {q && activeFolder !== "all" && (
+            <div className="flex items-center gap-2 mt-2 text-xs">
+              <span className="text-muted-foreground">Search in</span>
+              <div className="inline-flex rounded-md border p-0.5">
+                <Button size="sm" variant={scope === "folder" ? "default" : "ghost"} className="h-7 px-2 text-xs" onClick={() => setScope("folder")}>This folder</Button>
+                <Button size="sm" variant={scope === "all" ? "default" : "ghost"} className="h-7 px-2 text-xs" onClick={() => setScope("all")}>All folders</Button>
+              </div>
+            </div>
+          )}
           <div className="flex gap-2 overflow-x-auto mt-3 pb-1 -mx-1 px-1">
             <FolderChip label="All rules" count={rows.length} active={activeFolder === "all"} onClick={() => setActiveFolder("all")} />
             {folders.map((f) => (
@@ -354,7 +426,7 @@ function GrammarPage() {
             <div key={r.id} role="button" tabIndex={0} onClick={() => setPreviewing(r)} className="text-left cursor-pointer">
               <Card className={`p-4 hover:border-primary transition-colors h-full ${r.pinned ? "border-primary/60 bg-primary/5" : ""}`}>
                 <div className="flex items-start gap-2 mb-1">
-                  <div className="font-semibold text-lg line-clamp-2 flex-1">{r.title}</div>
+                  <div className="font-semibold text-lg line-clamp-2 flex-1"><Highlight text={r.title} needle={q} /></div>
                   <div className="flex shrink-0 -mr-2 -mt-1" onClick={(e) => e.stopPropagation()}>
                     {!q && (
                       <>
@@ -371,13 +443,26 @@ function GrammarPage() {
                     </Button>
                   </div>
                 </div>
-                {activeFolder === "all" && r.folder_id && folderById.get(r.folder_id) && (
-                  <span className="inline-flex items-center gap-1.5 text-xs rounded-full border px-2 py-0.5 mb-2">
+                {(activeFolder === "all" || (q && scope === "all")) && r.folder_id && folderById.get(r.folder_id) && (
+                  <span className="inline-flex items-center gap-1.5 text-xs rounded-full border px-2 py-0.5 mb-2 mr-1">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: folderById.get(r.folder_id)!.color }} />
                     {folderById.get(r.folder_id)!.name}
                   </span>
                 )}
-                {r.content && (
+                {r.tags?.length > 0 && (
+                  <div className="inline-flex flex-wrap gap-1 mb-2" onClick={(e) => e.stopPropagation()}>
+                    {r.tags.map((t) => (
+                      <button key={t} type="button" onClick={() => setQ(t)} className="text-xs rounded-full bg-secondary text-secondary-foreground px-2 py-0.5 hover:opacity-80">
+                        #<Highlight text={t} needle={q} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {q && r.content ? (
+                  <p className="text-sm text-muted-foreground line-clamp-4">
+                    <Highlight text={snippet(stripHtml(r.content), q)} needle={q} />
+                  </p>
+                ) : r.content && (
                   <div
                     className="rich-text-view text-sm text-muted-foreground line-clamp-4 [&_*]:!text-muted-foreground"
                     dangerouslySetInnerHTML={{ __html: sanitizeRichText(r.content) }}
@@ -443,6 +528,7 @@ function GrammarPage() {
               />
             </div>
             <FolderSelect folders={folders} value={editValue.folder_id} onChange={(folder_id) => setEditValue({ ...editValue, folder_id })} />
+            <TagsInput value={editValue.tags} onChange={(tags) => setEditValue((v) => ({ ...v, tags }))} />
             <div className="space-y-1.5">
               <Label>Notes</Label>
               <RichTextEditor
@@ -481,6 +567,7 @@ function GrammarPage() {
               />
             </div>
             <FolderSelect folders={folders} value={newValue.folder_id} onChange={(folder_id) => setNewValue({ ...newValue, folder_id })} />
+            <TagsInput value={newValue.tags} onChange={(tags) => setNewValue((v) => ({ ...v, tags }))} />
             <div className="space-y-1.5">
               <Label>Notes</Label>
               <RichTextEditor
@@ -540,6 +627,42 @@ function GrammarPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Outline */}
+      <Sheet open={outlineOpen} onOpenChange={setOutlineOpen}>
+        <SheetContent side="left" className="overflow-y-auto sm:max-w-sm">
+          <SheetHeader>
+            <SheetTitle>Outline</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 space-y-4">
+            {[...folders.map((f) => ({ id: f.id as string | null, name: f.name, color: f.color })), { id: null, name: folders.length ? "Unassigned" : "All rules", color: undefined as string | undefined }]
+              .map((g) => ({ ...g, items: rows.filter((r) => (r.folder_id ?? null) === g.id) }))
+              .filter((g) => g.items.length > 0)
+              .map((g) => (
+                <div key={g.id ?? "none"}>
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                    {g.color && <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: g.color }} />}
+                    {g.name} <span className="font-normal">({g.items.length})</span>
+                  </div>
+                  <ul className="space-y-0.5">
+                    {g.items.map((r) => (
+                      <li key={r.id}>
+                        <button
+                          type="button"
+                          className="w-full text-left text-sm rounded px-2 py-1 hover:bg-muted flex items-center gap-1.5"
+                          onClick={() => { setOutlineOpen(false); setPreviewing(r); }}
+                        >
+                          {r.pinned && <Pin className="h-3 w-3 text-primary shrink-0" />}
+                          <span className="truncate">{r.title}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -566,6 +689,39 @@ function FolderSelect({
           <option key={f.id} value={f.id}>{f.name}</option>
         ))}
       </select>
+    </div>
+  );
+}
+
+function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  const [draft, setDraft] = useState("");
+  const add = () => {
+    const parts = draft.split(",").map((s) => s.trim().replace(/^#/, "")).filter(Boolean);
+    if (parts.length) onChange(Array.from(new Set([...value, ...parts])));
+    setDraft("");
+  };
+  return (
+    <div className="space-y-1.5">
+      <Label>Tags</Label>
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {value.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1 rounded-full bg-secondary text-secondary-foreground text-xs px-2 py-0.5">
+              #{t}
+              <button type="button" aria-label={`Remove tag ${t}`} onClick={() => onChange(value.filter((x) => x !== t))}>
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <Input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); } }}
+        onBlur={add}
+        placeholder="z.B. Dativ, Nebensatz — press Enter"
+      />
     </div>
   );
 }
