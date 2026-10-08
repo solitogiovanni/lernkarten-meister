@@ -26,6 +26,9 @@ export type RevealCard = {
   antonyms?: string[] | null;
   comments?: string | null;
   imageUrl?: string | null;
+  comparative?: string | null;
+  superlative_relative?: string | null;
+  superlative_absolute?: string | null;
 };
 
 const articleTextColor = {
