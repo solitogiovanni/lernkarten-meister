@@ -1,0 +1,1 @@
+ALTER TABLE public.grammar_notes ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}'::text[];
