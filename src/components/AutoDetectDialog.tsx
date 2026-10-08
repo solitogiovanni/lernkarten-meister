@@ -219,6 +219,13 @@ export function AutoDetectDialog({
             themes: d.themes,
             synonyms: d.synonyms,
             antonyms: d.antonyms,
+            ...(d.kind === "adjective"
+              ? {
+                  comparative: d.comparative?.trim() || null,
+                  superlative_relative: d.superlative_relative?.trim() || null,
+                  superlative_absolute: d.superlative_absolute?.trim() || null,
+                }
+              : {}),
           },
         };
       };
