@@ -1,66 +1,50 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch";
 
 /**
  * Global theme registry shared by every deck (nouns, verbs, words).
- * Themes are loaded once from all tables and any theme typed in a form is
- * registered immediately so it shows up as a suggestion everywhere.
+ * All themes are loaded from every table; the 5 most recent come from the
+ * recent_themes table (kept up to date by a DB trigger on every card save).
  */
 
 const RECENT_MAX = 5;
 let recent: string[] = [];
 let all = new Set<string>();
-let loaded = false;
+let loadedAt = 0;
 let loading: Promise<void> | null = null;
 const listeners = new Set<() => void>();
+const STALE_MS = 15_000;
 
 function notify() {
   for (const l of listeners) l();
 }
 
-type Row = { themes: string[] | null; created_at: string | null };
+async function fetchRecent(): Promise<void> {
+  const { data } = await (supabase as any)
+    .from("recent_themes").select("theme").order("used_at", { ascending: false }).limit(RECENT_MAX);
+  const saved = ((data ?? []) as { theme: string }[]).map((r) => r.theme);
+  for (const t of saved) all.add(t);
+  if (saved.length) recent = saved;
+}
 
 async function fetchThemes(): Promise<void> {
-  const sb: any = supabase;
-  const [nouns, verbs, words] = await Promise.all([
-    sb.from("nouns").select("themes,created_at").order("created_at", { ascending: false }).limit(500),
-    sb.from("verbs").select("themes,created_at").order("created_at", { ascending: false }).limit(500),
-    sb.from("words").select("themes,created_at").order("created_at", { ascending: false }).limit(500),
-  ]);
-  const rows: Row[] = [
-    ...((nouns.data ?? []) as Row[]),
-    ...((verbs.data ?? []) as Row[]),
-    ...((words.data ?? []) as Row[]),
-  ].sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
-
-  const seen = new Set<string>();
-  const nextRecent: string[] = [];
-  for (const r of rows) {
+  const [nouns, verbs, words] = await Promise.all(
+    ["nouns", "verbs", "words"].map((t) => fetchAll<{ themes: string[] | null }>(t, (q) => q.select("themes").order("id"))),
+  );
+  for (const r of [...nouns.data, ...verbs.data, ...words.data]) {
     for (const t of r.themes ?? []) {
       const v = t.trim();
-      if (!v) continue;
-      all.add(v);
-      if (!seen.has(v)) {
-        seen.add(v);
-        if (nextRecent.length < 8) nextRecent.push(v);
-      }
+      if (v) all.add(v);
     }
   }
-  const { data: rt } = await sb.from("recent_themes").select("theme").order("used_at", { ascending: false }).limit(RECENT_MAX);
-  const saved = ((rt ?? []) as { theme: string }[]).map((r) => r.theme);
-  for (const t of saved) all.add(t);
-  // Locally registered themes stay at the front, they are the freshest.
-  recent = Array.from(new Set([...recent, ...(saved.length ? saved : nextRecent)])).slice(0, RECENT_MAX);
-  loaded = true;
+  await fetchRecent();
+  loadedAt = Date.now();
   notify();
 }
 
 export function loadGlobalThemes(force = false): Promise<void> {
-  if (force) {
-    loaded = false;
-    loading = null;
-  }
-  if (loaded) return Promise.resolve();
+  if (!force && loadedAt && Date.now() - loadedAt < STALE_MS) return Promise.resolve();
   if (!loading) loading = fetchThemes().catch(() => {}).finally(() => { loading = null; });
   return loading;
 }
@@ -68,27 +52,14 @@ export function loadGlobalThemes(force = false): Promise<void> {
 /** Makes themes available everywhere right away, before any reload. */
 export function registerThemes(themes: string[] | undefined | null) {
   if (!themes?.length) return;
-  let changed = false;
-  const touched: string[] = [];
-  for (const t of [...themes].reverse()) {
-    const v = t.trim();
-    if (!v) continue;
-    if (!all.has(v)) {
-      all.add(v);
-      changed = true;
-    }
-    if (recent[0] !== v) {
-      recent = [v, ...recent.filter((x) => x !== v)].slice(0, RECENT_MAX);
-      changed = true;
-    }
-    touched.push(v);
-  }
-  if (touched.length) {
-    const now = Date.now();
-    const rows = touched.map((theme, i) => ({ theme, used_at: new Date(now - i).toISOString() }));
-    (supabase as any).from("recent_themes").upsert(rows, { onConflict: "theme" }).then(() => {});
-  }
-  if (changed) notify();
+  const vals = themes.map((t) => t.trim()).filter(Boolean);
+  if (!vals.length) return;
+  for (const v of vals) all.add(v);
+  recent = Array.from(new Set([...vals, ...recent])).slice(0, RECENT_MAX);
+  notify();
+  const now = Date.now();
+  const rows = vals.map((theme, i) => ({ theme, used_at: new Date(now - i).toISOString() }));
+  (supabase as any).from("recent_themes").upsert(rows, { onConflict: "theme" }).then(() => {});
 }
 
 export function useGlobalThemes(enabled = true) {
@@ -98,9 +69,13 @@ export function useGlobalThemes(enabled = true) {
     if (!enabled) return;
     const update = () => setState({ recentThemes: recent, allThemes: Array.from(all).sort() });
     listeners.add(update);
-    loadGlobalThemes().then(update);
     update();
-    return () => { listeners.delete(update); };
+    loadGlobalThemes().then(update);
+    // Always refresh the recent list when a panel opens (saves via trigger).
+    fetchRecent().then(notify).catch(() => {});
+    const onFocus = () => { loadGlobalThemes(); };
+    window.addEventListener("focus", onFocus);
+    return () => { listeners.delete(update); window.removeEventListener("focus", onFocus); };
   }, [enabled]);
 
   return state;

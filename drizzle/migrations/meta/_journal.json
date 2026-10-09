@@ -36,6 +36,13 @@
       "when": 1791467726801,
       "tag": "0004_adjective_comparison",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791523701852,
+      "tag": "0005_register_themes_trigger",
+      "breakpoints": true
     }
   ]
 }
