@@ -132,11 +132,11 @@ export type AutofilledWord = {
 };
 
 const COMP_RULE = `
-For ADJECTIVES also return the comparison forms (Steigerung):
+For ADJECTIVES you MUST ALWAYS return the comparison forms (Steigerung) of the base lemma (if the input is inflected, e.g. "zeitlichen", use the base form "zeitlich"; participles used as adjectives are also compared, e.g. "interessanter"):
 - comparative: e.g. "schöner", "besser", "größer" (respect umlaut/irregular forms)
 - superlative_relative: with "am", e.g. "am schönsten", "am besten"
 - superlative_absolute: the absolute superlative / elative, e.g. "sehr schön, äußerst schön" (or a fixed form like "wunderschön" when common)
-If the adjective cannot be compared (e.g. "tot", "schwanger"), return empty strings.`;
+Only for truly non-comparable adjectives (e.g. "tot", "schwanger") return empty strings.`;
 
 const COMP_PROPS = {
   comparative: { type: "string" },
@@ -191,7 +191,9 @@ Be accurate.`;
                         antonyms: { type: "array", items: { type: "string" } },
                         ...COMP_PROPS,
                       },
-                      required: ["input", "word", "meanings", "themes", "examples"],
+                      required: data.kind === "adjective"
+                        ? ["input", "word", "meanings", "themes", "examples", "comparative", "superlative_relative", "superlative_absolute"]
+                        : ["input", "word", "meanings", "themes", "examples"],
                     },
                   },
                 },
