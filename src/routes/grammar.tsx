@@ -82,7 +82,7 @@ function Highlight({ text, needle }: { text: string; needle: string }) {
   let i = folded.indexOf(fn);
   while (i >= 0 && fn.length > 0) {
     if (i > pos) parts.push(text.slice(pos, i));
-    parts.push(<mark key={i} className="bg-accent text-accent-foreground rounded px-0.5">{text.slice(i, i + fn.length)}</mark>);
+    parts.push(<mark key={i} className="bg-green-500/30 text-green-900 dark:text-green-100 rounded px-0.5">{text.slice(i, i + fn.length)}</mark>);
     pos = i + fn.length;
     i = folded.indexOf(fn, pos);
   }
