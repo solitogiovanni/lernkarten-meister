@@ -460,6 +460,13 @@ export function AutoDetectDialog({
                         <Input value={d.meanings.join(", ")} onChange={(e) => updateDraft(i, { meanings: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="meanings (comma)" />
                       </div>
                     )}
+                    {d.kind === "adjective" && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <Input value={d.comparative ?? ""} onChange={(e) => updateDraft(i, { comparative: e.target.value })} placeholder="Comparative (schöner)" />
+                        <Input value={d.superlative_relative ?? ""} onChange={(e) => updateDraft(i, { superlative_relative: e.target.value })} placeholder="Superlative rel. (am schönsten)" />
+                        <Input value={d.superlative_absolute ?? ""} onChange={(e) => updateDraft(i, { superlative_absolute: e.target.value })} placeholder="Superlative abs. (sehr schön)" />
+                      </div>
+                    )}
 
                     {(d.themes ?? []).length > 0 && (
                       <div className="flex flex-wrap gap-1">
