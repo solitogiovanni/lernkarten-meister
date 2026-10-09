@@ -189,18 +189,26 @@ export function WordDeckPage({
   const saveEdit = async () => {
     if (!editing) return;
     if (!editValue.word.trim()) return toast.error("Word is required");
+    let ev = editValue;
+    if (kind === "adjective" && !ev.comparative?.trim() && !ev.superlativeRelative?.trim()) {
+      try {
+        const { results } = await autofillFn({ data: { kind, words: [ev.word.trim()] } });
+        const r = results[0];
+        if (r) ev = { ...ev, comparative: r.comparative ?? "", superlativeRelative: r.superlative_relative ?? "", superlativeAbsolute: r.superlative_absolute ?? "" };
+      } catch { /* save anyway */ }
+    }
     const { error } = await (supabase as any)
       .from("words")
       .update({
-        word: editValue.word.trim(),
-        meanings: editValue.meanings,
-        examples: editValue.examples.filter((x) => x.trim()),
-        themes: editValue.themes,
-        synonyms: editValue.synonyms,
-        antonyms: editValue.antonyms,
-        comments: editValue.comments.trim() || null,
-        image_url: editValue.imageUrl ?? null,
-        ...cmpPayload(editValue),
+        word: ev.word.trim(),
+        meanings: ev.meanings,
+        examples: ev.examples.filter((x) => x.trim()),
+        themes: ev.themes,
+        synonyms: ev.synonyms,
+        antonyms: ev.antonyms,
+        comments: ev.comments.trim() || null,
+        image_url: ev.imageUrl ?? null,
+        ...cmpPayload(ev),
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
