@@ -191,7 +191,9 @@ Be accurate.`;
                         antonyms: { type: "array", items: { type: "string" } },
                         ...COMP_PROPS,
                       },
-                      required: ["input", "word", "meanings", "themes", "examples"],
+                      required: data.kind === "adjective"
+                        ? ["input", "word", "meanings", "themes", "examples", "comparative", "superlative_relative", "superlative_absolute"]
+                        : ["input", "word", "meanings", "themes", "examples"],
                     },
                   },
                 },
