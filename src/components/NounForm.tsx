@@ -1,3 +1,4 @@
+import { ThemeSuggestions } from "@/components/ThemeSuggestions";
 import { useEffect, useState , useRef } from "react";
 import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
 import { Button } from "@/components/ui/button";
@@ -246,24 +247,7 @@ export function NounForm({
           onChange={(v) => set("themes", v)}
           placeholder="casa, lavoro…"
         />
-        {suggestions.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {suggestions
-              .filter((t) => !value.themes.includes(t))
-              .slice(0, 12)
-
-              .map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => set("themes", [...value.themes, t])}
-                  className="text-xs px-2 py-0.5 rounded-full border border-dashed text-muted-foreground hover:border-primary hover:text-foreground transition-colors"
-                >
-                  + {t}
-                </button>
-              ))}
-          </div>
-        )}
+        <ThemeSuggestions values={value.themes} onAdd={(t) => set("themes", [...value.themes, t])} />
       </div>
     </div>
   );
