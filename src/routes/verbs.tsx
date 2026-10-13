@@ -232,6 +232,7 @@ function VerbsPage() {
         image_url: editValue.imageUrl,
       })
       .eq("id", editing.id);
+    if (!error) setCachedImage("verbs", editing.id, editValue.imageUrl);
     if (error) return toast.error(error.message);
     toast.success("Saved");
     setEditing(null);

@@ -212,6 +212,7 @@ function DeckPage() {
         image_url: editValue.imageUrl,
       })
       .eq("id", editing.id);
+    if (!error) setCachedImage("nouns", editing.id, editValue.imageUrl);
     if (error) return toast.error(error.message);
     toast.success("Saved");
     setEditing(null);

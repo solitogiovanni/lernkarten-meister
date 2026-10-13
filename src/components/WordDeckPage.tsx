@@ -213,6 +213,7 @@ export function WordDeckPage({
         ...cmpPayload(ev),
       })
       .eq("id", editing.id);
+    if (!error) setCachedImage("words", editing.id, ev.imageUrl ?? null);
     if (error) return toast.error(error.message);
     toast.success("Saved");
     setEditing(null);
