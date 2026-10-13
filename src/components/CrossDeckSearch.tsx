@@ -105,10 +105,12 @@ export function CrossDeckSearch({
       return;
     }
     let cancelled = false;
+    const ctrl = new AbortController();
     const handle = setTimeout(async () => {
       setBusy(true);
       const like = `%${term}%`;
       const sb: any = supabase;
+      const sig = ctrl.signal;
       const nounSel = "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments";
       const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments";
       const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments";
@@ -119,18 +121,18 @@ export function CrossDeckSearch({
       const [nWord, nMean, vWord, vMean, wWord, wMean] = await Promise.all([
         currentKind === "noun"
           ? Promise.resolve({ data: [] as NounHit[] })
-          : sb.from("nouns").select(nounSel).or(`noun.ilike.${like},plural.ilike.${like}`).limit(20),
+          : sb.from("nouns").select(nounSel).or(`noun.ilike.${like},plural.ilike.${like}`).limit(20).abortSignal(sig),
         currentKind === "noun" || !deep
           ? Promise.resolve({ data: [] as NounHit[] })
-          : sb.rpc("search_nouns_by_meaning", { term }),
+          : sb.rpc("search_nouns_by_meaning", { term }).abortSignal(sig),
         currentKind === "verb"
           ? Promise.resolve({ data: [] as VerbHit[] })
-          : sb.from("verbs").select(verbSel).ilike("present", like).limit(20),
+          : sb.from("verbs").select(verbSel).ilike("present", like).limit(20).abortSignal(sig),
         currentKind === "verb" || !deep
           ? Promise.resolve({ data: [] as VerbHit[] })
-          : sb.rpc("search_verbs_by_meaning", { term }),
-        sb.from("words").select(wordSel).ilike("word", like).limit(40),
-        deep ? sb.rpc("search_words_by_meaning", { term }) : Promise.resolve({ data: [] as WordHit[] }),
+          : sb.rpc("search_verbs_by_meaning", { term }).abortSignal(sig),
+        sb.from("words").select(wordSel).ilike("word", like).limit(40).abortSignal(sig),
+        deep ? sb.rpc("search_words_by_meaning", { term }).abortSignal(sig) : Promise.resolve({ data: [] as WordHit[] }),
       ]);
       if (cancelled) return;
       const dedupe = <T extends { id: string }>(...lists: T[][]) => {
@@ -146,8 +148,8 @@ export function CrossDeckSearch({
       const failed = [nWord, nMean, vWord, vMean, wWord, wMean].some((r: any) => r?.error);
       setSearchFailed(failed);
       setBusy(false);
-    }, 250);
-    return () => { cancelled = true; clearTimeout(handle); };
+    }, 350);
+    return () => { cancelled = true; clearTimeout(handle); ctrl.abort(); };
   }, [q, currentKind, tick]);
 
   if (q.trim().length < 2) return null;
