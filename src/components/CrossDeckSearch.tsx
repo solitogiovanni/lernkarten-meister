@@ -148,8 +148,8 @@ export function CrossDeckSearch({
       const failed = [nWord, nMean, vWord, vMean, wWord, wMean].some((r: any) => r?.error);
       setSearchFailed(failed);
       setBusy(false);
-    }, 250);
-    return () => { cancelled = true; clearTimeout(handle); };
+    }, 350);
+    return () => { cancelled = true; clearTimeout(handle); ctrl.abort(); };
   }, [q, currentKind, tick]);
 
   if (q.trim().length < 2) return null;
