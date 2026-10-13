@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";
+import { loadDeck, setCachedImage } from "@/lib/deckCache";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -79,16 +80,17 @@ function DeckPage() {
   const [aiBusy, setAiBusy] = useState(false);
   const autofillFn = useServerFn(autofillNouns);
 
-  const load = async () => {
-    setLoading(true);
-    const { data, error } = await fetchAll<NounRow>("nouns", (q) =>
-      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,due_at,reps,created_at")
-        .order("noun", { ascending: true }),
-    );
-    if (error) toast.error(error.message);
-    setRows(data);
-    setLoading(false);
-  };
+  const load = () =>
+    loadDeck<Row>({
+      key: "nouns",
+      table: "nouns",
+      build: (q) =>
+      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
+        .order("noun", { ascending: true }),,
+      setRows,
+      setLoading,
+      onError: (msg) => toast.error(msg),
+    });
 
   useEffect(() => {
     load();

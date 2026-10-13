@@ -65,3 +65,7 @@ export async function loadDeck<T extends { id: string }>(opts: {
 export function forgetImage(table: string, id: string) {
   imgMap(table).delete(id);
 }
+
+export function setCachedImage(table: string, id: string, url: string | null) {
+  imgMap(table).set(id, url);
+}

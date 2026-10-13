@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";
+import { loadDeck, setCachedImage } from "@/lib/deckCache";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -102,16 +103,17 @@ function VerbsPage() {
     }
   };
 
-  const load = async () => {
-    setLoading(true);
-    const { data, error } = await fetchAll<Row>("verbs", (q) =>
-      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,due_at,reps,created_at")
-        .order("present", { ascending: true }),
-    );
-    if (error) toast.error(error.message);
-    setRows(data);
-    setLoading(false);
-  };
+  const load = () =>
+    loadDeck<Row>({
+      key: "verbs",
+      table: "verbs",
+      build: (q) =>
+      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
+        .order("present", { ascending: true }),,
+      setRows,
+      setLoading,
+      onError: (msg) => toast.error(msg),
+    });
 
   useEffect(() => { load(); }, []);
 
