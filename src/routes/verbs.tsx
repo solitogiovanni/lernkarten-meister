@@ -109,7 +109,7 @@ function VerbsPage() {
       table: "verbs",
       build: (q) =>
       q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
-        .order("present", { ascending: true }),,
+        .order("present", { ascending: true }),
       setRows,
       setLoading,
       onError: (msg) => toast.error(msg),

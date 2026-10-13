@@ -81,12 +81,12 @@ function DeckPage() {
   const autofillFn = useServerFn(autofillNouns);
 
   const load = () =>
-    loadDeck<Row>({
+    loadDeck<NounRow>({
       key: "nouns",
       table: "nouns",
       build: (q) =>
       q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
-        .order("noun", { ascending: true }),,
+        .order("noun", { ascending: true }),
       setRows,
       setLoading,
       onError: (msg) => toast.error(msg),

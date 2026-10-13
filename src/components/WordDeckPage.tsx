@@ -92,7 +92,7 @@ export function WordDeckPage({
       build: (q) =>
       q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
         .eq("kind", kind)
-        .order("word", { ascending: true }),,
+        .order("word", { ascending: true }),
       setRows,
       setLoading,
       onError: (msg) => toast.error(msg),
