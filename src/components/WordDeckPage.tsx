@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";
+import { loadDeck, setCachedImage } from "@/lib/deckCache";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -84,17 +85,18 @@ export function WordDeckPage({
         }
       : {};
 
-  const load = async () => {
-    setLoading(true);
-    const { data, error } = await fetchAll<Row>("words", (q) =>
-      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
+  const load = () =>
+    loadDeck<Row>({
+      key: `words:${kind}`,
+      table: "words",
+      build: (q) =>
+      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
         .eq("kind", kind)
         .order("word", { ascending: true }),
-    );
-    if (error) toast.error(error.message);
-    setRows(data);
-    setLoading(false);
-  };
+      setRows,
+      setLoading,
+      onError: (msg) => toast.error(msg),
+    });
 
   useEffect(() => {
     load();
@@ -211,6 +213,7 @@ export function WordDeckPage({
         ...cmpPayload(ev),
       })
       .eq("id", editing.id);
+    if (!error) setCachedImage("words", editing.id, ev.imageUrl ?? null);
     if (error) return toast.error(error.message);
     toast.success("Saved");
     setEditing(null);
