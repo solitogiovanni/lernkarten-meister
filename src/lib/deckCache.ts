@@ -69,3 +69,10 @@ export function forgetImage(table: string, id: string) {
 export function setCachedImage(table: string, id: string, url: string | null) {
   imgMap(table).set(id, url);
 }
+
+/** Fetch a single full card (incl. picture) directly, without waiting for the deck. */
+export async function fetchOneCard<T>(table: string, id: string): Promise<T | null> {
+  const { data } = await (supabase as any).from(table).select("*").eq("id", id).maybeSingle();
+  if (data && "image_url" in data) imgMap(table).set(id, data.image_url ?? null);
+  return (data as T) ?? null;
+}

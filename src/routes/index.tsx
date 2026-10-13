@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAll } from "@/lib/supabase-fetch";
-import { loadDeck, setCachedImage } from "@/lib/deckCache";
+import { loadDeck, setCachedImage, fetchOneCard } from "@/lib/deckCache";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -111,19 +111,19 @@ function DeckPage() {
   }, []);
 
   useEffect(() => {
-    if (loading || rows.length === 0) return;
     const raw = sessionStorage.getItem(EDIT_PREFILL_KEY);
     if (!raw) return;
     try {
       const p = JSON.parse(raw) as { kind: string; id: string; q?: string };
       if (p.kind === "noun" && p.id) {
         if (p.q) navigate({ search: (prev: DeckSearch) => ({ ...prev, q: p.q as string }) });
-        const r = rows.find((x) => x.id === p.id);
-        if (r) openEdit(r);
+        const local = rows.find((x) => x.id === p.id);
+        if (local) openEdit(local);
+        else fetchOneCard<any>("nouns", p.id).then((r) => { if (r) openEdit(r); });
       }
     } catch {}
     sessionStorage.removeItem(EDIT_PREFILL_KEY);
-  }, [loading, rows]);
+  }, []);
 
 
   const allThemes = useMemo(() => {

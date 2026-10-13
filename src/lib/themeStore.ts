@@ -14,7 +14,7 @@ let all = new Set<string>();
 let loadedAt = 0;
 let loading: Promise<void> | null = null;
 const listeners = new Set<() => void>();
-const STALE_MS = 15_000;
+const STALE_MS = 5 * 60_000;
 
 function notify() {
   for (const l of listeners) l();
