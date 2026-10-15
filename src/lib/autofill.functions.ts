@@ -46,7 +46,7 @@ Be accurate. If the input has the article (e.g. "der Tisch"), strip it and use i
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these inputs:\n${data.nouns.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
@@ -164,7 +164,7 @@ Be accurate.`;
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these ${kindLabel}s:\n${data.words.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
@@ -335,7 +335,7 @@ Be accurate. Lowercase verbs/adjectives/adverbs/prepositions/pronouns/conjunctio
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these inputs:\n${data.lines.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
@@ -461,7 +461,7 @@ Be accurate. If the input includes a preposition (e.g. "warten auf"), use the ba
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Process these verbs:\n${data.verbs.map((n, i) => `${i + 1}. ${n}`).join("\n")}` },
@@ -590,7 +590,7 @@ Only include kinds the word genuinely could be. If unambiguous, return exactly 1
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: systemPrompt + SYN_RULE },
             { role: "user", content: `Classify: ${data.word}` },
