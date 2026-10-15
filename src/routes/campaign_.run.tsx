@@ -34,6 +34,13 @@ type Kind = "noun" | "adjective" | "adverb" | "verb";
 
 const RATINGS: Rating[] = ["again", "hard", "good", "easy"];
 const RATING_LABEL: Record<Rating, string> = { again: "Again", hard: "Hard", good: "Good", easy: "Easy" };
+const RATING_SHORT: Record<Rating, string> = { again: "A", hard: "H", good: "G", easy: "E" };
+const RATING_TEXT: Record<Rating, string> = {
+  again: "text-rose-600 dark:text-rose-400",
+  hard: "text-amber-600 dark:text-amber-400",
+  good: "text-emerald-600 dark:text-emerald-400",
+  easy: "text-sky-600 dark:text-sky-400",
+};
 
 type VerbPrep = { preposition: string; case: "akk" | "dat" | "gen" | null; meaning: string };
 
@@ -368,9 +375,13 @@ function RunPage() {
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-7 px-2">
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
-          <span>
-            <span className="text-emerald-600 dark:text-emerald-400">{stats.correct}</span> ·{" "}
-            <span className="text-rose-600 dark:text-rose-400">{stats.wrong}</span>
+          <span className="flex items-center gap-2 text-xs tabular-nums whitespace-nowrap">
+            {RATINGS.map((r) => (
+              <span key={r} className={RATING_TEXT[r]}>
+                <span className="sm:hidden">{RATING_SHORT[r]}</span>
+                <span className="hidden sm:inline">{RATING_LABEL[r]}</span> {counts[r]}
+              </span>
+            ))}
           </span>
           {reviewMode && (
             <Button variant="outline" size="sm" onClick={() => setDone(true)} className="h-7 px-2">
