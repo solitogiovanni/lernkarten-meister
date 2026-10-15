@@ -32,6 +32,9 @@ export const Route = createFileRoute("/campaign_/run")({
 
 type Kind = "noun" | "adjective" | "adverb" | "verb";
 
+const RATINGS: Rating[] = ["again", "hard", "good", "easy"];
+const RATING_LABEL: Record<Rating, string> = { again: "Again", hard: "Hard", good: "Good", easy: "Easy" };
+
 type VerbPrep = { preposition: string; case: "akk" | "dat" | "gen" | null; meaning: string };
 
 type Card = {
@@ -255,10 +258,21 @@ function RunPage() {
     else if (!reviewMode) setDone(true);
   };
 
-  const startReview = () => {
+  const counts = RATINGS.reduce((acc, r) => {
+    acc[r] = Object.values(ratings).filter((x) => x === r).length;
+    return acc;
+  }, {} as Record<Rating, number>);
+  const selectedCount = chipSel.reduce((n, r) => n + (counts[r] ?? 0), 0);
+
+  const startReview = (filter: Rating[] | null) => {
+    const first = filter
+      ? cards.findIndex((_, i) => ratings[i] && filter.includes(ratings[i]))
+      : 0;
+    if (first < 0) return;
+    setReviewFilter(filter);
     setReviewMode(true);
     setDone(false);
-    setIdx(0);
+    setIdx(first);
   };
 
   if (loading)
@@ -295,8 +309,35 @@ function RunPage() {
           </Card>
         </div>
         <div className="text-lg">{pct}% accuracy</div>
+        <div className="pt-4 space-y-3">
+          <p className="text-sm text-muted-foreground">Pick one or more ratings to review:</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {RATINGS.map((r) => {
+              const count = counts[r];
+              const on = chipSel.includes(r);
+              return (
+                <Button
+                  key={r}
+                  size="sm"
+                  variant={on ? "default" : "outline"}
+                  disabled={count === 0}
+                  aria-pressed={on}
+                  onClick={() => setChipSel((s) => (s.includes(r) ? s.filter((x) => x !== r) : [...s, r]))}
+                >
+                  {RATING_LABEL[r]} ({count})
+                </Button>
+              );
+            })}
+          </div>
+          <Button
+            disabled={selectedCount === 0}
+            onClick={() => startReview(RATINGS.filter((r) => chipSel.includes(r)))}
+          >
+            Review selected ({selectedCount})
+          </Button>
+        </div>
         <div className="flex flex-wrap justify-center gap-2 pt-4">
-          <Button variant="outline" onClick={startReview}>Review cards</Button>
+          <Button variant="outline" onClick={() => startReview(null)}>Review all cards</Button>
           <Button asChild variant="outline"><Link to="/">Back to deck</Link></Button>
           <Button asChild><Link to="/campaign">New campaign</Link></Button>
         </div>
@@ -308,16 +349,22 @@ function RunPage() {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground gap-2">
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={goPrev} disabled={idx === 0} className="h-7 px-2">
+          <Button variant="ghost" size="sm" onClick={goPrev} disabled={reviewIdxs ? reviewPos <= 0 : idx === 0} className="h-7 px-2">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="tabular-nums">{idx + 1} / {cards.length}</span>
-          <Button variant="ghost" size="sm" onClick={goNext} disabled={idx + 1 >= cards.length && reviewMode} className="h-7 px-2">
+          <span className="tabular-nums">
+            {reviewIdxs ? `${reviewPos + 1} / ${reviewIdxs.length}` : `${idx + 1} / ${cards.length}`}
+          </span>
+          <Button variant="ghost" size="sm" onClick={goNext} disabled={reviewIdxs ? reviewPos + 1 >= reviewIdxs.length : false} className="h-7 px-2">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
         <div className="flex items-center gap-3">
-          {reviewMode && <span className="text-xs uppercase tracking-wider">Review</span>}
+          {reviewMode && (
+            <span className="text-xs uppercase tracking-wider">
+              Review{reviewFilter ? `: ${reviewFilter.map((r) => RATING_LABEL[r]).join(" + ")}` : ""}
+            </span>
+          )}
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-7 px-2">
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
