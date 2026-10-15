@@ -90,6 +90,8 @@ function RunPage() {
   const [editing, setEditing] = useState(false);
   const [ratings, setRatings] = useState<Record<number, Rating>>({});
   const [reviewMode, setReviewMode] = useState(false);
+  const [reviewFilter, setReviewFilter] = useState<Rating[] | null>(null);
+  const [chipSel, setChipSel] = useState<Rating[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -198,10 +200,22 @@ function RunPage() {
 
   const current = cards[idx];
 
-  const goPrev = () => { if (idx > 0) setIdx(idx - 1); };
+  const reviewIdxs = useMemo(() => {
+    if (!reviewMode) return null;
+    const all = cards.map((_, i) => i);
+    if (!reviewFilter) return all;
+    return all.filter((i) => ratings[i] && reviewFilter.includes(ratings[i]));
+  }, [reviewMode, reviewFilter, cards, ratings]);
+  const reviewPos = reviewIdxs ? reviewIdxs.indexOf(idx) : -1;
+
+  const goPrev = () => {
+    if (reviewIdxs) { if (reviewPos > 0) setIdx(reviewIdxs[reviewPos - 1]); return; }
+    if (idx > 0) setIdx(idx - 1);
+  };
   const goNext = () => {
+    if (reviewIdxs) { if (reviewPos + 1 < reviewIdxs.length) setIdx(reviewIdxs[reviewPos + 1]); return; }
     if (idx + 1 < cards.length) setIdx(idx + 1);
-    else if (!reviewMode) setDone(true);
+    else setDone(true);
   };
 
   const writeBack = async (card: Card, upd: any) => {
