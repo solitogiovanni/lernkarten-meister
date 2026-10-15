@@ -66,7 +66,7 @@ export function CardRevealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className={card.kind === "verb" ? "max-w-lg lg:max-w-3xl" : "max-w-lg"}>
         <div className="flex flex-col items-center text-center pt-2">
           <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{kindLabel[card.kind]}</p>
           <div className="flex items-center justify-center gap-2">
@@ -109,16 +109,20 @@ export function CardRevealDialog({
                     <SpeakButton text={card.perfect} size="icon" variant="ghost" />
                   </div>
                 )}
-                {card.conjugation && (
-                  <div className="text-sm">
-                    <span className="text-xs uppercase tracking-wider">Konjugation Präsens: </span>
-                    <span className="font-medium text-foreground">{card.conjugation}</span>
-                  </div>
-                )}
-                {card.praeteritum_conjugation && (
-                  <div className="text-sm">
-                    <span className="text-xs uppercase tracking-wider">Konjugation Präteritum: </span>
-                    <span className="font-medium text-foreground">{card.praeteritum_conjugation}</span>
+                {(card.conjugation || card.praeteritum_conjugation) && (
+                  <div className="text-sm text-left mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 w-fit max-w-full mx-auto">
+                    {card.conjugation && (
+                      <>
+                        <span className="text-xs uppercase tracking-wider pt-0.5">Präsens:</span>
+                        <span className="font-medium text-foreground lg:whitespace-nowrap">{card.conjugation}</span>
+                      </>
+                    )}
+                    {card.praeteritum_conjugation && (
+                      <>
+                        <span className="text-xs uppercase tracking-wider pt-0.5">Präteritum:</span>
+                        <span className="font-medium text-foreground lg:whitespace-nowrap">{card.praeteritum_conjugation}</span>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
