@@ -102,9 +102,9 @@ export function CrossDeckThemes({
     (async () => {
       setBusy(true);
       const sb: any = supabase;
-      const nounSel = "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url";
-      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url";
-      const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments,image_url";
+      const nounSel = "id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url";
+      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url";
+      const wordSel = "id,word,kind,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url";
       const match = (query: any) =>
         mode === "all" ? query.contains("themes", themes) : query.overlaps("themes", themes);
       const wordKinds = ["adjective", "adverb", "preposition", "pronoun", "conjunction"] as const;

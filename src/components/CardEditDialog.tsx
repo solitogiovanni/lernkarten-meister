@@ -201,7 +201,7 @@ export function CardEditDialog({
           meanings: noun.meanings,
           examples: noun.examples.filter((e) => e.trim()),
           themes: noun.themes,
-          tags: noun.tags ?? [],
+          ...(card.tags !== undefined ? { tags: noun.tags ?? [] } : {}),
           synonyms: noun.synonyms,
           antonyms: noun.antonyms,
           comments: noun.comments.trim() || null,
@@ -221,7 +221,7 @@ export function CardEditDialog({
           const { error } = await (supabase as any).from("nouns").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, article: payload.article, word: payload.noun, plural: payload.plural, image_url: payload.image_url,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, tags: payload.tags, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, tags: (payload as any).tags ?? card.tags, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
         }
       } else if (kind === "verb") {
         const payload = {
@@ -234,7 +234,7 @@ export function CardEditDialog({
           meanings: verb.meanings,
           examples: verb.examples.filter((e) => e.trim()),
           themes: verb.themes,
-          tags: verb.tags ?? [],
+          ...(card.tags !== undefined ? { tags: verb.tags ?? [] } : {}),
           synonyms: verb.synonyms,
           antonyms: verb.antonyms,
           comments: verb.comments.trim() || null,
@@ -255,7 +255,7 @@ export function CardEditDialog({
           if (error) throw error;
           next = { ...card, kind: "verb", article: null, plural: null, word: payload.present, image_url: payload.image_url,
             praeteritum: payload.praeteritum, perfect: payload.perfect, conjugation: payload.conjugation, praeteritum_conjugation: payload.praeteritum_conjugation, prepositions: payload.prepositions,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, tags: payload.tags, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, tags: (payload as any).tags ?? card.tags, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments };
         }
       } else {
         const payload = {
@@ -264,7 +264,7 @@ export function CardEditDialog({
           meanings: word.meanings,
           examples: word.examples.filter((e) => e.trim()),
           themes: word.themes,
-          tags: word.tags ?? [],
+          ...(card.tags !== undefined ? { tags: word.tags ?? [] } : {}),
           synonyms: word.synonyms,
           antonyms: word.antonyms,
           comments: word.comments.trim() || null,
@@ -287,7 +287,7 @@ export function CardEditDialog({
           const { error } = await (supabase as any).from("words").update(payload).eq("id", card.id);
           if (error) throw error;
           next = { ...card, kind, article: null, plural: null, word: payload.word, image_url: payload.image_url ?? null,
-            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, tags: payload.tags, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments,
+            meanings: payload.meanings, examples: payload.examples, themes: payload.themes, tags: (payload as any).tags ?? card.tags, synonyms: payload.synonyms, antonyms: payload.antonyms, comments: payload.comments,
             comparative: payload.comparative, superlative_relative: payload.superlative_relative, superlative_absolute: payload.superlative_absolute };
         }
       }
