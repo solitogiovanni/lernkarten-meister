@@ -1,3 +1,4 @@
+import { TagChips } from "@/components/TagsInput";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ export type RevealCard = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms?: string[] | null;
   antonyms?: string[] | null;
   comments?: string | null;
@@ -53,12 +55,14 @@ export function CardRevealDialog({
   card,
   onEdit,
   onToggleTheme,
+  onTagClick,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   card: RevealCard | null;
   onEdit: () => void;
   onToggleTheme?: (theme: string, add: boolean) => void;
+  onTagClick?: (tag: string) => void;
 }) {
   const { recentThemes } = useGlobalThemes(open && !!onToggleTheme);
   if (!card) return null;
@@ -233,6 +237,9 @@ export function CardRevealDialog({
                   <Badge key={t} variant="secondary" className="text-[10px] py-0">{t}</Badge>
                 ))}
               </div>
+            )}
+            {card.tags && card.tags.length > 0 && (
+              <div className="flex justify-center"><TagChips tags={card.tags} onClick={onTagClick} /></div>
             )}
           </div>
         </div>

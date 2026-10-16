@@ -104,6 +104,7 @@ export type Database = {
           plural: string | null
           reps: number
           synonyms: string[]
+          tags: string[]
           themes: string[]
           updated_at: string
         }
@@ -128,6 +129,7 @@ export type Database = {
           plural?: string | null
           reps?: number
           synonyms?: string[]
+          tags?: string[]
           themes?: string[]
           updated_at?: string
         }
@@ -152,6 +154,7 @@ export type Database = {
           plural?: string | null
           reps?: number
           synonyms?: string[]
+          tags?: string[]
           themes?: string[]
           updated_at?: string
         }
@@ -237,6 +240,7 @@ export type Database = {
           present: string
           reps: number
           synonyms: string[]
+          tags: string[]
           themes: string[]
           updated_at: string
         }
@@ -265,6 +269,7 @@ export type Database = {
           present: string
           reps?: number
           synonyms?: string[]
+          tags?: string[]
           themes?: string[]
           updated_at?: string
         }
@@ -293,6 +298,7 @@ export type Database = {
           present?: string
           reps?: number
           synonyms?: string[]
+          tags?: string[]
           themes?: string[]
           updated_at?: string
         }
@@ -320,6 +326,7 @@ export type Database = {
           superlative_absolute: string | null
           superlative_relative: string | null
           synonyms: string[]
+          tags: string[]
           themes: string[]
           updated_at: string
           word: string
@@ -345,6 +352,7 @@ export type Database = {
           superlative_absolute?: string | null
           superlative_relative?: string | null
           synonyms?: string[]
+          tags?: string[]
           themes?: string[]
           updated_at?: string
           word: string
@@ -370,6 +378,7 @@ export type Database = {
           superlative_absolute?: string | null
           superlative_relative?: string | null
           synonyms?: string[]
+          tags?: string[]
           themes?: string[]
           updated_at?: string
           word?: string
@@ -407,6 +416,7 @@ export type Database = {
           plural: string | null
           reps: number
           synonyms: string[]
+          tags: string[]
           themes: string[]
           updated_at: string
         }[]
@@ -444,6 +454,7 @@ export type Database = {
           present: string
           reps: number
           synonyms: string[]
+          tags: string[]
           themes: string[]
           updated_at: string
         }[]
@@ -477,6 +488,7 @@ export type Database = {
           superlative_absolute: string | null
           superlative_relative: string | null
           synonyms: string[]
+          tags: string[]
           themes: string[]
           updated_at: string
           word: string

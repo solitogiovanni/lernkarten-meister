@@ -18,6 +18,7 @@ type NounHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -32,6 +33,7 @@ type VerbHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -44,6 +46,7 @@ type WordHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -80,6 +83,7 @@ export function CrossDeckThemes({
   mode = "any",
 }: {
   themes: string[];
+  tags?: string[] | null;
   currentKind: DeckKind;
   mode?: "any" | "all";
 }) {
@@ -102,9 +106,9 @@ export function CrossDeckThemes({
     (async () => {
       setBusy(true);
       const sb: any = supabase;
-      const nounSel = "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url";
-      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url";
-      const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments,image_url";
+      const nounSel = "id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url";
+      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url";
+      const wordSel = "id,word,kind,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url";
       const match = (query: any) =>
         mode === "all" ? query.contains("themes", themes) : query.overlaps("themes", themes);
       const wordKinds = ["adjective", "adverb", "preposition", "pronoun", "conjunction"] as const;
@@ -148,6 +152,7 @@ export function CrossDeckThemes({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments,
@@ -166,6 +171,7 @@ export function CrossDeckThemes({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments,
@@ -181,6 +187,7 @@ export function CrossDeckThemes({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments,

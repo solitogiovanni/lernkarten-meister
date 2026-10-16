@@ -1,3 +1,4 @@
+import { TagChips } from "@/components/TagsInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,7 @@ type Row = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[];
   synonyms: string[];
   antonyms: string[];
   comments: string | null;
@@ -108,7 +110,7 @@ function VerbsPage() {
       key: "verbs",
       table: "verbs",
       build: (q) =>
-      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
+      q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,tags,synonyms,antonyms,comments,due_at,reps,created_at")
         .order("present", { ascending: true }),
       setRows,
       setLoading,
@@ -175,6 +177,7 @@ function VerbsPage() {
           r.praeteritum ?? "",
           r.perfect ?? "",
           ...r.meanings,
+          ...(r.tags ?? []).map((t) => "#" + t),
           ...(r.prepositions ?? []).map((p) => p.meaning ?? ""),
         ].join(" "));
         if (!hay.includes(needle)) return false;
@@ -204,6 +207,7 @@ function VerbsPage() {
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
@@ -226,6 +230,7 @@ function VerbsPage() {
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        tags: editValue.tags ?? [],
         synonyms: editValue.synonyms,
         antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
@@ -264,6 +269,7 @@ function VerbsPage() {
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      tags: newValue.tags ?? [],
       synonyms: newValue.synonyms,
       antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
@@ -414,6 +420,7 @@ function VerbsPage() {
                     ))}
                   </div>
                 )}
+                <TagChips tags={r.tags} onClick={(t) => setQ("#" + t)} />
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
@@ -423,11 +430,12 @@ function VerbsPage() {
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind="verb" hasLocalMatches={filtered.length > 0} onRefresh={load} />
+      <CrossDeckSearch q={q} currentKind="verb" hasLocalMatches={filtered.length > 0} onRefresh={load} onTagSearch={(t) => setQ("#" + t)} />
 
       <CrossDeckThemes themes={themes} currentKind="verb" mode={themeMode} />
 
       <CardRevealDialog
+        onTagClick={(t) => { setPreviewing(null); setQ("#" + t); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
         card={previewing ? {
@@ -441,6 +449,7 @@ function VerbsPage() {
           meanings: previewing.meanings,
           examples: previewing.examples,
           themes: previewing.themes,
+          tags: previewing.tags ?? [],
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,

@@ -12,7 +12,7 @@ import { RichTextEditor } from "@/components/RichTextEditor";
 import { Loader2, Plus, Trash2, Pencil, Pin, PinOff, ArrowUp, ArrowDown, FolderPlus, ListTree, X } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeRichText } from "@/lib/sanitizeHtml";
-import { GRAMMAR_PREFILL_KEY } from "@/components/CrossDeckSearch";
+import { GRAMMAR_PREFILL_KEY, GRAMMAR_SEARCH_KEY, CrossDeckSearch } from "@/components/CrossDeckSearch";
 import { SearchField } from "@/components/SearchField";
 import { fold } from "@/lib/normalize";
 
@@ -195,6 +195,23 @@ function GrammarPage() {
     }
   }, [creating]);
 
+  const [pendingOpen, setPendingOpen] = useState<string | null>(null);
+  useEffect(() => {
+    const raw = sessionStorage.getItem(GRAMMAR_SEARCH_KEY);
+    if (!raw) return;
+    sessionStorage.removeItem(GRAMMAR_SEARCH_KEY);
+    try {
+      const p = JSON.parse(raw) as { q?: string; id?: string };
+      if (p.q) { setQ(p.q); setScope("all"); }
+      if (p.id) setPendingOpen(p.id);
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => {
+    if (!pendingOpen) return;
+    const r = rows.find((x) => x.id === pendingOpen);
+    if (r) { setPreviewing(r); setPendingOpen(null); }
+  }, [rows, pendingOpen]);
+
   useEffect(() => {
     const title = sessionStorage.getItem(GRAMMAR_PREFILL_KEY)?.trim();
     if (!title) return;
@@ -253,7 +270,7 @@ function GrammarPage() {
     const needle = fold(q.trim());
     if (!needle) return list;
     return list.filter((r) =>
-      fold(r.title + " " + (r.tags ?? []).join(" ") + " " + stripHtml(r.content ?? "")).includes(needle),
+      fold(r.title + " " + (r.tags ?? []).map((t) => "#" + t).join(" ") + " " + stripHtml(r.content ?? "")).includes(needle),
     );
   }, [rows, q, activeFolder, scope]);
 
@@ -452,7 +469,7 @@ function GrammarPage() {
                 {r.tags?.length > 0 && (
                   <div className="inline-flex flex-wrap gap-1 mb-2" onClick={(e) => e.stopPropagation()}>
                     {r.tags.map((t) => (
-                      <button key={t} type="button" onClick={() => setQ(t)} className="text-xs rounded-full bg-secondary text-secondary-foreground px-2 py-0.5 hover:opacity-80">
+                      <button key={t} type="button" onClick={() => { setQ("#" + t); setScope("all"); }} className="text-xs rounded-full bg-secondary text-secondary-foreground px-2 py-0.5 hover:opacity-80">
                         #<Highlight text={t} needle={q} />
                       </button>
                     ))}
@@ -473,6 +490,8 @@ function GrammarPage() {
           ))}
         </div>
       )}
+
+      <CrossDeckSearch q={q} currentKind="grammar" hasLocalMatches onTagSearch={(t) => { setQ("#" + t); setScope("all"); }} />
 
       {/* Preview */}
       <Dialog open={!!previewing} onOpenChange={(o) => !o && setPreviewing(null)}>

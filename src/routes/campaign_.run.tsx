@@ -133,9 +133,9 @@ function RunPage() {
           ? (supabase as any).from(table).select(cols).in("id", ids).then((r: any) => ({ data: r.data ?? [] }))
           : Promise.resolve({ data: [] as any[] });
       const [nRes, wRes, vRes] = await Promise.all([
-        full("nouns", "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at", nIds),
-        full("words", "id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,ease,interval_days,reps,lapses,due_at", wIds),
-        full("verbs", "id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at", vIds),
+        full("nouns", "id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at", nIds),
+        full("words", "id,kind,word,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,ease,interval_days,reps,lapses,due_at", wIds),
+        full("verbs", "id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,tags,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at", vIds),
       ]);
 
       const nounCards: Card[] = (nRes.data ?? []).map((r: any) => ({
@@ -152,6 +152,7 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        tags: r.tags ?? [],
         synonyms: r.synonyms ?? [],
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
@@ -176,6 +177,7 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        tags: r.tags ?? [],
         synonyms: r.synonyms ?? [],
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,
@@ -203,6 +205,7 @@ function RunPage() {
         meanings: r.meanings ?? [],
         examples: r.examples ?? [],
         themes: r.themes ?? [],
+        tags: r.tags ?? [],
         synonyms: r.synonyms ?? [],
         antonyms: r.antonyms ?? [],
         comments: r.comments ?? null,

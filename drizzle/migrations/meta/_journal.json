@@ -43,6 +43,13 @@
       "when": 1791523701852,
       "tag": "0005_register_themes_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792132202309,
+      "tag": "0006_add_card_tags",
+      "breakpoints": true
     }
   ]
 }

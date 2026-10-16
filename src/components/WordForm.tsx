@@ -1,3 +1,4 @@
+import { TagsInput } from "@/components/TagsInput";
 import { ThemeSuggestions } from "@/components/ThemeSuggestions";
 import { useEffect, useState , useRef } from "react";
 import { useGlobalThemes, registerThemes } from "@/lib/themeStore";
@@ -15,6 +16,7 @@ export type WordFormValue = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[];
   synonyms: string[];
   antonyms: string[];
   comments: string;
@@ -256,6 +258,8 @@ export function WordForm({
         />
         <ThemeSuggestions values={value.themes} onAdd={(t) => set("themes", [...value.themes, t])} />
       </div>
+
+      <TagsInput value={value.tags ?? []} onChange={(v) => set("tags", v)} />
     </div>
   );
 }

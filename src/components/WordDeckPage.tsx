@@ -1,3 +1,4 @@
+import { TagChips } from "@/components/TagsInput";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +32,7 @@ type Row = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[];
   synonyms: string[];
   antonyms: string[];
   comments: string | null;
@@ -90,7 +92,7 @@ export function WordDeckPage({
       key: `words:${kind}`,
       table: "words",
       build: (q) =>
-      q.select("id,word,meanings,examples,themes,synonyms,antonyms,comments,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
+      q.select("id,word,meanings,examples,themes,tags,synonyms,antonyms,comments,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
         .eq("kind", kind)
         .order("word", { ascending: true }),
       setRows,
@@ -155,7 +157,7 @@ export function WordDeckPage({
     return rows.filter((r) => {
       if (q) {
         const needle = fold(q);
-        const hay = fold([r.word, ...r.meanings].join(" "));
+        const hay = fold([r.word, ...r.meanings, ...(r.tags ?? []).map((t) => "#" + t)].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (themes.length) {
@@ -178,6 +180,7 @@ export function WordDeckPage({
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
@@ -206,6 +209,7 @@ export function WordDeckPage({
         meanings: ev.meanings,
         examples: ev.examples.filter((x) => x.trim()),
         themes: ev.themes,
+        tags: ev.tags ?? [],
         synonyms: ev.synonyms,
         antonyms: ev.antonyms,
         comments: ev.comments.trim() || null,
@@ -254,6 +258,7 @@ export function WordDeckPage({
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      tags: newValue.tags ?? [],
       synonyms: newValue.synonyms,
       antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
@@ -427,6 +432,7 @@ export function WordDeckPage({
                     ))}
                   </div>
                 )}
+                <TagChips tags={r.tags} onClick={(t) => setQ("#" + t)} />
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
@@ -436,11 +442,12 @@ export function WordDeckPage({
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} />
+      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} onTagSearch={(t) => setQ("#" + t)} />
 
       <CrossDeckThemes themes={themes} currentKind={kind} mode={themeMode} />
 
       <CardRevealDialog
+        onTagClick={(t) => { setPreviewing(null); setQ("#" + t); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
         card={previewing ? {
@@ -449,6 +456,7 @@ export function WordDeckPage({
           meanings: previewing.meanings,
           examples: previewing.examples,
           themes: previewing.themes,
+          tags: previewing.tags ?? [],
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,
