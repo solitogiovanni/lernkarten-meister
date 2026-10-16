@@ -458,7 +458,7 @@ function DeckPage() {
                     ))}
                   </div>
                 )}
-                <TagChips tags={r.tags} onClick={(t) => navigate({ search: (p: DeckSearch) => ({ ...p, q: t }) })} />
+                <TagChips tags={r.tags} onClick={(t) => navigate({ search: (p: DeckSearch) => ({ ...p, q: "#" + t }) })} />
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
@@ -468,13 +468,13 @@ function DeckPage() {
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} />
+      <CrossDeckSearch q={q} currentKind="noun" hasLocalMatches={filtered.length > 0} onRefresh={load} onTagSearch={(t) => navigate({ search: (p: DeckSearch) => ({ ...p, q: "#" + t }) })} />
 
       <CrossDeckThemes themes={selectedThemes} currentKind="noun" mode={themeMode} />
 
       {/* Reveal preview */}
       <CardRevealDialog
-        onTagClick={(t) => { setPreviewing(null); navigate({ search: (p: DeckSearch) => ({ ...p, q: t }) }); }}
+        onTagClick={(t) => { setPreviewing(null); navigate({ search: (p: DeckSearch) => ({ ...p, q: "#" + t }) }); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
         card={previewing ? {

@@ -432,7 +432,7 @@ export function WordDeckPage({
                     ))}
                   </div>
                 )}
-                <TagChips tags={r.tags} onClick={(t) => setQ(t)} />
+                <TagChips tags={r.tags} onClick={(t) => setQ("#" + t)} />
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
@@ -442,12 +442,12 @@ export function WordDeckPage({
         </div>
       )}
 
-      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} />
+      <CrossDeckSearch q={q} currentKind={kind} hasLocalMatches={filtered.length > 0} onRefresh={load} onTagSearch={(t) => setQ("#" + t)} />
 
       <CrossDeckThemes themes={themes} currentKind={kind} mode={themeMode} />
 
       <CardRevealDialog
-        onTagClick={(t) => { setPreviewing(null); setQ(t); }}
+        onTagClick={(t) => { setPreviewing(null); setQ("#" + t); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
         card={previewing ? {
