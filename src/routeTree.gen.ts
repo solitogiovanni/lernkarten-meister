@@ -9,62 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerbsRouteImport } from './routes/verbs'
-import { Route as PronounsRouteImport } from './routes/pronouns'
-import { Route as PrepositionsRouteImport } from './routes/prepositions'
-import { Route as ImportRouteImport } from './routes/import_'
-import { Route as GrammarRouteImport } from './routes/grammar'
-import { Route as ConjunctionsRouteImport } from './routes/conjunctions'
-import { Route as CampaignRouteImport } from './routes/campaign'
-import { Route as AdverbsRouteImport } from './routes/adverbs'
-import { Route as AdjectivesRouteImport } from './routes/adjectives'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ImportVerbsRouteImport } from './routes/import.verbs'
-import { Route as ImportPronounsRouteImport } from './routes/import.pronouns'
-import { Route as ImportPrepositionsRouteImport } from './routes/import.prepositions'
-import { Route as ImportConjunctionsRouteImport } from './routes/import.conjunctions'
-import { Route as ImportAdverbsRouteImport } from './routes/import.adverbs'
-import { Route as ImportAdjectivesRouteImport } from './routes/import.adjectives'
+import { Route as AdjectivesRouteImport } from './routes/adjectives'
+import { Route as AdverbsRouteImport } from './routes/adverbs'
+import { Route as CampaignRouteImport } from './routes/campaign'
+import { Route as ConjunctionsRouteImport } from './routes/conjunctions'
+import { Route as GrammarRouteImport } from './routes/grammar'
+import { Route as ImportRouteImport } from './routes/import_'
+import { Route as PrepositionsRouteImport } from './routes/prepositions'
+import { Route as PronounsRouteImport } from './routes/pronouns'
+import { Route as VerbsRouteImport } from './routes/verbs'
 import { Route as CampaignRunRouteImport } from './routes/campaign_.run'
+import { Route as ImportAdjectivesRouteImport } from './routes/import.adjectives'
+import { Route as ImportAdverbsRouteImport } from './routes/import.adverbs'
+import { Route as ImportConjunctionsRouteImport } from './routes/import.conjunctions'
+import { Route as ImportPrepositionsRouteImport } from './routes/import.prepositions'
+import { Route as ImportPronounsRouteImport } from './routes/import.pronouns'
+import { Route as ImportVerbsRouteImport } from './routes/import.verbs'
 
-const VerbsRoute = VerbsRouteImport.update({
-  id: '/verbs',
-  path: '/verbs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PronounsRoute = PronounsRouteImport.update({
-  id: '/pronouns',
-  path: '/pronouns',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrepositionsRoute = PrepositionsRouteImport.update({
-  id: '/prepositions',
-  path: '/prepositions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImportRoute = ImportRouteImport.update({
-  id: '/import_',
-  path: '/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GrammarRoute = GrammarRouteImport.update({
-  id: '/grammar',
-  path: '/grammar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConjunctionsRoute = ConjunctionsRouteImport.update({
-  id: '/conjunctions',
-  path: '/conjunctions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CampaignRoute = CampaignRouteImport.update({
-  id: '/campaign',
-  path: '/campaign',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdverbsRoute = AdverbsRouteImport.update({
-  id: '/adverbs',
-  path: '/adverbs',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdjectivesRoute = AdjectivesRouteImport.update({
@@ -72,34 +37,49 @@ const AdjectivesRoute = AdjectivesRouteImport.update({
   path: '/adjectives',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdverbsRoute = AdverbsRouteImport.update({
+  id: '/adverbs',
+  path: '/adverbs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ImportVerbsRoute = ImportVerbsRouteImport.update({
-  id: '/import/verbs',
-  path: '/import/verbs',
+const CampaignRoute = CampaignRouteImport.update({
+  id: '/campaign',
+  path: '/campaign',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ImportPronounsRoute = ImportPronounsRouteImport.update({
-  id: '/import/pronouns',
-  path: '/import/pronouns',
+const ConjunctionsRoute = ConjunctionsRouteImport.update({
+  id: '/conjunctions',
+  path: '/conjunctions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ImportPrepositionsRoute = ImportPrepositionsRouteImport.update({
-  id: '/import/prepositions',
-  path: '/import/prepositions',
+const GrammarRoute = GrammarRouteImport.update({
+  id: '/grammar',
+  path: '/grammar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ImportConjunctionsRoute = ImportConjunctionsRouteImport.update({
-  id: '/import/conjunctions',
-  path: '/import/conjunctions',
+const ImportRoute = ImportRouteImport.update({
+  id: '/import_',
+  path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ImportAdverbsRoute = ImportAdverbsRouteImport.update({
-  id: '/import/adverbs',
-  path: '/import/adverbs',
+const PrepositionsRoute = PrepositionsRouteImport.update({
+  id: '/prepositions',
+  path: '/prepositions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PronounsRoute = PronounsRouteImport.update({
+  id: '/pronouns',
+  path: '/pronouns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerbsRoute = VerbsRouteImport.update({
+  id: '/verbs',
+  path: '/verbs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignRunRoute = CampaignRunRouteImport.update({
+  id: '/campaign_/run',
+  path: '/campaign/run',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImportAdjectivesRoute = ImportAdjectivesRouteImport.update({
@@ -107,9 +87,29 @@ const ImportAdjectivesRoute = ImportAdjectivesRouteImport.update({
   path: '/import/adjectives',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignRunRoute = CampaignRunRouteImport.update({
-  id: '/campaign_/run',
-  path: '/campaign/run',
+const ImportAdverbsRoute = ImportAdverbsRouteImport.update({
+  id: '/import/adverbs',
+  path: '/import/adverbs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportConjunctionsRoute = ImportConjunctionsRouteImport.update({
+  id: '/import/conjunctions',
+  path: '/import/conjunctions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportPrepositionsRoute = ImportPrepositionsRouteImport.update({
+  id: '/import/prepositions',
+  path: '/import/prepositions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportPronounsRoute = ImportPronounsRouteImport.update({
+  id: '/import/pronouns',
+  path: '/import/pronouns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportVerbsRoute = ImportVerbsRouteImport.update({
+  id: '/import/verbs',
+  path: '/import/verbs',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -253,60 +253,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/verbs': {
-      id: '/verbs'
-      path: '/verbs'
-      fullPath: '/verbs'
-      preLoaderRoute: typeof VerbsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pronouns': {
-      id: '/pronouns'
-      path: '/pronouns'
-      fullPath: '/pronouns'
-      preLoaderRoute: typeof PronounsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/prepositions': {
-      id: '/prepositions'
-      path: '/prepositions'
-      fullPath: '/prepositions'
-      preLoaderRoute: typeof PrepositionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/import_': {
-      id: '/import_'
-      path: '/import'
-      fullPath: '/import'
-      preLoaderRoute: typeof ImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/grammar': {
-      id: '/grammar'
-      path: '/grammar'
-      fullPath: '/grammar'
-      preLoaderRoute: typeof GrammarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/conjunctions': {
-      id: '/conjunctions'
-      path: '/conjunctions'
-      fullPath: '/conjunctions'
-      preLoaderRoute: typeof ConjunctionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/campaign': {
-      id: '/campaign'
-      path: '/campaign'
-      fullPath: '/campaign'
-      preLoaderRoute: typeof CampaignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/adverbs': {
-      id: '/adverbs'
-      path: '/adverbs'
-      fullPath: '/adverbs'
-      preLoaderRoute: typeof AdverbsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/adjectives': {
@@ -316,46 +267,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdjectivesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/adverbs': {
+      id: '/adverbs'
+      path: '/adverbs'
+      fullPath: '/adverbs'
+      preLoaderRoute: typeof AdverbsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/import/verbs': {
-      id: '/import/verbs'
-      path: '/import/verbs'
-      fullPath: '/import/verbs'
-      preLoaderRoute: typeof ImportVerbsRouteImport
+    '/campaign': {
+      id: '/campaign'
+      path: '/campaign'
+      fullPath: '/campaign'
+      preLoaderRoute: typeof CampaignRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/import/pronouns': {
-      id: '/import/pronouns'
-      path: '/import/pronouns'
-      fullPath: '/import/pronouns'
-      preLoaderRoute: typeof ImportPronounsRouteImport
+    '/conjunctions': {
+      id: '/conjunctions'
+      path: '/conjunctions'
+      fullPath: '/conjunctions'
+      preLoaderRoute: typeof ConjunctionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/import/prepositions': {
-      id: '/import/prepositions'
-      path: '/import/prepositions'
-      fullPath: '/import/prepositions'
-      preLoaderRoute: typeof ImportPrepositionsRouteImport
+    '/grammar': {
+      id: '/grammar'
+      path: '/grammar'
+      fullPath: '/grammar'
+      preLoaderRoute: typeof GrammarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/import/conjunctions': {
-      id: '/import/conjunctions'
-      path: '/import/conjunctions'
-      fullPath: '/import/conjunctions'
-      preLoaderRoute: typeof ImportConjunctionsRouteImport
+    '/import_': {
+      id: '/import_'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/import/adverbs': {
-      id: '/import/adverbs'
-      path: '/import/adverbs'
-      fullPath: '/import/adverbs'
-      preLoaderRoute: typeof ImportAdverbsRouteImport
+    '/prepositions': {
+      id: '/prepositions'
+      path: '/prepositions'
+      fullPath: '/prepositions'
+      preLoaderRoute: typeof PrepositionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pronouns': {
+      id: '/pronouns'
+      path: '/pronouns'
+      fullPath: '/pronouns'
+      preLoaderRoute: typeof PronounsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verbs': {
+      id: '/verbs'
+      path: '/verbs'
+      fullPath: '/verbs'
+      preLoaderRoute: typeof VerbsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaign_/run': {
+      id: '/campaign_/run'
+      path: '/campaign/run'
+      fullPath: '/campaign/run'
+      preLoaderRoute: typeof CampaignRunRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/import/adjectives': {
@@ -365,11 +337,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportAdjectivesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaign_/run': {
-      id: '/campaign_/run'
-      path: '/campaign/run'
-      fullPath: '/campaign/run'
-      preLoaderRoute: typeof CampaignRunRouteImport
+    '/import/adverbs': {
+      id: '/import/adverbs'
+      path: '/import/adverbs'
+      fullPath: '/import/adverbs'
+      preLoaderRoute: typeof ImportAdverbsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import/conjunctions': {
+      id: '/import/conjunctions'
+      path: '/import/conjunctions'
+      fullPath: '/import/conjunctions'
+      preLoaderRoute: typeof ImportConjunctionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import/prepositions': {
+      id: '/import/prepositions'
+      path: '/import/prepositions'
+      fullPath: '/import/prepositions'
+      preLoaderRoute: typeof ImportPrepositionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import/pronouns': {
+      id: '/import/pronouns'
+      path: '/import/pronouns'
+      fullPath: '/import/pronouns'
+      preLoaderRoute: typeof ImportPronounsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import/verbs': {
+      id: '/import/verbs'
+      path: '/import/verbs'
+      fullPath: '/import/verbs'
+      preLoaderRoute: typeof ImportVerbsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
