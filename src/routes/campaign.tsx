@@ -21,6 +21,8 @@ export const Route = createFileRoute("/campaign")({
 });
 
 type Item = { kind: "noun" | "adjective" | "adverb" | "verb"; themes: string[]; due_at: string; reps: number };
+// In-memory cache so revisiting the tab is instant; refreshed in the background.
+let setupCache: Item[] | null = null;
 
 function CampaignSetup() {
   const [items, setItems] = useState<Item[]>([]);
@@ -122,6 +124,7 @@ function CampaignSetup() {
   };
 
   useEffect(() => {
+    if (setupCache) { setItems(setupCache); setLoading(false); }
     (async () => {
       const [nounsRes, wordsRes, verbsRes] = await Promise.all([
         fetchAll<{ themes: string[]; due_at: string; reps: number }>("nouns", (q) => q.select("themes,due_at,reps")),
@@ -133,6 +136,7 @@ function CampaignSetup() {
         ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at, reps: r.reps })),
         ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at, reps: r.reps })),
       ];
+      setupCache = all;
       setItems(all);
       setLoading(false);
     })();
