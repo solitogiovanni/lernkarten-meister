@@ -458,7 +458,7 @@ function DeckPage() {
                     ))}
                   </div>
                 )}
-                <TagChips tags={r.tags} onClick={(t) => setQ(t)} />
+                <TagChips tags={r.tags} onClick={(t) => navigate({ search: (p: DeckSearch) => ({ ...p, q: t }) })} />
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
