@@ -18,6 +18,7 @@ type NounHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -32,6 +33,7 @@ type VerbHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -44,6 +46,7 @@ type WordHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -80,6 +83,7 @@ export function CrossDeckThemes({
   mode = "any",
 }: {
   themes: string[];
+  tags?: string[] | null;
   currentKind: DeckKind;
   mode?: "any" | "all";
 }) {
