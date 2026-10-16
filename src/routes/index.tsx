@@ -474,6 +474,7 @@ function DeckPage() {
 
       {/* Reveal preview */}
       <CardRevealDialog
+        onTagClick={(t) => { setPreviewing(null); navigate({ search: (p: DeckSearch) => ({ ...p, q: t }) }); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
         card={previewing ? {
@@ -484,6 +485,7 @@ function DeckPage() {
           meanings: previewing.meanings,
           examples: previewing.examples,
           themes: previewing.themes,
+          tags: previewing.tags ?? [],
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,

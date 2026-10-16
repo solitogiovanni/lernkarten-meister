@@ -55,12 +55,14 @@ export function CardRevealDialog({
   card,
   onEdit,
   onToggleTheme,
+  onTagClick,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   card: RevealCard | null;
   onEdit: () => void;
   onToggleTheme?: (theme: string, add: boolean) => void;
+  onTagClick?: (tag: string) => void;
 }) {
   const { recentThemes } = useGlobalThemes(open && !!onToggleTheme);
   if (!card) return null;

@@ -435,6 +435,7 @@ function VerbsPage() {
       <CrossDeckThemes themes={themes} currentKind="verb" mode={themeMode} />
 
       <CardRevealDialog
+        onTagClick={(t) => { setPreviewing(null); setQ(t); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
         card={previewing ? {
@@ -448,6 +449,7 @@ function VerbsPage() {
           meanings: previewing.meanings,
           examples: previewing.examples,
           themes: previewing.themes,
+          tags: previewing.tags ?? [],
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,
