@@ -109,16 +109,33 @@ function RunPage() {
       const wantWords = kindList.includes("adjective") || kindList.includes("adverb");
       const wantVerb = kindList.includes("verb");
       const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
+      // Step 1: lightweight metadata only, to pick the cards.
+      const light = "id,themes,due_at,reps";
+      const [nL, wL, vL] = await Promise.all([
+        wantNoun ? fetchAll<any>("nouns", (q) => q.select(light)) : Promise.resolve({ data: [] as any[] }),
+        wantWords ? fetchAll<any>("words", (q) => q.select(light).in("kind", wordKinds)) : Promise.resolve({ data: [] as any[] }),
+        wantVerb ? fetchAll<any>("verbs", (q) => q.select(light)) : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const picked = shuffle([
+        ...(nL.data ?? []).map((r: any) => ({ ...r, t: "nouns" })),
+        ...(wL.data ?? []).map((r: any) => ({ ...r, t: "words" })),
+        ...(vL.data ?? []).map((r: any) => ({ ...r, t: "verbs" })),
+      ].filter((c: any) => {
+        if (scope === "due" && !isDueReview(c.due_at, c.reps)) return false;
+        if (themeList.length > 0 && !(c.themes ?? []).some((t: string) => themeList.includes(t))) return false;
+        return true;
+      })).slice(0, limit);
+      const idsOf = (t: string) => picked.filter((c: any) => c.t === t).map((c: any) => c.id);
+      const nIds = idsOf("nouns"), wIds = idsOf("words"), vIds = idsOf("verbs");
+      // Step 2: full details only for the chosen cards.
+      const full = (table: string, cols: string, ids: string[]) =>
+        ids.length
+          ? (supabase as any).from(table).select(cols).in("id", ids).then((r: any) => ({ data: r.data ?? [] }))
+          : Promise.resolve({ data: [] as any[] });
       const [nRes, wRes, vRes] = await Promise.all([
-        wantNoun
-          ? fetchAll<any>("nouns", (q) => q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
-          : Promise.resolve({ data: [] as any[] }),
-        wantWords
-          ? fetchAll<any>("words", (q) => q.select("id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,ease,interval_days,reps,lapses,due_at").in("kind", wordKinds))
-          : Promise.resolve({ data: [] as any[] }),
-        wantVerb
-          ? fetchAll<any>("verbs", (q) => q.select("id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at"))
-          : Promise.resolve({ data: [] as any[] }),
+        full("nouns", "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at", nIds),
+        full("words", "id,kind,word,meanings,examples,themes,synonyms,antonyms,comments,image_url,comparative,superlative_relative,superlative_absolute,ease,interval_days,reps,lapses,due_at", wIds),
+        full("verbs", "id,present,praeteritum,perfect,conjugation,praeteritum_conjugation,prepositions,meanings,examples,themes,synonyms,antonyms,comments,image_url,ease,interval_days,reps,lapses,due_at", vIds),
       ]);
 
       const nounCards: Card[] = (nRes.data ?? []).map((r: any) => ({
