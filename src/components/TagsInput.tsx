@@ -46,14 +46,16 @@ export function TagChips({ tags, onClick }: { tags?: string[] | null; onClick?: 
   return (
     <div className="flex flex-wrap gap-1 mt-1" onClick={(e) => e.stopPropagation()}>
       {tags.map((t) => (
-        <button
+        <span
           key={t}
-          type="button"
+          role="button"
+          tabIndex={0}
           onClick={() => onClick?.(t)}
+          onKeyDown={(e) => { if (e.key === "Enter") onClick?.(t); }}
           className="text-[11px] rounded-full bg-secondary text-secondary-foreground px-2 py-0.5 hover:opacity-80"
         >
           #{t}
-        </button>
+        </span>
       ))}
     </div>
   );
