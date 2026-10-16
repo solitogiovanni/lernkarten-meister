@@ -1,3 +1,4 @@
+import { TagChips } from "@/components/TagsInput";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -33,6 +34,7 @@ type NounRow = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[];
   synonyms: string[];
   antonyms: string[];
   comments: string | null;
@@ -85,7 +87,7 @@ function DeckPage() {
       key: "nouns",
       table: "nouns",
       build: (q) =>
-      q.select("id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments,due_at,reps,created_at")
+      q.select("id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments,due_at,reps,created_at")
         .order("noun", { ascending: true }),
       setRows,
       setLoading,
@@ -161,7 +163,7 @@ function DeckPage() {
     return rows.filter((r) => {
       if (q) {
         const needle = fold(q);
-        const hay = fold([r.noun, r.plural ?? "", ...r.meanings].join(" "));
+        const hay = fold([r.noun, r.plural ?? "", ...r.meanings, ...(r.tags ?? [])].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (selectedThemes.length) {
@@ -187,6 +189,7 @@ function DeckPage() {
       meanings: r.meanings,
       examples: r.examples,
       themes: r.themes,
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments ?? "",
@@ -206,6 +209,7 @@ function DeckPage() {
         meanings: editValue.meanings,
         examples: editValue.examples.filter((x) => x.trim()),
         themes: editValue.themes,
+        tags: editValue.tags ?? [],
         synonyms: editValue.synonyms,
         antonyms: editValue.antonyms,
         comments: editValue.comments.trim() || null,
@@ -241,6 +245,7 @@ function DeckPage() {
       meanings: newValue.meanings,
       examples: newValue.examples.filter((x) => x.trim()),
       themes: newValue.themes,
+      tags: newValue.tags ?? [],
       synonyms: newValue.synonyms,
       antonyms: newValue.antonyms,
       comments: newValue.comments.trim() || null,
@@ -453,6 +458,7 @@ function DeckPage() {
                     ))}
                   </div>
                 )}
+                <TagChips tags={r.tags} onClick={(t) => setQ(t)} />
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
