@@ -1,3 +1,4 @@
+import { TagChips } from "@/components/TagsInput";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ type NounHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -35,10 +37,12 @@ type VerbHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
 };
+type NoteHit = { id: string; title: string; tags: string[]; folder_id: string | null };
 type WordHit = {
   id: string;
   word: string;
@@ -46,6 +50,7 @@ type WordHit = {
   meanings: string[];
   examples: string[];
   themes: string[];
+  tags?: string[] | null;
   synonyms: string[] | null;
   antonyms: string[] | null;
   comments: string | null;
@@ -74,18 +79,22 @@ const labelFor: Record<DeckKind, string> = {
 export const ADD_PREFILL_KEY = "wortschatz:addPrefill";
 export const EDIT_PREFILL_KEY = "wortschatz:editPrefill";
 export const GRAMMAR_PREFILL_KEY = "wortschatz:grammarPrefill";
+export const GRAMMAR_SEARCH_KEY = "wortschatz:grammarSearch";
 
 export function CrossDeckSearch({
   q,
   currentKind,
   hasLocalMatches,
   onRefresh,
+  onTagSearch,
 }: {
   q: string;
-  currentKind: DeckKind;
+  currentKind: DeckKind | "grammar";
   hasLocalMatches: boolean;
   onRefresh?: () => void;
+  onTagSearch?: (tag: string) => void;
 }) {
+  const [notes, setNotes] = useState<NoteHit[]>([]);
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [nouns, setNouns] = useState<NounHit[]>([]);
@@ -99,9 +108,10 @@ export function CrossDeckSearch({
 
 
   useEffect(() => {
-    const term = q.trim();
+    const raw = q.trim();
+    const term = raw.replace(/^#+/, "").trim();
     if (term.length < 2) {
-      setNouns([]); setVerbs([]); setWords([]); setSearchFailed(false);
+      setNouns([]); setVerbs([]); setWords([]); setNotes([]); setSearchFailed(false);
       return;
     }
     let cancelled = false;
@@ -111,9 +121,9 @@ export function CrossDeckSearch({
       const like = `%${term}%`;
       const sb: any = supabase;
       const sig = ctrl.signal;
-      const nounSel = "id,article,noun,plural,meanings,examples,themes,synonyms,antonyms,comments";
-      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,synonyms,antonyms,comments";
-      const wordSel = "id,word,kind,meanings,examples,themes,synonyms,antonyms,comments";
+      const nounSel = "id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments";
+      const verbSel = "id,present,praeteritum,perfect,prepositions,meanings,examples,themes,tags,synonyms,antonyms,comments";
+      const wordSel = "id,word,kind,meanings,examples,themes,tags,synonyms,antonyms,comments";
 
       // Meaning search folds text and uses trigram indexes, which need at least
       // 3 characters; shorter terms would force a full scan and can time out.
@@ -134,15 +144,29 @@ export function CrossDeckSearch({
         sb.from("words").select(wordSel).ilike("word", like).limit(40).abortSignal(sig),
         deep ? sb.rpc("search_words_by_meaning", { term }).abortSignal(sig) : Promise.resolve({ data: [] as WordHit[] }),
       ]);
+      // Tag matches across every card type + Grammar notes (exact tag, a few case variants).
+      const tagVariants = Array.from(new Set([term, term.toLowerCase(), term.charAt(0).toUpperCase() + term.slice(1).toLowerCase()]));
+      const [nTag, vTag, wTag, gTag, gTitle] = await Promise.all([
+        currentKind === "noun" ? Promise.resolve({ data: [] }) : sb.from("nouns").select(nounSel).overlaps("tags", tagVariants).limit(40).abortSignal(sig),
+        currentKind === "verb" ? Promise.resolve({ data: [] }) : sb.from("verbs").select(verbSel).overlaps("tags", tagVariants).limit(40).abortSignal(sig),
+        sb.from("words").select(wordSel).overlaps("tags", tagVariants).limit(60).abortSignal(sig),
+        currentKind === "grammar" ? Promise.resolve({ data: [] }) : sb.from("grammar_notes").select("id,title,tags,folder_id").overlaps("tags", tagVariants).limit(40).abortSignal(sig),
+        currentKind === "grammar" ? Promise.resolve({ data: [] }) : sb.from("grammar_notes").select("id,title,tags,folder_id").ilike("title", like).limit(20).abortSignal(sig),
+      ]);
       if (cancelled) return;
+      {
+        const m = new Map<string, NoteHit>();
+        for (const r of [...((gTag.data ?? []) as NoteHit[]), ...((gTitle.data ?? []) as NoteHit[])]) m.set(r.id, r);
+        setNotes(Array.from(m.values()));
+      }
       const dedupe = <T extends { id: string }>(...lists: T[][]) => {
         const m = new Map<string, T>();
         for (const list of lists) for (const r of list) m.set(r.id, r);
         return Array.from(m.values());
       };
-      setNouns(dedupe<NounHit>((nWord.data ?? []) as NounHit[], (nMean.data ?? []) as NounHit[]));
-      setVerbs(dedupe<VerbHit>((vWord.data ?? []) as VerbHit[], (vMean.data ?? []) as VerbHit[]));
-      const wordsAll = dedupe<WordHit>((wWord.data ?? []) as WordHit[], (wMean.data ?? []) as WordHit[])
+      setNouns(dedupe<NounHit>((nWord.data ?? []) as NounHit[], (nMean.data ?? []) as NounHit[], (nTag.data ?? []) as NounHit[]));
+      setVerbs(dedupe<VerbHit>((vWord.data ?? []) as VerbHit[], (vMean.data ?? []) as VerbHit[], (vTag.data ?? []) as VerbHit[]));
+      const wordsAll = dedupe<WordHit>((wWord.data ?? []) as WordHit[], (wMean.data ?? []) as WordHit[], (wTag.data ?? []) as WordHit[])
         .filter((x) => x.kind !== currentKind);
       setWords(wordsAll);
       const failed = [nWord, nMean, vWord, vMean, wWord, wMean].some((r: any) => r?.error);
@@ -171,6 +195,7 @@ export function CrossDeckSearch({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments,
@@ -188,6 +213,7 @@ export function CrossDeckSearch({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments,
@@ -202,6 +228,7 @@ export function CrossDeckSearch({
       meanings: r.meanings ?? [],
       examples: r.examples ?? [],
       themes: r.themes ?? [],
+      tags: r.tags ?? [],
       synonyms: r.synonyms ?? [],
       antonyms: r.antonyms ?? [],
       comments: r.comments,
@@ -227,6 +254,7 @@ export function CrossDeckSearch({
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
+          <TagChips tags={r.tags} onClick={onTagSearch} />
         </button>
       )),
     },
@@ -243,6 +271,7 @@ export function CrossDeckSearch({
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
+          <TagChips tags={r.tags} onClick={onTagSearch} />
         </button>
       )),
     },
@@ -259,6 +288,7 @@ export function CrossDeckSearch({
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
+          <TagChips tags={r.tags} onClick={onTagSearch} />
         </button>
       )),
     },
@@ -275,6 +305,7 @@ export function CrossDeckSearch({
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
+          <TagChips tags={r.tags} onClick={onTagSearch} />
         </button>
       )),
     },
@@ -291,13 +322,19 @@ export function CrossDeckSearch({
           {r.meanings.length > 0 && (
             <div className="text-xs text-muted-foreground line-clamp-1">{r.meanings.join(", ")}</div>
           )}
+          <TagChips tags={r.tags} onClick={onTagSearch} />
         </button>
       )),
     })),
   ] as { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[]).filter((g) => g.kind !== currentKind);
 
-  const otherTotal = nouns.length + verbs.length + words.length;
+  const otherTotal = nouns.length + verbs.length + words.length + notes.length;
   const term = q.trim();
+
+  const openNote = (n: NoteHit) => {
+    sessionStorage.setItem(GRAMMAR_SEARCH_KEY, JSON.stringify({ q: n.title, id: n.id }));
+    navigate({ to: "/grammar" });
+  };
 
   if (busy && otherTotal === 0 && hasLocalMatches) return null;
 
@@ -356,6 +393,22 @@ export function CrossDeckSearch({
             </h2>
             {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
           </div>
+          {notes.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-medium">Grammar notes</h3>
+                <Badge variant="secondary" className="text-[10px]">{notes.length}</Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {notes.map((n) => (
+                  <button key={n.id} type="button" onClick={() => openNote(n)} className={cardCls}>
+                    <div className="flex items-center gap-1 text-sm font-medium"><BookOpen className="h-3.5 w-3.5 text-muted-foreground" />{n.title}</div>
+                    <TagChips tags={n.tags} onClick={onTagSearch} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {groups.filter((g) => g.count > 0).map((g) => (
             <div key={g.kind} className="space-y-2">
               <div className="flex items-center gap-2">
@@ -369,12 +422,13 @@ export function CrossDeckSearch({
           ))}
         </div>
       )}
-      {!busy && addBar}
+      {!busy && currentKind !== "grammar" && addBar}
       <CardRevealDialog
         open={!!preview}
         onOpenChange={(o) => !o && setPreview(null)}
         card={preview?.card ?? null}
         onEdit={onEditPreview}
+        onTagClick={onTagSearch ? (t) => { setPreview(null); onTagSearch(t); } : undefined}
         onToggleTheme={async (theme, add) => {
           if (!preview) return;
           try {

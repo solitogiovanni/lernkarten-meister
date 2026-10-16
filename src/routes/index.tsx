@@ -163,7 +163,7 @@ function DeckPage() {
     return rows.filter((r) => {
       if (q) {
         const needle = fold(q);
-        const hay = fold([r.noun, r.plural ?? "", ...r.meanings, ...(r.tags ?? [])].join(" "));
+        const hay = fold([r.noun, r.plural ?? "", ...r.meanings, ...(r.tags ?? []).map((t) => "#" + t)].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (selectedThemes.length) {

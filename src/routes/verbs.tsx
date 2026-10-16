@@ -177,7 +177,7 @@ function VerbsPage() {
           r.praeteritum ?? "",
           r.perfect ?? "",
           ...r.meanings,
-          ...(r.tags ?? []),
+          ...(r.tags ?? []).map((t) => "#" + t),
           ...(r.prepositions ?? []).map((p) => p.meaning ?? ""),
         ].join(" "));
         if (!hay.includes(needle)) return false;

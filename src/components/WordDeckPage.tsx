@@ -157,7 +157,7 @@ export function WordDeckPage({
     return rows.filter((r) => {
       if (q) {
         const needle = fold(q);
-        const hay = fold([r.word, ...r.meanings, ...(r.tags ?? [])].join(" "));
+        const hay = fold([r.word, ...r.meanings, ...(r.tags ?? []).map((t) => "#" + t)].join(" "));
         if (!hay.includes(needle)) return false;
       }
       if (themes.length) {
