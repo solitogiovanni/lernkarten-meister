@@ -1,4 +1,5 @@
 import { TagChips } from "@/components/TagsInput";
+import { RatingBadge } from "@/components/RatingFilter";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,8 @@ export type RevealCard = {
   examples: string[];
   themes: string[];
   tags?: string[] | null;
+  lastRating?: string | null;
+  lastRatedAt?: string | null;
   synonyms?: string[] | null;
   antonyms?: string[] | null;
   comments?: string | null;
@@ -72,7 +75,7 @@ export function CardRevealDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={card.kind === "verb" ? "max-w-lg lg:max-w-3xl" : "max-w-lg"}>
         <div className="flex flex-col items-center text-center pt-2">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{kindLabel[card.kind]}</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{kindLabel[card.kind]}{card.lastRating && <span className="ml-2 normal-case tracking-normal"><RatingBadge rating={card.lastRating} at={card.lastRatedAt} /></span>}</p>
           <div className="flex items-center justify-center gap-2">
             {card.kind === "noun" && card.article ? (
               <div className={`text-4xl font-bold tracking-tight ${articleTextColor[card.article]}`}>

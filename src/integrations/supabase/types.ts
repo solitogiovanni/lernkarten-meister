@@ -99,6 +99,7 @@ export type Database = {
           interval_days: number
           lapses: number
           last_rated_at: string | null
+          last_rating: string | null
           meanings: string[]
           noun: string
           plural: string | null
@@ -124,6 +125,7 @@ export type Database = {
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
+          last_rating?: string | null
           meanings?: string[]
           noun: string
           plural?: string | null
@@ -149,6 +151,7 @@ export type Database = {
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
+          last_rating?: string | null
           meanings?: string[]
           noun?: string
           plural?: string | null
@@ -183,6 +186,7 @@ export type Database = {
           kinds: string[]
           mode: string
           name: string
+          ratings: string[]
           scope: string
           size: number
           themes: string[]
@@ -195,6 +199,7 @@ export type Database = {
           kinds?: string[]
           mode: string
           name: string
+          ratings?: string[]
           scope: string
           size: number
           themes?: string[]
@@ -207,6 +212,7 @@ export type Database = {
           kinds?: string[]
           mode?: string
           name?: string
+          ratings?: string[]
           scope?: string
           size?: number
           themes?: string[]
@@ -232,6 +238,7 @@ export type Database = {
           interval_days: number
           lapses: number
           last_rated_at: string | null
+          last_rating: string | null
           meanings: string[]
           perfect: string | null
           praeteritum: string | null
@@ -261,6 +268,7 @@ export type Database = {
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
+          last_rating?: string | null
           meanings?: string[]
           perfect?: string | null
           praeteritum?: string | null
@@ -290,6 +298,7 @@ export type Database = {
           interval_days?: number
           lapses?: number
           last_rated_at?: string | null
+          last_rating?: string | null
           meanings?: string[]
           perfect?: string | null
           praeteritum?: string | null
@@ -321,6 +330,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["word_kind"]
           lapses: number
           last_rated_at: string | null
+          last_rating: string | null
           meanings: string[]
           reps: number
           superlative_absolute: string | null
@@ -347,6 +357,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["word_kind"]
           lapses?: number
           last_rated_at?: string | null
+          last_rating?: string | null
           meanings?: string[]
           reps?: number
           superlative_absolute?: string | null
@@ -373,6 +384,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["word_kind"]
           lapses?: number
           last_rated_at?: string | null
+          last_rating?: string | null
           meanings?: string[]
           reps?: number
           superlative_absolute?: string | null
@@ -411,6 +423,7 @@ export type Database = {
           interval_days: number
           lapses: number
           last_rated_at: string | null
+          last_rating: string | null
           meanings: string[]
           noun: string
           plural: string | null
@@ -446,6 +459,7 @@ export type Database = {
           interval_days: number
           lapses: number
           last_rated_at: string | null
+          last_rating: string | null
           meanings: string[]
           perfect: string | null
           praeteritum: string | null
@@ -483,6 +497,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["word_kind"]
           lapses: number
           last_rated_at: string | null
+          last_rating: string | null
           meanings: string[]
           reps: number
           superlative_absolute: string | null

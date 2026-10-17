@@ -22,6 +22,7 @@ const searchSchema = z.object({
   limit: fallback(z.number(), 20).default(20),
   direction: fallback(z.enum(["de2it", "it2de", "mixed"]), "de2it").default("de2it"),
   kinds: fallback(z.string(), "noun,adjective,adverb,verb").default("noun,adjective,adverb,verb"),
+  ratings: fallback(z.string(), "").default(""),
 });
 
 export const Route = createFileRoute("/campaign_/run")({
@@ -88,7 +89,8 @@ const articleTextColor = {
 };
 
 function RunPage() {
-  const { mode, scope, themes, limit, direction, kinds } = Route.useSearch();
+  const { mode, scope, themes, limit, direction, kinds, ratings: ratingsParam } = Route.useSearch();
+  const ratingList = ratingsParam ? ratingsParam.split(",").filter(Boolean) : [];
   const themeList = themes ? themes.split(",").filter(Boolean) : [];
   const kindList = (kinds ? kinds.split(",").filter(Boolean) : ["noun"]) as Kind[];
   const navigate = useNavigate();
@@ -110,7 +112,7 @@ function RunPage() {
       const wantVerb = kindList.includes("verb");
       const wordKinds = kindList.filter((k) => k === "adjective" || k === "adverb");
       // Step 1: lightweight metadata only, to pick the cards.
-      const light = "id,themes,due_at,reps";
+      const light = "id,themes,due_at,reps,last_rating";
       const [nL, wL, vL] = await Promise.all([
         wantNoun ? fetchAll<any>("nouns", (q) => q.select(light)) : Promise.resolve({ data: [] as any[] }),
         wantWords ? fetchAll<any>("words", (q) => q.select(light).in("kind", wordKinds)) : Promise.resolve({ data: [] as any[] }),
@@ -122,6 +124,7 @@ function RunPage() {
         ...(vL.data ?? []).map((r: any) => ({ ...r, t: "verbs" })),
       ].filter((c: any) => {
         if (scope === "due" && !isDueReview(c.due_at, c.reps)) return false;
+        if (ratingList.length > 0 && !ratingList.includes(c.last_rating)) return false;
         if (themeList.length > 0 && !(c.themes ?? []).some((t: string) => themeList.includes(t))) return false;
         return true;
       })).slice(0, limit);
@@ -248,7 +251,8 @@ function RunPage() {
     else setDone(true);
   };
 
-  const writeBack = async (card: Card, upd: any) => {
+  const writeBack = async (card: Card, upd0: any, rating?: Rating) => {
+    const upd = rating ? { ...upd0, last_rating: rating } : upd0;
     if (card.kind === "noun") {
       await supabase.from("nouns").update(upd).eq("id", card.id);
     } else if (card.kind === "verb") {
@@ -264,7 +268,7 @@ function RunPage() {
     if (isFirst) {
       const upd = applyRating(current, rating);
       setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
-      await writeBack(current, upd);
+      await writeBack(current, upd, rating);
     }
     setRatings((r) => ({ ...r, [idx]: rating }));
     if (idx + 1 < cards.length) setIdx(idx + 1);
@@ -278,7 +282,7 @@ function RunPage() {
     if (isFirst) {
       const upd = applyRating(current, rating);
       setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
-      await writeBack(current, upd);
+      await writeBack(current, upd, rating);
     }
     setRatings((r) => ({ ...r, [idx]: rating }));
     if (idx + 1 < cards.length) setIdx(idx + 1);
