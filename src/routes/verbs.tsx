@@ -456,6 +456,8 @@ function VerbsPage() {
           examples: previewing.examples,
           themes: previewing.themes,
           tags: previewing.tags ?? [],
+            lastRating: (previewing as any).last_rating ?? null,
+            lastRatedAt: (previewing as any).last_rated_at ?? null,
           synonyms: previewing.synonyms,
           antonyms: previewing.antonyms,
           comments: previewing.comments,
