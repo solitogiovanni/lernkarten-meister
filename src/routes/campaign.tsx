@@ -20,7 +20,13 @@ export const Route = createFileRoute("/campaign")({
   component: CampaignSetup,
 });
 
-type Item = { kind: "noun" | "adjective" | "adverb" | "verb"; themes: string[]; due_at: string; reps: number };
+type Item = { kind: "noun" | "adjective" | "adverb" | "verb"; themes: string[]; due_at: string; reps: number; last_rating: string | null };
+const RATING_CHIPS = [
+  { v: "again", label: "Again", on: "bg-rose-600 text-white border-rose-600" },
+  { v: "hard", label: "Hard", on: "bg-amber-500 text-white border-amber-500" },
+  { v: "good", label: "Good", on: "bg-emerald-600 text-white border-emerald-600" },
+  { v: "easy", label: "Easy", on: "bg-sky-600 text-white border-sky-600" },
+] as const;
 // In-memory cache so revisiting the tab is instant; refreshed in the background.
 let setupCache: Item[] | null = null;
 
@@ -32,6 +38,7 @@ function CampaignSetup() {
   const [scope, setScope] = useState<"all" | "due">("due");
   const [kinds, setKinds] = useState<Set<"noun" | "adjective" | "adverb" | "verb">>(new Set(["noun", "adjective", "adverb", "verb"]));
   const [themes, setThemes] = useState<string[]>([]);
+  const [ratingSel, setRatingSel] = useState<string[]>([]);
   const [themeFilter, setThemeFilter] = useState("");
   const [size, setSize] = useState<number>(20);
   const navigate = useNavigate();
@@ -45,6 +52,7 @@ function CampaignSetup() {
     kinds: string[];
     themes: string[];
     size: number;
+    ratings?: string[];
   };
   const [saved, setSaved] = useState<Saved[]>([]);
   const [loadedId, setLoadedId] = useState<string>("");
@@ -70,6 +78,7 @@ function CampaignSetup() {
     setScope(s.scope);
     setKinds(new Set(s.kinds as any));
     setThemes(s.themes);
+    setRatingSel(s.ratings ?? []);
     setSize(s.size);
     setLoadedId(id);
     toast.success(`Loaded "${s.name}"`);
@@ -87,7 +96,7 @@ function CampaignSetup() {
     const payload = {
       name, mode, direction, scope,
       kinds: Array.from(kinds),
-      themes, size,
+      themes, size, ratings: ratingSel,
     };
     const existing = saved.find((s) => s.id === loadedId);
     if (existing && existing.name === name) {
@@ -127,14 +136,14 @@ function CampaignSetup() {
     if (setupCache) { setItems(setupCache); setLoading(false); }
     (async () => {
       const [nounsRes, wordsRes, verbsRes] = await Promise.all([
-        fetchAll<{ themes: string[]; due_at: string; reps: number }>("nouns", (q) => q.select("themes,due_at,reps")),
-        fetchAll<{ kind: "adjective" | "adverb"; themes: string[]; due_at: string; reps: number }>("words", (q) => q.select("kind,themes,due_at,reps")),
-        fetchAll<{ themes: string[]; due_at: string; reps: number }>("verbs", (q) => q.select("themes,due_at,reps")),
+        fetchAll<{ themes: string[]; due_at: string; reps: number; last_rating: string | null }>("nouns", (q) => q.select("themes,due_at,reps,last_rating")),
+        fetchAll<{ kind: "adjective" | "adverb"; themes: string[]; due_at: string; reps: number; last_rating: string | null }>("words", (q) => q.select("kind,themes,due_at,reps,last_rating")),
+        fetchAll<{ themes: string[]; due_at: string; reps: number; last_rating: string | null }>("verbs", (q) => q.select("themes,due_at,reps,last_rating")),
       ]);
       const all: Item[] = [
-        ...nounsRes.data.map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at, reps: r.reps })),
-        ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at, reps: r.reps })),
-        ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at, reps: r.reps })),
+        ...nounsRes.data.map((r) => ({ kind: "noun" as const, themes: r.themes, due_at: r.due_at, reps: r.reps, last_rating: r.last_rating })),
+        ...wordsRes.data.map((r) => ({ kind: r.kind, themes: r.themes, due_at: r.due_at, reps: r.reps, last_rating: r.last_rating })),
+        ...verbsRes.data.map((r) => ({ kind: "verb" as const, themes: r.themes, due_at: r.due_at, reps: r.reps, last_rating: r.last_rating })),
       ];
       setupCache = all;
       setItems(all);
@@ -152,10 +161,11 @@ function CampaignSetup() {
     return items.filter((r) => {
       if (!kinds.has(r.kind)) return false;
       if (scope === "due" && !isDueReview(r.due_at, r.reps)) return false;
+      if (ratingSel.length > 0 && !(r.last_rating && ratingSel.includes(r.last_rating))) return false;
       if (themes.length > 0 && !r.themes.some((t) => themes.includes(t))) return false;
       return true;
     });
-  }, [items, kinds, scope, themes]);
+  }, [items, kinds, scope, themes, ratingSel]);
 
   const sizes = [10, 20, 50];
 
@@ -182,6 +192,7 @@ function CampaignSetup() {
         limit,
         direction: mode === "flashcards" ? direction : "de2it",
         kinds: Array.from(kinds).join(","),
+        ratings: ratingSel.join(","),
       },
     });
   };
@@ -314,6 +325,28 @@ function CampaignSetup() {
         <div className="grid grid-cols-2 gap-2 mb-3">
           <Button variant={scope === "due" ? "default" : "outline"} onClick={() => setScope("due")}>Due today</Button>
           <Button variant={scope === "all" ? "default" : "outline"} onClick={() => setScope("all")}>All cards</Button>
+        </div>
+        <div className="mb-3">
+          <Label className="mb-1.5 block text-sm text-muted-foreground">Last rating (optional — pick any combination)</Label>
+          <div className="flex flex-wrap gap-2">
+            {RATING_CHIPS.map((c) => {
+              const on = ratingSel.includes(c.v);
+              const n = items.filter((r) => kinds.has(r.kind) && r.last_rating === c.v).length;
+              return (
+                <button
+                  key={c.v}
+                  type="button"
+                  onClick={() => {
+                    setRatingSel((s) => (on ? s.filter((x) => x !== c.v) : [...s, c.v]));
+                    if (!on && scope === "due") setScope("all");
+                  }}
+                  className={`px-3 py-1 rounded-full border text-sm transition-colors ${on ? c.on : "border-border text-muted-foreground hover:text-foreground"}`}
+                >
+                  {c.label} ({n})
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {allThemes.length > 0 && (
