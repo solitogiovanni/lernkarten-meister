@@ -50,6 +50,13 @@
       "when": 1792132202309,
       "tag": "0006_add_card_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792242361039,
+      "tag": "0007_add_last_rating",
+      "breakpoints": true
     }
   ]
 }
