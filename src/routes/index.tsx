@@ -71,6 +71,7 @@ const articleColor = {
 
 function DeckPage() {
   const { q, theme, mode, due } = Route.useSearch();
+  const [ratingSel, setRatingSel] = useState<string[]>([]);
   const navigate = useNavigate({ from: "/" });
   const [rows, setRows] = useState<NounRow[]>([]);
   const [loading, setLoading] = useState(true);

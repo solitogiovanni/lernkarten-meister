@@ -70,6 +70,7 @@ export function WordDeckPage({
     setThemes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   const [themeFilter, setThemeFilter] = useState("");
   const [due, setDue] = useState(false);
+  const [ratingSel, setRatingSel] = useState<string[]>([]);
   const [editing, setEditing] = useState<Row | null>(null);
   const [previewing, setPreviewing] = useState<Row | null>(null);
   const [editValue, setEditValue] = useState<WordFormValue>(emptyWord);
