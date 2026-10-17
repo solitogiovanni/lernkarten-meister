@@ -14,6 +14,7 @@ import { Loader2, Plus, Sparkles, Trash2, Upload, Play } from "lucide-react";
 import { SearchField } from "@/components/SearchField";
 import { toast } from "sonner";
 import { isDueReview } from "@/lib/srs";
+import { RatingFilter, RatingBadge, countRatings } from "@/components/RatingFilter";
 import { fold } from "@/lib/normalize";
 import { autofillWords } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -92,7 +93,7 @@ export function WordDeckPage({
       key: `words:${kind}`,
       table: "words",
       build: (q) =>
-      q.select("id,word,meanings,examples,themes,tags,synonyms,antonyms,comments,comparative,superlative_relative,superlative_absolute,due_at,reps,created_at")
+      q.select("id,word,meanings,examples,themes,tags,synonyms,antonyms,comments,comparative,superlative_relative,superlative_absolute,due_at,reps,last_rating,last_rated_at,created_at")
         .eq("kind", kind)
         .order("word", { ascending: true }),
       setRows,
@@ -167,10 +168,12 @@ export function WordDeckPage({
         if (!ok) return false;
       }
       if (due && !isDueReview(r.due_at, r.reps)) return false;
+      if (ratingSel.length > 0 && !ratingSel.includes((r as any).last_rating)) return false;
       return true;
     });
-  }, [rows, q, themes, themeMode, due]);
+  }, [rows, q, themes, themeMode, due, ratingSel]);
 
+  const ratingCounts = countRatings(rows as any);
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
   const openEdit = (r: Row) => {
@@ -343,8 +346,9 @@ export function WordDeckPage({
             <Button variant={due ? "default" : "outline"} size="sm" className="hidden sm:inline-flex" onClick={() => setDue(!due)}>
               Due today ({dueCount})
             </Button>
-            {(q || themes.length > 0 || due) && (
-              <Button variant="ghost" size="sm" className="ml-auto sm:ml-0" onClick={() => { setQ(""); setThemes([]); setDue(false); }}>
+            <RatingFilter value={ratingSel} onChange={setRatingSel} counts={ratingCounts} />
+            {(q || themes.length > 0 || due || ratingSel.length > 0) && (
+              <Button variant="ghost" size="sm" className="ml-auto sm:ml-0" onClick={() => { setQ(""); setThemes([]); setDue(false); setRatingSel([]); }}>
                 Clear
               </Button>
             )}
@@ -436,6 +440,7 @@ export function WordDeckPage({
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
+                {(r as any).last_rating && <div className="mt-1"><RatingBadge rating={(r as any).last_rating} at={(r as any).last_rated_at} /></div>}
               </Card>
             </button>
           ))}

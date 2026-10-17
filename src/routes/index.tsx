@@ -16,6 +16,7 @@ import { Loader2, Sparkles, Trash2, Upload, Play } from "lucide-react";
 import { SearchField } from "@/components/SearchField";
 import { toast } from "sonner";
 import { isDueReview } from "@/lib/srs";
+import { RatingFilter, RatingBadge, countRatings } from "@/components/RatingFilter";
 import { fold } from "@/lib/normalize";
 import { autofillNouns } from "@/lib/autofill.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -87,7 +88,7 @@ function DeckPage() {
       key: "nouns",
       table: "nouns",
       build: (q) =>
-      q.select("id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments,due_at,reps,created_at")
+      q.select("id,article,noun,plural,meanings,examples,themes,tags,synonyms,antonyms,comments,due_at,reps,last_rating,last_rated_at,created_at")
         .order("noun", { ascending: true }),
       setRows,
       setLoading,
@@ -173,11 +174,13 @@ function DeckPage() {
         if (!ok) return false;
       }
       if (due && !isDueReview(r.due_at, r.reps)) return false;
+      if (ratingSel.length > 0 && !ratingSel.includes((r as any).last_rating)) return false;
       return true;
     });
-  }, [rows, q, selectedThemes, themeMode, due]);
+  }, [rows, q, selectedThemes, themeMode, due, ratingSel]);
 
 
+  const ratingCounts = countRatings(rows as any);
   const dueCount = rows.filter((r) => isDueReview(r.due_at, r.reps)).length;
 
   const openEdit = (r: NounRow) => {
@@ -336,12 +339,13 @@ function DeckPage() {
             >
               Due today ({dueCount})
             </Button>
-            {(q || theme || due) && (
+            <RatingFilter value={ratingSel} onChange={setRatingSel} counts={ratingCounts} />
+            {(q || theme || due || ratingSel.length > 0) && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="ml-auto sm:ml-0"
-                onClick={() => navigate({ search: { q: "", theme: "", mode: "any", due: false } })}
+                onClick={() => { navigate({ search: { q: "", theme: "", mode: "any", due: false } }); setRatingSel([]); }}
               >
                 Clear
               </Button>
@@ -462,6 +466,7 @@ function DeckPage() {
                 {isDueReview(r.due_at, r.reps) && (
                   <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">● due for review</div>
                 )}
+                {(r as any).last_rating && <div className="mt-1"><RatingBadge rating={(r as any).last_rating} at={(r as any).last_rated_at} /></div>}
               </Card>
             </button>
           ))}
