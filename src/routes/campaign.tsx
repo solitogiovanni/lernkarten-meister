@@ -167,7 +167,7 @@ function CampaignSetup() {
     });
   }, [items, kinds, scope, themes, ratingSel]);
 
-  const sizes = [10, 20, 50];
+  const sizes = [10, 20, 30, 40, 50, 100];
 
   const toggleKind = (k: "noun" | "adjective" | "adverb" | "verb") => {
     const next = new Set(kinds);
@@ -383,7 +383,7 @@ function CampaignSetup() {
 
       <Card className="p-4">
         <Label className="mb-2 block">Session size</Label>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           {sizes.map((s) => (
             <Button key={s} variant={size === s ? "default" : "outline"} onClick={() => setSize(s)}>{s}</Button>
           ))}
