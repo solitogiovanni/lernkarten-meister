@@ -90,6 +90,39 @@ function Highlight({ text, needle }: { text: string; needle: string }) {
   return <>{parts}</>;
 }
 
+const MARK_CLASS = "bg-green-500/30 text-green-900 dark:text-green-100 rounded px-0.5";
+
+// Wrap matches of `needle` inside text nodes of sanitized HTML with <mark>.
+function highlightHtml(html: string, needle: string): string {
+  const fn = foldKeep(needle.trim());
+  if (!fn || typeof document === "undefined") return html;
+  const root = document.createElement("div");
+  root.innerHTML = html;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes: Text[] = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+  for (const node of nodes) {
+    const text = node.data;
+    const folded = foldKeep(text);
+    let i = folded.indexOf(fn);
+    if (i < 0) continue;
+    const frag = document.createDocumentFragment();
+    let pos = 0;
+    while (i >= 0) {
+      if (i > pos) frag.appendChild(document.createTextNode(text.slice(pos, i)));
+      const m = document.createElement("mark");
+      m.className = MARK_CLASS;
+      m.textContent = text.slice(i, i + fn.length);
+      frag.appendChild(m);
+      pos = i + fn.length;
+      i = folded.indexOf(fn, pos);
+    }
+    frag.appendChild(document.createTextNode(text.slice(pos)));
+    node.parentNode?.replaceChild(frag, node);
+  }
+  return root.innerHTML;
+}
+
 export const Route = createFileRoute("/grammar")({
   head: () => ({
     meta: [
@@ -500,13 +533,13 @@ function GrammarPage() {
             <>
               <div className="shrink-0">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Grammar rule</p>
-                <h2 className="text-2xl font-bold tracking-tight">{previewing.title}</h2>
+                <h2 className="text-2xl font-bold tracking-tight"><Highlight text={previewing.title} needle={q} /></h2>
               </div>
               <div className="flex-1 overflow-y-auto min-h-0 my-4">
                 {previewing.content ? (
                   <div
                     className="rich-text-view text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(previewing.content) }}
+                    dangerouslySetInnerHTML={{ __html: highlightHtml(sanitizeRichText(previewing.content), q) }}
                   />
                 ) : (
                   <p className="text-sm text-muted-foreground italic">No notes yet.</p>
