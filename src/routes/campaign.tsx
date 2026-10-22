@@ -74,6 +74,24 @@ function CampaignSetup() {
   };
   useEffect(() => { loadSaved(); }, []);
 
+  const unloadCampaign = () => {
+    setLoadedId("");
+    setMode("flashcards");
+    setDirection("de2it");
+    setScope("due");
+    setKinds(new Set(["noun", "adjective", "adverb", "verb"]));
+    setThemes([]);
+    setRatingSel([]);
+    setThemeFilter("");
+    setSize(20);
+    toast.success("Campaign unloaded — settings reset");
+  };
+  useEffect(() => {
+    const handler = () => unloadCampaign();
+    window.addEventListener("wortschatz:campaign-unload", handler);
+    return () => window.removeEventListener("wortschatz:campaign-unload", handler);
+  }, []);
+
   const applySaved = (id: string) => {
     const s = saved.find((x) => x.id === id);
     if (!s) return;
