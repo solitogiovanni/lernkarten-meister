@@ -14,7 +14,12 @@ import { fetchAll } from "@/lib/supabase-fetch";
 
 export const Route = createFileRoute("/import/verbs")({
   head: () => ({
-    meta: [{ title: "Import verbs — Wortschatz" }],
+    meta: [{ title: "Import verbs — Wortschatz" },
+      { name: "description", content: "Import German verbs into your Wortschatz collection." },
+      { property: "og:title", content: "Import verbs — Wortschatz" },
+      { property: "og:description", content: "Import German verbs into your Wortschatz collection." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" }],
   }),
   component: ImportVerbsPage,
 });

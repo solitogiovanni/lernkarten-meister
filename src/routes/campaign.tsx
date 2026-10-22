@@ -15,7 +15,11 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/campaign")({
   head: () => ({
-    meta: [{ title: "Campaign — Wortschatz" }, { name: "description", content: "Set up a memorization session." }],
+    meta: [{ title: "Campaign — Wortschatz" },
+      { property: "og:title", content: "Campaign — Wortschatz" },
+      { property: "og:description", content: "Set up a memorization session." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" }, { name: "description", content: "Set up a memorization session." }],
   }),
   component: CampaignSetup,
 });

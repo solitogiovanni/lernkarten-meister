@@ -5,6 +5,10 @@ export const Route = createFileRoute("/adjectives")({
   head: () => ({
     meta: [
       { title: "Adjectives — Wortschatz" },
+      { property: "og:title", content: "Adjectives — Wortschatz" },
+      { property: "og:description", content: "Your German adjective deck." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "description", content: "Your German adjective deck." },
     ],
   }),
