@@ -27,7 +27,12 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/campaign_/run")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({ meta: [{ title: "Studying — Wortschatz" }] }),
+  head: () => ({ meta: [{ title: "Studying — Wortschatz" },
+      { name: "description", content: "Practice German vocabulary in a personalized Wortschatz campaign." },
+      { property: "og:title", content: "Studying — Wortschatz" },
+      { property: "og:description", content: "Practice German vocabulary in a personalized Wortschatz campaign." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" }] }),
   component: RunPage,
 });
 

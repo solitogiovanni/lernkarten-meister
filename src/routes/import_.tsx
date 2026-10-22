@@ -16,6 +16,10 @@ export const Route = createFileRoute("/import_")({
   head: () => ({
     meta: [
       { title: "Import — Wortschatz" },
+      { property: "og:title", content: "Import — Wortschatz" },
+      { property: "og:description", content: "Paste a mixed list of German words and let AI classify each as noun, verb, adjective or adverb." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "description", content: "Paste a mixed list of German words and let AI classify each as noun, verb, adjective or adverb." },
     ],
   }),

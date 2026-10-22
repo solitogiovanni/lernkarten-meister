@@ -58,7 +58,11 @@ type DeckSearch = { q: string; theme: string; mode: string; due: boolean };
 export const Route = createFileRoute("/")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
-    meta: [{ title: "Deck — Wortschatz" }, { name: "description", content: "Your German noun deck." }],
+    meta: [{ title: "Deck — Wortschatz" },
+      { property: "og:title", content: "Deck — Wortschatz" },
+      { property: "og:description", content: "Your German noun deck." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" }, { name: "description", content: "Your German noun deck." }],
   }),
   component: DeckPage,
 });

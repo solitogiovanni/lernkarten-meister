@@ -29,6 +29,10 @@ export const Route = createFileRoute("/verbs")({
   head: () => ({
     meta: [
       { title: "Verbs — Wortschatz" },
+      { property: "og:title", content: "Verbs — Wortschatz" },
+      { property: "og:description", content: "Your German verb deck." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "description", content: "Your German verb deck." },
     ],
   }),

@@ -39,8 +39,6 @@ export const Route = createRootRoute({
       { name: "twitter:title", content: "Wortschatz — German Vocabulary Trainer" },
       { property: "og:description", content: "Deutsch Noun Deck is a German noun learning app that helps users memorize vocabulary through flashcards." },
       { name: "twitter:description", content: "Deutsch Noun Deck is a German noun learning app that helps users memorize vocabulary through flashcards." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f1bda5bb-7fc5-47cd-bbbc-15bd8a7e62b6/id-preview-c96aac66--b672e9a6-6152-4ece-a7c2-bc848c1b9c21.lovable.app-1778083031333.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f1bda5bb-7fc5-47cd-bbbc-15bd8a7e62b6/id-preview-c96aac66--b672e9a6-6152-4ece-a7c2-bc848c1b9c21.lovable.app-1778083031333.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
