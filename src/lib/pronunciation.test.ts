@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import { speakGerman } from "./pronunciation";
 
