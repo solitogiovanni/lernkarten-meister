@@ -511,7 +511,8 @@ function FlashcardView({
   const isIt2De = effectiveDir === "it2de";
 
   return (
-    <Card className="p-8 min-h-[320px] flex flex-col">
+    <Card className="relative p-8 min-h-[320px] flex flex-col">
+      <ExamplesHelp examples={card.examples} />
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {!revealed ? (
           isIt2De ? (
@@ -731,7 +732,8 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
   };
 
   return (
-    <Card className="p-8 min-h-[320px] flex flex-col">
+    <Card className="relative p-8 min-h-[320px] flex flex-col">
+      <ExamplesHelp examples={card.examples} />
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <KindLabel kind={card.kind} />
         {qtype === "article" && (
