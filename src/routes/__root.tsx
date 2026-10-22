@@ -98,7 +98,7 @@ function RootComponent() {
               <NavLink to="/conjunctions" label="Conjunctions" />
               <NavLink to="/grammar" label="Grammar" />
               <NavLink to="/import" label="Import" />
-              <NavLink to="/campaign" label="Campaign" />
+              <NavLink to="/campaign" label="Campaign" onSelfClick={() => window.dispatchEvent(new Event("wortschatz:campaign-unload"))} />
             </nav>
             <div className="flex items-center gap-1">
               <LogoutButton />
@@ -124,7 +124,7 @@ function RootComponent() {
               <NavLink to="/conjunctions" label="Conjunctions" />
               <NavLink to="/grammar" label="Grammar" />
               <NavLink to="/import" label="Import" />
-              <NavLink to="/campaign" label="Campaign" />
+              <NavLink to="/campaign" label="Campaign" onSelfClick={() => window.dispatchEvent(new Event("wortschatz:campaign-unload"))} />
             </nav>
           )}
         </header>
