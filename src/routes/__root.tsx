@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useLocation } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthGate, LogoutButton } from "@/components/AuthGate";
@@ -63,10 +63,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NavLink({ to, label }: { to: string; label: string }) {
+function NavLink({ to, label, onSelfClick }: { to: string; label: string; onSelfClick?: () => void }) {
+  const location = useLocation();
   return (
     <Link
       to={to}
+      onClick={() => { if (location.pathname === to) onSelfClick?.(); }}
       className="px-3 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
       activeProps={{ className: "px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground" }}
       activeOptions={{ exact: to === "/" }}
@@ -96,7 +98,7 @@ function RootComponent() {
               <NavLink to="/conjunctions" label="Conjunctions" />
               <NavLink to="/grammar" label="Grammar" />
               <NavLink to="/import" label="Import" />
-              <NavLink to="/campaign" label="Campaign" />
+              <NavLink to="/campaign" label="Campaign" onSelfClick={() => window.dispatchEvent(new Event("wortschatz:campaign-unload"))} />
             </nav>
             <div className="flex items-center gap-1">
               <LogoutButton />
@@ -122,7 +124,7 @@ function RootComponent() {
               <NavLink to="/conjunctions" label="Conjunctions" />
               <NavLink to="/grammar" label="Grammar" />
               <NavLink to="/import" label="Import" />
-              <NavLink to="/campaign" label="Campaign" />
+              <NavLink to="/campaign" label="Campaign" onSelfClick={() => window.dispatchEvent(new Event("wortschatz:campaign-unload"))} />
             </nav>
           )}
         </header>
