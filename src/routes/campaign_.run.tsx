@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Check, X, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Check, X, Pencil, ChevronLeft, ChevronRight, CircleHelp } from "lucide-react";
 import { applyRating, isDueReview, type Rating } from "@/lib/srs";
 import { answersMatch, normalizeAnswer } from "@/lib/normalize";
 import { CardEditDialog, type EditableCard } from "@/components/CardEditDialog";
@@ -454,6 +454,37 @@ function KindLabel({ kind }: { kind: Kind }) {
   return <p className="text-xs uppercase tracking-wider text-muted-foreground">{kind}</p>;
 }
 
+function ExamplesHelp({ examples }: { examples: string[] }) {
+  const [open, setOpen] = useState(false);
+  if (examples.length === 0) return null;
+  return (
+    <div className="absolute top-3 right-3 z-10">
+      <Button
+        size="icon"
+        variant={open ? "default" : "outline"}
+        aria-label="Show examples"
+        title="Examples"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <CircleHelp className="h-4 w-4" />
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-10 w-80 max-w-[80vw] rounded-lg border bg-background shadow-lg p-3 text-left">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Examples</p>
+          <div className="space-y-1.5 text-sm">
+            {examples.map((ex, i) => (
+              <div key={i} className="flex items-start gap-1">
+                <span className="flex-1 italic">{ex}</span>
+                <SpeakButton text={ex} size="icon" variant="ghost" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FlashcardView({
   card,
   onRate,
@@ -480,7 +511,8 @@ function FlashcardView({
   const isIt2De = effectiveDir === "it2de";
 
   return (
-    <Card className="p-8 min-h-[320px] flex flex-col">
+    <Card className="relative p-8 min-h-[320px] flex flex-col">
+      <ExamplesHelp examples={card.examples} />
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {!revealed ? (
           isIt2De ? (
@@ -700,7 +732,8 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
   };
 
   return (
-    <Card className="p-8 min-h-[320px] flex flex-col">
+    <Card className="relative p-8 min-h-[320px] flex flex-col">
+      <ExamplesHelp examples={card.examples} />
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <KindLabel kind={card.kind} />
         {qtype === "article" && (
