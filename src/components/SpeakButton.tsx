@@ -1,32 +1,10 @@
 import { Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { speakGerman } from "@/lib/pronunciation";
 
-function pickGermanVoice(): SpeechSynthesisVoice | null {
-  if (typeof window === "undefined" || !window.speechSynthesis) return null;
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices || voices.length === 0) return null;
-  return (
-    voices.find((v) => v.lang?.toLowerCase().startsWith("de") && /google|microsoft|natural|premium/i.test(v.name)) ||
-    voices.find((v) => v.lang?.toLowerCase().startsWith("de")) ||
-    null
-  );
-}
-
-export function speakGerman(text: string) {
-  if (typeof window === "undefined" || !window.speechSynthesis || !text.trim()) return;
-  try {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "de-DE";
-    u.rate = 0.95;
-    const v = pickGermanVoice();
-    if (v) u.voice = v;
-    window.speechSynthesis.speak(u);
-  } catch {
-    /* ignore */
-  }
-}
+export { speakGerman } from "@/lib/pronunciation";
 
 export function SpeakButton({
   text,
@@ -53,7 +31,7 @@ export function SpeakButton({
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        speakGerman(text);
+        speakGerman(text, (message) => toast.error(message));
       }}
     >
       <Volume2 className="h-4 w-4" />
