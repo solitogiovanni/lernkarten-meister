@@ -22,7 +22,7 @@ export function SpeakButton({
   if (!text?.trim()) return null;
   return (
     <Button
-      type="button"
+      asChild
       size={size}
       variant={variant}
       aria-label={label}
@@ -34,7 +34,18 @@ export function SpeakButton({
         speakGerman(text, (message) => toast.error(message));
       }}
     >
-      <Volume2 className="h-4 w-4" />
+      <span
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          event.stopPropagation();
+          speakGerman(text, (message) => toast.error(message));
+        }}
+      >
+        <Volume2 className="h-4 w-4" />
+      </span>
     </Button>
   );
 }
