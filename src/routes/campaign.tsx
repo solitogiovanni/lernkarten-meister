@@ -335,7 +335,12 @@ function CampaignSetup() {
           <div className="flex flex-wrap gap-2">
             {RATING_CHIPS.map((c) => {
               const on = ratingSel.includes(c.v);
-              const n = items.filter((r) => kinds.has(r.kind) && r.last_rating === c.v).length;
+              const n = items.filter((r) =>
+                r.last_rating === c.v &&
+                kinds.has(r.kind) &&
+                (scope !== "due" || isDueReview(r.due_at, r.reps)) &&
+                (themes.length === 0 || r.themes.some((t) => themes.includes(t)))
+              ).length;
               return (
                 <button
                   key={c.v}
