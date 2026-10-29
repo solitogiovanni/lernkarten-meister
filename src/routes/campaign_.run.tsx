@@ -109,6 +109,8 @@ function RunPage() {
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<Rating[] | null>(null);
   const [chipSel, setChipSel] = useState<Rating[]>([]);
+  const [runMode, setRunMode] = useState(mode);
+  const [runDir, setRunDir] = useState(direction);
 
   useEffect(() => {
     (async () => {
@@ -309,6 +311,34 @@ function RunPage() {
     setReviewMode(true);
     setDone(false);
     setIdx(first);
+  };
+
+  // Repeat the same set of cards with new settings.
+  const presentKinds = (["noun", "verb", "adjective", "adverb"] as Kind[]).filter((k) => cards.some((c) => c.kind === k));
+  const [rpMode, setRpMode] = useState<"flashcards" | "quiz">(mode);
+  const [rpDir, setRpDir] = useState<"de2it" | "it2de" | "mixed">(direction);
+  const [rpKinds, setRpKinds] = useState<Kind[] | null>(null);
+  const [rpRatings, setRpRatings] = useState<Rating[]>([]);
+  const rpKindSel = rpKinds ?? presentKinds;
+  const repeatIdxs = cards
+    .map((_, i) => i)
+    .filter((i) => rpKindSel.includes(cards[i].kind))
+    .filter((i) => rpRatings.length === 0 || (ratings[i] && rpRatings.includes(ratings[i])));
+  const startRepeat = () => {
+    const next = shuffle(repeatIdxs.map((i) => cards[i]));
+    if (next.length === 0) return;
+    setCards(next);
+    setRunMode(rpMode);
+    setRunDir(rpDir);
+    setRatings({});
+    setStats({ correct: 0, wrong: 0 });
+    setChipSel([]);
+    setReviewMode(false);
+    setReviewFilter(null);
+    setRpKinds(null);
+    setRpRatings([]);
+    setIdx(0);
+    setDone(false);
   };
 
   if (loading)
