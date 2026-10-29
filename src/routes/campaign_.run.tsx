@@ -109,6 +109,8 @@ function RunPage() {
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<Rating[] | null>(null);
   const [chipSel, setChipSel] = useState<Rating[]>([]);
+  const [runMode, setRunMode] = useState(mode);
+  const [runDir, setRunDir] = useState(direction);
 
   useEffect(() => {
     (async () => {
@@ -273,6 +275,7 @@ function RunPage() {
     if (isFirst) {
       const upd = applyRating(current, rating);
       setStats((s) => ({ ...s, correct: s.correct + (rating === "again" ? 0 : 1), wrong: s.wrong + (rating === "again" ? 1 : 0) }));
+      setCards((prev) => prev.map((c, i) => (i === idx ? { ...c, ...upd } : c)));
       await writeBack(current, upd, rating);
     }
     setRatings((r) => ({ ...r, [idx]: rating }));
@@ -287,6 +290,7 @@ function RunPage() {
     if (isFirst) {
       const upd = applyRating(current, rating);
       setStats((s) => ({ correct: s.correct + (correct ? 1 : 0), wrong: s.wrong + (correct ? 0 : 1) }));
+      setCards((prev) => prev.map((c, i) => (i === idx ? { ...c, ...upd } : c)));
       await writeBack(current, upd, rating);
     }
     setRatings((r) => ({ ...r, [idx]: rating }));
@@ -309,6 +313,34 @@ function RunPage() {
     setReviewMode(true);
     setDone(false);
     setIdx(first);
+  };
+
+  // Repeat the same set of cards with new settings.
+  const presentKinds = (["noun", "verb", "adjective", "adverb"] as Kind[]).filter((k) => cards.some((c) => c.kind === k));
+  const [rpMode, setRpMode] = useState<"flashcards" | "quiz">(mode);
+  const [rpDir, setRpDir] = useState<"de2it" | "it2de" | "mixed">(direction);
+  const [rpKinds, setRpKinds] = useState<Kind[] | null>(null);
+  const [rpRatings, setRpRatings] = useState<Rating[]>([]);
+  const rpKindSel = rpKinds ?? presentKinds;
+  const repeatIdxs = cards
+    .map((_, i) => i)
+    .filter((i) => rpKindSel.includes(cards[i].kind))
+    .filter((i) => rpRatings.length === 0 || (ratings[i] && rpRatings.includes(ratings[i])));
+  const startRepeat = () => {
+    const next = shuffle(repeatIdxs.map((i) => cards[i]));
+    if (next.length === 0) return;
+    setCards(next);
+    setRunMode(rpMode);
+    setRunDir(rpDir);
+    setRatings({});
+    setStats({ correct: 0, wrong: 0 });
+    setChipSel([]);
+    setReviewMode(false);
+    setReviewFilter(null);
+    setRpKinds(null);
+    setRpRatings([]);
+    setIdx(0);
+    setDone(false);
   };
 
   if (loading)
@@ -372,6 +404,49 @@ function RunPage() {
             Review selected ({selectedCount})
           </Button>
         </div>
+        <Card className="p-4 mt-6 space-y-3 text-left">
+          <p className="font-semibold">Repeat this session</p>
+          <p className="text-xs text-muted-foreground">Same cards, reshuffled. Pick new settings:</p>
+          <div className="flex flex-wrap gap-2">
+            {(["flashcards", "quiz"] as const).map((m) => (
+              <Button key={m} size="sm" variant={rpMode === m ? "default" : "outline"} onClick={() => setRpMode(m)}>
+                {m === "flashcards" ? "Flashcards" : "Quiz"}
+              </Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {([["de2it", "DE → IT"], ["it2de", "IT → DE"], ["mixed", "Mixed"]] as const).map(([d, l]) => (
+              <Button key={d} size="sm" variant={rpDir === d ? "default" : "outline"} onClick={() => setRpDir(d)}>{l}</Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {presentKinds.map((k) => {
+              const on = rpKindSel.includes(k);
+              const n = cards.filter((c) => c.kind === k).length;
+              return (
+                <Button key={k} size="sm" variant={on ? "default" : "outline"} aria-pressed={on}
+                  onClick={() => setRpKinds(on ? rpKindSel.filter((x) => x !== k) : [...rpKindSel, k])}>
+                  <span className="capitalize">{k}s</span>&nbsp;({n})
+                </Button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {RATINGS.map((r) => {
+              const on = rpRatings.includes(r);
+              return (
+                <Button key={r} size="sm" variant={on ? "default" : "outline"} aria-pressed={on} disabled={counts[r] === 0}
+                  onClick={() => setRpRatings((s) => (on ? s.filter((x) => x !== r) : [...s, r]))}>
+                  {RATING_LABEL[r]} ({counts[r]})
+                </Button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">No rating selected = all ratings.</p>
+          <Button className="w-full" disabled={repeatIdxs.length === 0} onClick={startRepeat}>
+            Start repeat ({repeatIdxs.length} cards)
+          </Button>
+        </Card>
         <div className="flex flex-wrap justify-center gap-2 pt-4">
           <Button variant="outline" onClick={() => startReview(null)}>Review all cards</Button>
           <Button asChild variant="outline"><Link to="/">Back to deck</Link></Button>
@@ -421,11 +496,11 @@ function RunPage() {
       </div>
       <Progress value={((idx) / cards.length) * 100} className="mb-6" />
 
-      {(reviewMode || mode === "flashcards") ? (
+      {(reviewMode || runMode === "flashcards") ? (
         <FlashcardView
           card={current}
           onRate={submitFlashRating}
-          direction={direction}
+          direction={runDir}
           existingRating={ratings[idx] ?? null}
           reviewMode={reviewMode}
           onNext={goNext}
