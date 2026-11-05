@@ -896,6 +896,7 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
             </span>
           </div>
         )}
+        {result && <ConfusedWithPanel key={card.id} table={card.kind === "noun" ? "nouns" : card.kind === "verb" ? "verbs" : "words"} id={card.id} editable={false} />}
       </div>
 
       {qtype !== "article" && !result && (
