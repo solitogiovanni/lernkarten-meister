@@ -258,6 +258,7 @@ export function CrossDeckThemes({
         </div>
       </details>
       <CardRevealDialog
+        cardRef={preview ? { table: preview.kind === "noun" ? "nouns" : preview.kind === "verb" ? "verbs" : "words", id: preview.id } : null}
         open={!!preview}
         onOpenChange={(o) => !o && setPreview(null)}
         card={preview?.card ?? null}

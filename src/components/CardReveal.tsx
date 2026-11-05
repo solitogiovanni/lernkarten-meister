@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SpeakButton } from "@/components/SpeakButton";
 import { Pencil } from "lucide-react";
+import { ConfusedWithPanel, type CardTable } from "@/components/ConfusedWithPanel";
 import { sanitizeRichText, looksLikeHtml } from "@/lib/sanitizeHtml";
 import { useGlobalThemes } from "@/lib/themeStore";
 import type { VerbPrep } from "@/components/VerbForm";
@@ -59,6 +60,7 @@ export function CardRevealDialog({
   onEdit,
   onToggleTheme,
   onTagClick,
+  cardRef,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -66,6 +68,7 @@ export function CardRevealDialog({
   onEdit: () => void;
   onToggleTheme?: (theme: string, add: boolean) => void;
   onTagClick?: (tag: string) => void;
+  cardRef?: { table: CardTable; id: string } | null;
 }) {
   const { recentThemes } = useGlobalThemes(open && !!onToggleTheme);
   if (!card) return null;
@@ -198,6 +201,7 @@ export function CardRevealDialog({
                 )}
               </div>
             ) : null}
+            {cardRef && <ConfusedWithPanel key={cardRef.id} table={cardRef.table} id={cardRef.id} />}
             {card.comments && (
               <div className="text-sm text-amber-700 dark:text-amber-300 border border-amber-500/40 bg-amber-500/10 rounded-md px-3 py-2 mt-3 text-left max-w-md mx-auto max-h-40 overflow-y-auto">
                 {looksLikeHtml(sanitizeRichText(card.comments)) ? (

@@ -453,6 +453,7 @@ export function WordDeckPage({
       <CrossDeckThemes themes={themes} currentKind={kind} mode={themeMode} />
 
       <CardRevealDialog
+        cardRef={previewing ? { table: "words", id: previewing.id } : null}
         onTagClick={(t) => { setPreviewing(null); setQ("#" + t); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}

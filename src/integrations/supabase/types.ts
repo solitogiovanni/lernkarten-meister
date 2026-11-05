@@ -87,6 +87,7 @@ export type Database = {
           antonyms: string[]
           article: Database["public"]["Enums"]["german_article"] | null
           comments: string | null
+          confused_with: Json
           created_at: string
           due_at: string
           ease: number
@@ -113,6 +114,7 @@ export type Database = {
           antonyms?: string[]
           article?: Database["public"]["Enums"]["german_article"] | null
           comments?: string | null
+          confused_with?: Json
           created_at?: string
           due_at?: string
           ease?: number
@@ -139,6 +141,7 @@ export type Database = {
           antonyms?: string[]
           article?: Database["public"]["Enums"]["german_article"] | null
           comments?: string | null
+          confused_with?: Json
           created_at?: string
           due_at?: string
           ease?: number
@@ -224,6 +227,7 @@ export type Database = {
         Row: {
           antonyms: string[]
           comments: string | null
+          confused_with: Json
           conjugation: string | null
           created_at: string
           due_at: string
@@ -254,6 +258,7 @@ export type Database = {
         Insert: {
           antonyms?: string[]
           comments?: string | null
+          confused_with?: Json
           conjugation?: string | null
           created_at?: string
           due_at?: string
@@ -284,6 +289,7 @@ export type Database = {
         Update: {
           antonyms?: string[]
           comments?: string | null
+          confused_with?: Json
           conjugation?: string | null
           created_at?: string
           due_at?: string
@@ -318,6 +324,7 @@ export type Database = {
           antonyms: string[]
           comments: string | null
           comparative: string | null
+          confused_with: Json
           created_at: string
           due_at: string
           ease: number
@@ -345,6 +352,7 @@ export type Database = {
           antonyms?: string[]
           comments?: string | null
           comparative?: string | null
+          confused_with?: Json
           created_at?: string
           due_at?: string
           ease?: number
@@ -372,6 +380,7 @@ export type Database = {
           antonyms?: string[]
           comments?: string | null
           comparative?: string | null
+          confused_with?: Json
           created_at?: string
           due_at?: string
           ease?: number
@@ -411,6 +420,7 @@ export type Database = {
           antonyms: string[]
           article: Database["public"]["Enums"]["german_article"] | null
           comments: string | null
+          confused_with: Json
           created_at: string
           due_at: string
           ease: number
@@ -445,6 +455,7 @@ export type Database = {
         Returns: {
           antonyms: string[]
           comments: string | null
+          confused_with: Json
           conjugation: string | null
           created_at: string
           due_at: string
@@ -485,6 +496,7 @@ export type Database = {
           antonyms: string[]
           comments: string | null
           comparative: string | null
+          confused_with: Json
           created_at: string
           due_at: string
           ease: number

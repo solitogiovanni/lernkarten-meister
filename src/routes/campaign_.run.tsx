@@ -1,3 +1,4 @@
+import { ConfusedWithPanel } from "@/components/ConfusedWithPanel";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -736,7 +737,7 @@ function FlashcardView({
                   )}
                 </div>
               )}
-
+              <ConfusedWithPanel key={card.id} table={card.kind === "noun" ? "nouns" : card.kind === "verb" ? "verbs" : "words"} id={card.id} />
             </div>
           </>
         )}
@@ -895,6 +896,7 @@ function QuizView({ card, onResult }: { card: Card; onResult: (correct: boolean)
             </span>
           </div>
         )}
+        {result && <ConfusedWithPanel key={card.id} table={card.kind === "noun" ? "nouns" : card.kind === "verb" ? "verbs" : "words"} id={card.id} editable={false} />}
       </div>
 
       {qtype !== "article" && !result && (
