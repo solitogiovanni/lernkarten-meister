@@ -57,6 +57,13 @@
       "when": 1792242361039,
       "tag": "0007_add_last_rating",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793874030487,
+      "tag": "0008_migration",
+      "breakpoints": true
     }
   ]
 }
