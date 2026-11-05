@@ -445,6 +445,7 @@ function VerbsPage() {
       <CrossDeckThemes themes={themes} currentKind="verb" mode={themeMode} />
 
       <CardRevealDialog
+        cardRef={previewing ? { table: "verbs", id: previewing.id } : null}
         onTagClick={(t) => { setPreviewing(null); setQ("#" + t); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}

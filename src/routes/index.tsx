@@ -484,6 +484,7 @@ function DeckPage() {
 
       {/* Reveal preview */}
       <CardRevealDialog
+        cardRef={previewing ? { table: "nouns", id: previewing.id } : null}
         onTagClick={(t) => { setPreviewing(null); navigate({ search: (p: DeckSearch) => ({ ...p, q: "#" + t }) }); }}
         open={!!previewing}
         onOpenChange={(o) => !o && setPreviewing(null)}
