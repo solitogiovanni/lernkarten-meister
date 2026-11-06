@@ -1,3 +1,4 @@
+import { ConfusedWithPanel } from "@/components/ConfusedWithPanel";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -342,6 +343,9 @@ export function CardEditDialog({
               showComparison={kind === "adjective"}
               placeholder={kind === "adjective" ? "schön" : kind === "adverb" ? "schnell" : kind === "preposition" ? "auf" : kind === "pronoun" ? "ich" : "und"}
             />
+          )}
+          {kind === card.kind && (
+            <ConfusedWithPanel key={card.id} table={card.kind === "noun" ? "nouns" : card.kind === "verb" ? "verbs" : "words"} id={card.id} />
           )}
         </div>
 

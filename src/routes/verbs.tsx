@@ -1,3 +1,4 @@
+import { ConfusedWithPanel } from "@/components/ConfusedWithPanel";
 import { TagChips } from "@/components/TagsInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -492,6 +493,7 @@ function VerbsPage() {
           <SheetHeader><SheetTitle>Edit verb</SheetTitle></SheetHeader>
           <div className="mt-4">
             <VerbForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
+            {editing && <div className="mt-4"><ConfusedWithPanel key={editing.id} table="verbs" id={editing.id} /></div>}
             <div className="flex justify-start mt-6 gap-2">
               <Button variant="outline" onClick={() => aiFillCurrent("edit")} disabled={aiBusy}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
