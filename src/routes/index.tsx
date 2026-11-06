@@ -1,3 +1,4 @@
+import { ConfusedWithPanel } from "@/components/ConfusedWithPanel";
 import { TagChips } from "@/components/TagsInput";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -531,6 +532,7 @@ function DeckPage() {
           </SheetHeader>
           <div className="mt-4">
             <NounForm value={editValue} onChange={setEditValue} themeSuggestions={allThemes} recentThemes={recentThemes} />
+            {editing && <div className="mt-4"><ConfusedWithPanel key={editing.id} table="nouns" id={editing.id} /></div>}
             <div className="flex justify-start mt-6 gap-2">
               <Button variant="outline" onClick={() => aiFillCurrent("edit")} disabled={aiBusy}>
                 {aiBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
