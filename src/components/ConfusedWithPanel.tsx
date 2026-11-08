@@ -122,7 +122,14 @@ export function ConfusedWithPanel({
       await writeList(table, id, next);
       setList(next);
       if (link && reciprocal && selfInfo) {
-        await addReciprocal({ table: link.table, id: link.id }, { word: selfInfo.word, meaning: selfInfo.meaning, card_id: id, card_table: table });
+        const newEntry: ConfusedEntry = { word: w, meaning: meaning.trim(), card_id: link.id, card_table: link.table };
+        const selfEntry: ConfusedEntry = { word: selfInfo.word, meaning: selfInfo.meaning, card_id: id, card_table: table };
+        // Full cluster: new card gets self + all linked peers; every peer gets the new card.
+        const peers = next.filter((e) => e.card_id && e.card_table && e.card_id !== link.id) as (ConfusedEntry & { card_id: string; card_table: CardTable })[];
+        const linkList = await readList(link.table, link.id);
+        const toAdd = [selfEntry, ...peers].filter((p) => p.card_id !== link.id && !linkList.some((e) => e.card_id === p.card_id));
+        if (toAdd.length) await writeList(link.table, link.id, [...linkList, ...toAdd]);
+        await Promise.all(peers.map((p) => addReciprocal({ table: p.card_table, id: p.card_id }, newEntry)));
       }
       toast.success(link && reciprocal ? "Linked on both cards" : "Added");
       reset();
@@ -135,7 +142,15 @@ export function ConfusedWithPanel({
 
   const remove = async (i: number) => {
     const next = list.filter((_, j) => j !== i);
-    try { await writeList(table, id, next); setList(next); } catch (e: any) { toast.error(e?.message ?? "Could not remove"); }
+    const gone = list[i];
+    try {
+      await writeList(table, id, next); setList(next);
+      if (gone?.card_id && gone.card_table) {
+        const other = await readList(gone.card_table, gone.card_id);
+        const filtered = other.filter((e) => e.card_id !== id);
+        if (filtered.length !== other.length) await writeList(gone.card_table, gone.card_id, filtered);
+      }
+    } catch (e: any) { toast.error(e?.message ?? "Could not remove"); }
   };
 
   return (
