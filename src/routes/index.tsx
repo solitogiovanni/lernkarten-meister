@@ -1,3 +1,4 @@
+import { useGlobalThemes } from "@/lib/themeStore";
 import { ConfusedWithPanel } from "@/components/ConfusedWithPanel";
 import { TagChips } from "@/components/TagsInput";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -135,11 +136,13 @@ function DeckPage() {
   }, []);
 
 
+  const globalThemes = useGlobalThemes();
   const allThemes = useMemo(() => {
     const set = new Set<string>();
     for (const r of rows) for (const t of r.themes) set.add(t);
+    for (const t of globalThemes.allThemes) set.add(t);
     return Array.from(set).sort();
-  }, [rows]);
+  }, [rows, globalThemes.allThemes]);
 
   const recentThemes = useMemo(() => {
     const seen = new Set<string>();
