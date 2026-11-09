@@ -235,6 +235,11 @@ export function CrossDeckSearch({
     },
   });
 
+  const ARTICLE_BADGE: Record<string, string> = {
+    der: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+    die: "bg-pink-500/15 text-pink-700 dark:text-pink-300",
+    das: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  };
   const cardCls = "block w-full text-left p-3 rounded-md border bg-card hover:border-primary transition-colors";
 
   const groups: { kind: DeckKind; label: string; render: () => React.ReactNode; count: number }[] = ([
@@ -246,7 +251,7 @@ export function CrossDeckSearch({
         <button key={r.id} type="button" onClick={() => openNoun(r)} className={cardCls}>
           <div className="flex items-center gap-1">
             <div className="text-sm font-medium">
-              {r.article && <span className="text-muted-foreground mr-1">{r.article}</span>}
+              {r.article && <span className={`text-xs px-1.5 py-0.5 rounded font-medium mr-1 ${ARTICLE_BADGE[r.article as "der" | "die" | "das"] ?? ""}`}>{r.article}</span>}
               {r.noun}
             </div>
             <SpeakButton text={r.article ? `${r.article} ${r.noun}` : r.noun} size="icon" variant="ghost" className="h-5 w-5" />

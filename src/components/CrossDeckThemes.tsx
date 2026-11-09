@@ -197,10 +197,18 @@ export function CrossDeckThemes({
 
   const cardCls = "block w-full text-left p-3 rounded-md border bg-card hover:border-primary transition-colors";
 
-  const item = (id: string, label: string, speak: string, meanings: string[], onClick: () => void) => (
+  const ARTICLE_BADGE: Record<string, string> = {
+    der: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+    die: "bg-pink-500/15 text-pink-700 dark:text-pink-300",
+    das: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+  };
+  const item = (id: string, label: string, speak: string, meanings: string[], onClick: () => void, article?: string | null) => (
     <button key={id} type="button" onClick={onClick} className={cardCls}>
       <div className="flex items-center gap-1">
-        <div className="text-sm font-medium">{label}</div>
+        <div className="text-sm font-medium">
+          {article && <span className={`text-xs px-1.5 py-0.5 rounded font-medium mr-1 ${ARTICLE_BADGE[article] ?? ""}`}>{article}</span>}
+          {label}
+        </div>
         <SpeakButton text={speak} size="icon" variant="ghost" className="h-5 w-5" />
       </div>
       {meanings.length > 0 && (
@@ -214,7 +222,7 @@ export function CrossDeckThemes({
       kind: "noun",
       count: nouns.length,
       render: () => nouns.map((r) =>
-        item(r.id, `${r.article ? r.article + " " : ""}${r.noun}`, r.article ? `${r.article} ${r.noun}` : r.noun, r.meanings ?? [], () => openNoun(r))),
+        item(r.id, r.noun, r.article ? `${r.article} ${r.noun}` : r.noun, r.meanings ?? [], () => openNoun(r), r.article)),
     },
     {
       kind: "verb",
