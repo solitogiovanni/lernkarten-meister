@@ -7,15 +7,8 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { AlertTriangle, Columns2, Plus, X, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchOneCard } from "@/lib/deckCache";
-
-export type CardTable = "nouns" | "verbs" | "words";
-
-export type ConfusedEntry = {
-  word: string;
-  meaning: string;
-  card_id?: string | null;
-  card_table?: CardTable | null;
-};
+import { mergeConfusionGroups, type CardTable, type ConfusedEntry, type CardRef, type ConfusionMember } from "@/lib/confusionGroups";
+export type { CardTable, ConfusedEntry } from "@/lib/confusionGroups";
 
 type Suggestion = { id: string; table: CardTable; word: string; label: string; meanings: string[] };
 
@@ -28,7 +21,8 @@ function headword(table: CardTable, r: any): string {
 }
 
 async function readList(table: CardTable, id: string): Promise<ConfusedEntry[]> {
-  const { data } = await db.from(table).select("confused_with").eq("id", id).maybeSingle();
+  const { data, error } = await db.from(table).select("confused_with").eq("id", id).maybeSingle();
+  if (error) throw error;
   return Array.isArray(data?.confused_with) ? data.confused_with : [];
 }
 
@@ -37,11 +31,12 @@ async function writeList(table: CardTable, id: string, list: ConfusedEntry[]) {
   if (error) throw error;
 }
 
-/** Add `self` to the other card's list (if not already there). */
-async function addReciprocal(target: { table: CardTable; id: string }, self: ConfusedEntry) {
-  const list = await readList(target.table, target.id);
-  if (list.some((e) => e.card_id === self.card_id)) return;
-  await writeList(target.table, target.id, [...list, self]);
+async function readMember(ref: CardRef): Promise<ConfusionMember | null> {
+  const columns = ref.table === "nouns" ? "noun,article" : ref.table === "verbs" ? "present" : "word";
+  const { data, error } = await db.from(ref.table).select(`${columns},meanings,confused_with`).eq("id", ref.id).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return { ...ref, word: headword(ref.table, data), meaning: (data.meanings ?? []).join(", "), entries: Array.isArray(data.confused_with) ? data.confused_with : [] };
 }
 
 async function searchCards(term: string, signal: AbortSignal): Promise<Suggestion[]> {
@@ -116,20 +111,15 @@ export function ConfusedWithPanel({
     setSaving(true);
     try {
       const entry: ConfusedEntry = { word: w, meaning: meaning.trim(), card_id: link?.id ?? null, card_table: link?.table ?? null };
-      const fresh = await readList(table, id);
-      const exists = fresh.some((e) => (entry.card_id && e.card_id === entry.card_id) || e.word.toLowerCase() === w.toLowerCase());
-      const next = exists ? fresh : [...fresh, entry];
-      await writeList(table, id, next);
-      setList(next);
-      if (link && reciprocal && selfInfo) {
-        const newEntry: ConfusedEntry = { word: w, meaning: meaning.trim(), card_id: link.id, card_table: link.table };
-        const selfEntry: ConfusedEntry = { word: selfInfo.word, meaning: selfInfo.meaning, card_id: id, card_table: table };
-        // Full cluster: new card gets self + all linked peers; every peer gets the new card.
-        const peers = next.filter((e) => e.card_id && e.card_table && e.card_id !== link.id) as (ConfusedEntry & { card_id: string; card_table: CardTable })[];
-        const linkList = await readList(link.table, link.id);
-        const toAdd = [selfEntry, ...peers].filter((p) => p.card_id !== link.id && !linkList.some((e) => e.card_id === p.card_id));
-        if (toAdd.length) await writeList(link.table, link.id, [...linkList, ...toAdd]);
-        await Promise.all(peers.map((p) => addReciprocal({ table: p.card_table, id: p.card_id }, newEntry)));
+      if (link && reciprocal) {
+        const next = await mergeConfusionGroups({ table, id }, { table: link.table, id: link.id }, readMember, (ref, entries) => writeList(ref.table, ref.id, entries), entry);
+        setList(next);
+      } else {
+        const fresh = await readList(table, id);
+        const exists = fresh.some((e) => (entry.card_id && e.card_id === entry.card_id && e.card_table === entry.card_table) || e.word.toLowerCase() === w.toLowerCase());
+        const next = exists ? fresh : [...fresh, entry];
+        await writeList(table, id, next);
+        setList(next);
       }
       toast.success(link && reciprocal ? "Linked on both cards" : "Added");
       reset();
@@ -314,7 +304,7 @@ function CompareDialog({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {rows[0] && <CardSummary table={left.table} row={rows[0]} />}
-            <CardSummary table={right!.table} row={rows[1]} />
+             {right && <CardSummary table={right.table} row={rows[1]} />}
           </div>
         )}
       </DialogContent>
